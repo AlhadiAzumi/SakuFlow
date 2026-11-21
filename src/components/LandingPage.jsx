@@ -24,6 +24,7 @@ import {
   Zap,
 } from 'lucide-react'
 import LogoMark from './LogoMark'
+import Reveal from './Reveal'
 
 const NAV = [
   { label: 'Fitur', href: '#fitur' },
@@ -169,7 +170,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       {/* ---------- 2. Hero ---------- */}
       <section className="px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pt-14">
         <div className="hero-shell mx-auto max-w-7xl px-5 pb-28 pt-14 sm:px-10 sm:pt-20">
-          <div className="relative z-10 mx-auto max-w-3xl text-center">
+          <Reveal className="relative z-10 mx-auto max-w-3xl text-center">
             <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[64px]">
               Catat Keuangan Harian
               <br className="hidden sm:block" /> Lebih Cepat dengan{' '}
@@ -194,10 +195,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </button>
               <DarkPill href="#cara-kerja">Lihat Cara Kerja</DarkPill>
             </div>
-          </div>
+          </Reveal>
 
           {/* 3 kartu pratinjau UI */}
-          <div className="relative z-10 mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3 md:gap-5">
+          <Reveal delay={120} className="relative z-10 mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3 md:gap-5">
             {/* Kiri: simulasi chat WA */}
             <article className="float-a rounded-3xl border border-white/60 bg-white/85 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl">
               <div className="mb-4 flex items-center gap-2.5">
@@ -281,13 +282,13 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <CircleCheck size={13} /> Tersinkron otomatis
               </div>
             </article>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ---------- 3. Strip fitur ---------- */}
       <section id="fitur" className="scroll-mt-28 bg-slate-50/70 px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+        <Reveal className="mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
             Dirancang untuk Pencatatan Harian Tanpa Ribet
           </h2>
@@ -304,12 +305,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </span>
             ))}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ---------- 4. Studi kasus interaktif ---------- */}
       <section className="px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+        <Reveal className="mx-auto max-w-7xl">
           <SectionHeading
             title="Kelola Arus Kas dengan Cara yang"
             accent="Paling Mudah"
@@ -337,54 +338,55 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             {PERSONAS.map((item, index) => {
               const active = persona === index
               return (
-                <article
-                  key={item.tab}
-                  className={`soft-lift relative overflow-hidden rounded-3xl border p-7 ${
-                    active
-                      ? 'border-transparent bg-gradient-to-br from-sky-400 via-blue-600 to-blue-800 text-white shadow-[0_26px_60px_rgba(37,99,235,0.32)]'
-                      : 'border-slate-200 bg-white text-slate-900 shadow-[0_12px_34px_rgba(37,99,235,0.06)]'
-                  }`}
-                >
-                  {active && (
-                    <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/20 blur-2xl" />
-                  )}
-                  <div className="relative">
-                    <span className={`text-[10px] font-extrabold uppercase tracking-[0.16em] ${active ? 'text-blue-100' : 'text-blue-600'}`}>
-                      {item.tab}
-                    </span>
-                    <h3 className="mt-3 text-xl font-extrabold tracking-tight">{item.title}</h3>
-                    <p className={`mt-2 text-[13px] leading-relaxed ${active ? 'text-blue-50/85' : 'text-slate-500'}`}>
-                      {item.desc}
-                    </p>
-                    <ul className="mt-5 space-y-2.5">
-                      {item.points.map((point) => (
-                        <li key={point} className="flex items-center gap-2 text-[12px] font-semibold">
-                          <span className={`grid h-5 w-5 place-items-center rounded-full ${active ? 'bg-white/20' : 'bg-blue-50 text-blue-600'}`}>
-                            <Check size={12} />
-                          </span>
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                    <div className={`mt-6 rounded-2xl p-4 ${active ? 'bg-white/15' : 'bg-slate-50'}`}>
-                      <p className={`preview-value text-2xl font-extrabold tracking-tight ${active ? 'text-white' : 'text-blue-700'}`}>
-                        {item.stat}
+                <Reveal key={item.tab} delay={index * 90} className="h-full">
+                  <article
+                    className={`soft-lift relative h-full overflow-hidden rounded-3xl border p-7 ${
+                      active
+                        ? 'border-transparent bg-gradient-to-br from-sky-400 via-blue-600 to-blue-800 text-white shadow-[0_26px_60px_rgba(37,99,235,0.32)]'
+                        : 'border-slate-200 bg-white text-slate-900 shadow-[0_12px_34px_rgba(37,99,235,0.06)]'
+                    }`}
+                  >
+                    {active && (
+                      <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/20 blur-2xl" />
+                    )}
+                    <div className="relative">
+                      <span className={`text-[10px] font-extrabold uppercase tracking-[0.16em] ${active ? 'text-blue-100' : 'text-blue-600'}`}>
+                        {item.tab}
+                      </span>
+                      <h3 className="mt-3 text-xl font-extrabold tracking-tight">{item.title}</h3>
+                      <p className={`mt-2 text-[13px] leading-relaxed ${active ? 'text-blue-50/85' : 'text-slate-500'}`}>
+                        {item.desc}
                       </p>
-                      <p className={`mt-0.5 text-[10.5px] font-semibold ${active ? 'text-blue-100' : 'text-slate-400'}`}>
-                        {item.statLabel}
-                      </p>
+                      <ul className="mt-5 space-y-2.5">
+                        {item.points.map((point) => (
+                          <li key={point} className="flex items-center gap-2 text-[12px] font-semibold">
+                            <span className={`grid h-5 w-5 place-items-center rounded-full ${active ? 'bg-white/20' : 'bg-blue-50 text-blue-600'}`}>
+                              <Check size={12} />
+                            </span>
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className={`mt-6 rounded-2xl p-4 ${active ? 'bg-white/15' : 'bg-slate-50'}`}>
+                        <p className={`preview-value text-2xl font-extrabold tracking-tight ${active ? 'text-white' : 'text-blue-700'}`}>
+                          {item.stat}
+                        </p>
+                        <p className={`mt-0.5 text-[10.5px] font-semibold ${active ? 'text-blue-100' : 'text-slate-400'}`}>
+                          {item.statLabel}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
+                </Reveal>
               )
             })}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ---------- 5. WA → Dashboard ---------- */}
       <section id="bot-whatsapp" className="scroll-mt-28 bg-slate-50/70 px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+        <Reveal className="mx-auto max-w-6xl">
           <SectionHeading
             title="Catat Transaksi Cukup Lewat"
             accent="Chat WhatsApp"
@@ -440,12 +442,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ---------- 6. Diagram node aliran uang ---------- */}
       <section id="alur-dana" className="scroll-mt-28 px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+        <Reveal className="mx-auto max-w-6xl">
           <SectionHeading
             title="Pantau Aliran Uangmu"
             accent="Secara Real-Time"
@@ -489,12 +491,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ---------- 7. Kecepatan + CTA + footer ---------- */}
       <section className="bg-slate-50/70 px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
+        <Reveal className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-[38px] sm:leading-[1.15]">
               Pencatatan Selesai dalam <span className="text-gradient">Hitungan Detik</span>
@@ -542,9 +544,9 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <p className="mt-1 text-[10.5px] text-blue-600/80">Dilindungi Supabase Row Level Security.</p>
             </div>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="hero-shell mx-auto mt-24 max-w-6xl rounded-[32px] px-6 py-14 text-center sm:px-12 sm:py-16">
+        <Reveal delay={80} className="hero-shell mx-auto mt-24 max-w-6xl rounded-[32px] px-6 py-14 text-center sm:px-12 sm:py-16">
           <div className="relative z-10">
             <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-[42px] sm:leading-[1.15]">
               Mulai Rapikan Arus Kasmu Sekarang
@@ -561,11 +563,11 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
             </button>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="bg-white px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Brand />
             <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-slate-500">
@@ -609,7 +611,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </ul>
             </div>
           ))}
-        </div>
+        </Reveal>
         <div className="mx-auto mt-10 max-w-7xl text-center text-[11px] text-slate-400">
           © {new Date().getFullYear()} SakuFlow. Dibuat untuk membantu arus kas yang lebih tenang.
         </div>

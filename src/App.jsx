@@ -20,6 +20,7 @@ import InsightCard from './components/InsightCard'
 import LandingPage from './components/LandingPage'
 import LogoMark from './components/LogoMark'
 import MoneyFlow from './components/MoneyFlow'
+import Reveal from './components/Reveal'
 import SavingsCard from './components/SavingsCard'
 import Settings from './components/Settings'
 import SummaryCards from './components/SummaryCards'
@@ -255,36 +256,44 @@ export default function App() {
               </div>
             )}
 
-            <section className="panel panel--flow">
-              <MoneyFlow income={summary.income} expenses={categories} savingsTarget={settings.savingsTarget} />
-            </section>
+            <Reveal delay={60}>
+              <section className="panel panel--flow">
+                <MoneyFlow income={summary.income} expenses={categories} savingsTarget={settings.savingsTarget} />
+              </section>
+            </Reveal>
 
-            <SavingsCard progress={savingsProgress} onOpenSettings={() => setTab('settings')} />
+            <Reveal delay={100}><SavingsCard progress={savingsProgress} onOpenSettings={() => setTab('settings')} /></Reveal>
 
-            <BudgetPanel budgets={budgetStatus} onOpenSettings={() => setTab('settings')} />
+            <Reveal delay={140}><BudgetPanel budgets={budgetStatus} onOpenSettings={() => setTab('settings')} /></Reveal>
 
-            <InsightCard insight={insight} />
+            <Reveal delay={180}><InsightCard insight={insight} /></Reveal>
 
             <div className="grid-2">
-              <section className="panel">
-                <h2 className="panel__title">Naik turun uangmu</h2>
-                <TrendChart trend={trend} />
-              </section>
-              <section className="panel">
-                <h2 className="panel__title">Pengeluaran terbesar</h2>
-                <CategoryBreakdown categories={categories} />
-              </section>
+              <Reveal className="h-full" delay={60}>
+                <section className="panel h-full">
+                  <h2 className="panel__title">Naik turun uangmu</h2>
+                  <TrendChart trend={trend} />
+                </section>
+              </Reveal>
+              <Reveal className="h-full" delay={120}>
+                <section className="panel h-full">
+                  <h2 className="panel__title">Pengeluaran terbesar</h2>
+                  <CategoryBreakdown categories={categories} />
+                </section>
+              </Reveal>
             </div>
 
-            <section className="panel">
-              <div className="panel__header-row">
-                <div>
-                  <h2 className="panel__title">Catatan terakhir</h2>
+            <Reveal delay={100}>
+              <section className="panel">
+                <div className="panel__header-row">
+                  <div>
+                    <h2 className="panel__title">Catatan terakhir</h2>
+                  </div>
+                  <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua <ArrowRight size={14} /></button>
                 </div>
-                <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua <ArrowRight size={14} /></button>
-              </div>
-              <TransactionList items={[...monthItems].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 5)} onEdit={openEdit} onDelete={handleDelete} compact />
-            </section>
+                <TransactionList items={[...monthItems].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 5)} onEdit={openEdit} onDelete={handleDelete} compact />
+              </section>
+            </Reveal>
           </div>
         ) : tab === 'notes' ? (
           <div className="page page--notes">

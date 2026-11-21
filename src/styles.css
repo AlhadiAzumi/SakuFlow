@@ -28,7 +28,10 @@
   --shadow-soft: 0 8px 24px rgba(37, 99, 235, 0.06);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --reveal-offset: 18px;
 }
+
+html { scroll-behavior: smooth; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -916,6 +919,12 @@ code {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
+.reveal {
+  opacity: 0;
+  transform: translateY(var(--reveal-offset));
+  transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
 .soft-lift { transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s var(--ease); }
 .soft-lift:hover { transform: translateY(-6px); border-color: rgba(147, 197, 253, 0.8); box-shadow: 0 26px 60px rgba(37, 99, 235, 0.18); }
 .float-a { animation: float-a 8s ease-in-out infinite; will-change: transform; }
@@ -975,5 +984,7 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1; transform: none; }
 }
