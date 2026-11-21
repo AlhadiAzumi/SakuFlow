@@ -79,12 +79,12 @@ function Brand() {
 }
 
 function DarkPill({ children, onClick, href, className = '' }) {
-  const classes = `group inline-flex items-center gap-2.5 rounded-full bg-slate-900 px-5 py-3 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_16px_32px_rgba(15,23,42,0.28)] ${className}`
+  const classes = `group inline-flex items-center gap-2.5 rounded-full bg-slate-900 px-5 py-3 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_16px_32px_rgba(15,23,42,0.28)] ${className}`
   if (href) {
     return (
       <a href={href} className={classes}>
         {children}
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition group-hover:rotate-45">
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
           <ArrowUpRight size={13} />
         </span>
       </a>
@@ -93,7 +93,7 @@ function DarkPill({ children, onClick, href, className = '' }) {
   return (
     <button type="button" onClick={onClick} className={classes}>
       {children}
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition group-hover:rotate-45">
+      <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
         <ArrowUpRight size={13} />
       </span>
     </button>
@@ -187,10 +187,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <button
                 type="button"
                 onClick={onEnter}
-                className="group inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white shadow-lg backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/30"
+                className="group inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white shadow-lg backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/30"
               >
                 {primaryLabel}
-                <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+                <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
               </button>
               <DarkPill href="#cara-kerja">Lihat Cara Kerja</DarkPill>
             </div>
@@ -433,7 +433,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <button
                   type="button"
                   onClick={onEnter}
-                  className="mt-5 w-full rounded-full bg-blue-600 px-5 py-3.5 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5 hover:bg-blue-700"
+                  className="mt-5 w-full rounded-full bg-blue-600 px-5 py-3.5 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-blue-700"
                 >
                   Simpan ke SakuFlow
                 </button>
@@ -555,10 +555,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <button
               type="button"
               onClick={onEnter}
-              className="group mt-8 inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/30"
+              className="group mt-8 inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/30"
             >
               {primaryLabel}
-              <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+              <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
             </button>
           </div>
         </div>
