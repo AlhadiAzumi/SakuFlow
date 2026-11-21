@@ -98,7 +98,7 @@ export const getInsight = (transactions, monthItems) => {
     headline = `Pengeluaran 7 hari terakhir naik ${pct}% dibanding minggu sebelumnya. Yuk, cek kategori terbesarmu.`
   } else if (lastWeek > 0 && thisWeek < lastWeek) {
     const pct = Math.round(((lastWeek - thisWeek) / lastWeek) * 100)
-    headline = `Kamu lebih hemat ${pct}% dalam 7 hari terakhir. Pertahankan! 🎉`
+    headline = `Kamu lebih hemat ${pct}% dalam 7 hari terakhir. Pertahankan!`
   } else if (thisWeek > 0) {
     headline = `Kamu mengeluarkan ${formatRupiah(thisWeek)} dalam 7 hari terakhir. Terus catat supaya polanya makin jelas.`
   } else {
@@ -106,7 +106,7 @@ export const getInsight = (transactions, monthItems) => {
   }
 
   const detail = top
-    ? `Kategori terbesar bulan ini: ${top.emoji} ${top.label} (${formatRupiah(top.amount)}, ${Math.round(top.pct)}% dari total pengeluaran).`
+    ? `Kategori terbesar bulan ini: ${top.label} (${formatRupiah(top.amount)}, ${Math.round(top.pct)}% dari total pengeluaran).`
     : `Ada ${EXPENSE_CATEGORIES.length} kategori yang siap dipakai saat kamu mulai mencatat.`
 
   return { headline, detail, thisWeek, lastWeek, top }

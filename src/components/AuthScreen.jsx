@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { ArrowLeft, ArrowUpRight, Globe } from 'lucide-react'
 import { useApp } from '../context/useApp'
+import LogoMark from './LogoMark'
 
-export default function AuthScreen() {
+export default function AuthScreen({ onBack }) {
   const { signIn, signUp, signInWithGoogle } = useApp()
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
@@ -47,17 +49,22 @@ export default function AuthScreen() {
 
   return (
     <div className="auth-page">
+      {onBack && (
+        <button type="button" onClick={onBack} className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[12px] font-bold text-slate-600 shadow-sm backdrop-blur transition hover:text-blue-700">
+          <ArrowLeft size={14} /> Kembali ke beranda
+        </button>
+      )}
       <div className="auth-card">
         <div className="auth-card__brand">
-          <span className="brand-mark">💸</span>
+          <span className="brand-mark"><LogoMark className="h-full w-full rounded-[10px]" /></span>
           <div>
-            <strong>Catatan Uang Harian</strong>
-            <small>Tahu ke mana uangmu pergi</small>
+            <strong>SakuFlow</strong>
+            <small>Catat cepat, arah uang jelas</small>
           </div>
         </div>
 
         <div className="auth-card__intro">
-          <h1>Selamat datang kembali 👋</h1>
+          <h1>Selamat datang kembali</h1>
           <p>Masuk untuk melihat peta uangmu dan lanjut mencatat.</p>
         </div>
 
@@ -74,12 +81,13 @@ export default function AuthScreen() {
           {notice && <p className="form-notice" role="status">{notice}</p>}
           <button type="submit" className="button button--primary button--full" disabled={loading}>
             {loading ? 'Tunggu…' : mode === 'signin' ? 'Masuk' : 'Buat akun'}
+            <span className="button__icon"><ArrowUpRight size={13} strokeWidth={2.5} /></span>
           </button>
         </form>
 
         <div className="auth-card__divider"><span>atau</span></div>
         <button type="button" className="button button--outline button--full" onClick={google} disabled={loading}>
-          <span aria-hidden="true">🔵</span> Lanjut dengan Google
+          <Globe size={17} strokeWidth={2.2} /> Lanjut dengan Google
         </button>
 
         <p className="auth-card__switch">

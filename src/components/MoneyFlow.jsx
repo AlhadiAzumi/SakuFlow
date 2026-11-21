@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { Compass } from 'lucide-react'
+import CategoryIcon from './CategoryIcon'
 import { formatRupiah, formatRupiahCompact } from '../lib/format'
 
 const W = 900
@@ -20,8 +22,8 @@ function buildItems(income, expenseItems) {
     items.push({
       id: 'sisa',
       label: 'Sisa / Tabungan',
-      emoji: '🐷',
-      color: '#10B981',
+      icon: 'piggy',
+      color: '#2563EB',
       amount: leftover,
       isLeftover: true,
     })
@@ -43,7 +45,7 @@ function FlowCompact({ items, total, sourceLabel }) {
       <div className="flow-compact__items">
         {items.map((item) => (
           <div className="flow-compact__item" key={item.id}>
-            <span className="flow-compact__emoji">{item.emoji}</span>
+            <span className="flow-compact__emoji"><CategoryIcon category={item} size={14} /></span>
             <div className="flow-compact__body">
               <div className="flow-compact__row">
                 <span>{item.label}</span>
@@ -71,7 +73,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
   if (!items.length || total <= 0) {
     return (
       <div className="flow-empty">
-        <div className="flow-empty__icon">🧭</div>
+        <div className="flow-empty__icon"><Compass size={34} /></div>
         <h3>Belum ada alur uang</h3>
         <p>Catat pemasukan atau pengeluaran pertamamu, dan di sini akan muncul peta ke mana uangmu pergi.</p>
       </div>
@@ -107,7 +109,6 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
     <div className="flow-chart">
       <div className="flow-chart__heading">
         <div>
-          <span className="eyebrow">PETA UANGMU</span>
           <h2>Ke mana uangmu pergi?</h2>
         </div>
         <div className="flow-chart__total">
@@ -123,8 +124,8 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
         <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-label="Diagram alur uang per kategori" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="sourceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0D9488" />
-              <stop offset="100%" stopColor="#115E59" />
+              <stop offset="0%" stopColor="#38BDF8" />
+              <stop offset="100%" stopColor="#1D4ED8" />
             </linearGradient>
           </defs>
 
@@ -172,9 +173,9 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
                 fill={node.color}
               />
               <circle cx={RIGHT_X + RIGHT_W + 20} cy={node.rightTop + node.h / 2} r="13" fill={node.color} fillOpacity="0.14" />
-              <text x={RIGHT_X + RIGHT_W + 20} y={node.rightTop + node.h / 2 + 5} textAnchor="middle" className="flow-svg__emoji">
-                {node.emoji}
-              </text>
+              <foreignObject x={RIGHT_X + RIGHT_W + 8} y={node.rightTop + node.h / 2 - 12} width="24" height="24">
+                <div className="flow-svg__icon" style={{ color: node.color }}><CategoryIcon category={node} size={14} /></div>
+              </foreignObject>
               <text x={RIGHT_X + RIGHT_W + 44} y={node.rightTop + node.h / 2 - 2} className="flow-svg__label">
                 {node.label}
               </text>

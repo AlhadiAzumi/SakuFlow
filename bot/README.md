@@ -1,6 +1,6 @@
 # Bot WhatsApp — Catatan Uang Harian
 
-Bot ini menerima chat seperti **"masuk uang 500 ribu"**, lalu menulis transaksi ke database Supabase yang **sama** dengan website. Karena website memakai Supabase Realtime, catatannya langsung muncul tanpa refresh. ✨
+Bot ini menerima chat seperti **"masuk uang 500 ribu"**, lalu menulis transaksi ke database Supabase yang **sama** dengan website. Karena website memakai Supabase Realtime, catatannya langsung muncul tanpa refresh.
 
 ```
 Kamu chat WA

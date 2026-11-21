@@ -59,7 +59,7 @@ async function handleMessage(message) {
     if (/^\d{4,8}$/.test(text)) {
       const userId = await store.verifyOtp(phone, text)
       await sendText(phone, userId
-        ? '✅ Nomor WhatsApp kamu berhasil dihubungkan! Sekarang kamu bisa langsung chat catatan uang di sini.'
+        ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
       return
     }
@@ -82,7 +82,7 @@ async function handleMessage(message) {
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     const totals = await store.getMonthTotals(userId, monthKey)
     await sendText(phone, [
-      `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()} 📊`,
+      `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()}`,
       `Uang masuk: ${rupiah(totals.income)}`,
       `Uang keluar: ${rupiah(totals.expense)}`,
       `Sisa: ${rupiah(totals.income - totals.expense)}`,
@@ -111,15 +111,15 @@ async function handleMessage(message) {
     const category = getCategory(parsed.type, parsed.category)
     const totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
     await sendText(phone, [
-      `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan ✅`,
-      `${rupiah(parsed.amount)} • ${category.emoji} ${category.label}`,
+      `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
+      `${rupiah(parsed.amount)} • ${category.label}`,
       `Total bulan ini — masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
-      'Cek websitenya, datanya langsung muncul ✨',
+      'Cek websitenya, datanya langsung muncul.',
     ].join('\n'))
     return
   }
 
-  await sendText(phone, `Aku belum paham pesan itu 🤔\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
+  await sendText(phone, `Aku belum paham pesan itu.\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
 }
 
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {

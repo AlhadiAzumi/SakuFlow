@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import CategoryIcon from './CategoryIcon'
 import { getCategories } from '../lib/categories'
 import { formatNumber, parseAmount, todayKey } from '../lib/format'
 
@@ -85,7 +87,6 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div className="modal__header">
           <div>
-            <span className="eyebrow">{isEdit ? 'UBAH CATATAN' : 'CATAT CEPAT'}</span>
             <h2 id="modal-title">{isEdit ? 'Ubah catatan' : 'Uangmu kemana?'}</h2>
           </div>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Tutup">×</button>
@@ -94,10 +95,10 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
         <form onSubmit={handleSubmit} className="modal__form">
           <div className="segmented">
             <button type="button" className={form.type === 'expense' ? 'is-active is-active--out' : ''} onClick={() => setType('expense')}>
-              ↗ Uang keluar
+              <ArrowUpRight size={15} /> Uang keluar
             </button>
             <button type="button" className={form.type === 'income' ? 'is-active is-active--in' : ''} onClick={() => setType('income')}>
-              ↙ Uang masuk
+              <ArrowDownLeft size={15} /> Uang masuk
             </button>
           </div>
 
@@ -128,7 +129,7 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
                   style={form.category === category.id ? { borderColor: category.color, background: `${category.color}14` } : undefined}
                   onClick={() => setForm((prev) => ({ ...prev, category: category.id }))}
                 >
-                  <span>{category.emoji}</span>
+                  <span className="category-chip__icon"><CategoryIcon category={category} size={15} /></span>
                   <small>{category.label}</small>
                 </button>
               ))}

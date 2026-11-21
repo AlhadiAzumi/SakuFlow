@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CategoryIcon from './CategoryIcon'
 import { useApp } from '../context/useApp'
 import { EXPENSE_CATEGORIES } from '../lib/categories'
 import { formatNumber, parseAmount } from '../lib/format'
@@ -32,8 +33,7 @@ export default function BudgetSettings() {
 
   return (
     <section className="panel">
-      <span className="eyebrow">RENCANA BULANAN</span>
-      <h2 className="panel__title">Budget & target tabungan</h2>
+      <h2 className="panel__title">Budget &amp; target tabungan</h2>
 
       <label className="field savings-target-field">
         <span className="field__label">Target tabungan per bulan</span>
@@ -55,7 +55,7 @@ export default function BudgetSettings() {
         <div className="budget-settings-grid">
           {EXPENSE_CATEGORIES.map((category) => (
             <label className="budget-setting" key={category.id}>
-              <span className="budget-setting__label"><span>{category.emoji}</span>{category.label}</span>
+              <span className="budget-setting__label"><span className="budget-setting__icon" style={{ color: category.color }}><CategoryIcon category={category} size={14} /></span>{category.label}</span>
               <span className="budget-setting__input">
                 <small>Rp</small>
                 <input

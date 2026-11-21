@@ -1,6 +1,8 @@
-# Catatan Uang Harian
+# SakuFlow — Catatan Uang Harian
 
 Aplikasi pencatat keuangan berbasis web (PWA) yang membantu pengguna melihat **ke mana uang mereka pergi**. Fokus utamanya bukan sekadar tabel saldo, tapi visualisasi alur uang dan insight mingguan yang mudah dipahami.
+
+Tampilan memakai gaya *light-mode fintech SaaS*: latar `slate-50`, kartu kaca putih, aksen gradasi biru, dan CTA pil gelap. Stack frontend: React + Vite + Tailwind CSS v4 + `lucide-react`. Pengunjung yang belum login melihat landing page lengkap; setelah login masuk ke dashboard yang memakai sistem desain yang sama.
 
 ## Fitur MVP
 

@@ -1,9 +1,24 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  House,
+  Plus,
+  ReceiptText,
+  Settings2,
+  Sparkles,
+  TriangleAlert,
+} from 'lucide-react'
 import AddTransactionModal from './components/AddTransactionModal'
 import AuthScreen from './components/AuthScreen'
 import BudgetPanel from './components/BudgetPanel'
 import CategoryBreakdown from './components/CategoryBreakdown'
 import InsightCard from './components/InsightCard'
+import LandingPage from './components/LandingPage'
+import LogoMark from './components/LogoMark'
 import MoneyFlow from './components/MoneyFlow'
 import SavingsCard from './components/SavingsCard'
 import Settings from './components/Settings'
@@ -23,15 +38,15 @@ import {
 import { currentMonthKey, formatMonthLabel, shiftMonth } from './lib/format'
 
 const TABS = [
-  { id: 'home', label: 'Beranda', icon: '⌂' },
-  { id: 'notes', label: 'Catatan', icon: '≡' },
-  { id: 'settings', label: 'Setelan', icon: '⚙' },
+  { id: 'home', label: 'Beranda', icon: House },
+  { id: 'notes', label: 'Catatan', icon: ReceiptText },
+  { id: 'settings', label: 'Setelan', icon: Settings2 },
 ]
 
 function LoadingScreen() {
   return (
     <div className="loading-screen">
-      <div className="loading-screen__mark">💸</div>
+      <div className="loading-screen__mark"><LogoMark className="h-full w-full rounded-[16px]" /></div>
       <div className="loading-screen__spinner" />
       <p>Menyiapkan catatanmu…</p>
     </div>
@@ -42,7 +57,7 @@ function Toast({ toast }) {
   if (!toast) return null
   return (
     <div className={`toast toast--${toast.tone}`} role="status" key={toast.id}>
-      <span>{toast.tone === 'error' ? '⚠️' : '✓'}</span>
+      {toast.tone === 'error' ? <CircleAlert size={16} /> : <Check size={16} />}
       {toast.message}
     </div>
   )
@@ -55,9 +70,13 @@ export default function App() {
   } = useApp()
 
   const [tab, setTab] = useState('home')
+  const [view, setView] = useState('landing')
+  const [showAuth, setShowAuth] = useState(false)
   const [month, setMonth] = useState(currentMonthKey())
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+
+  const isLoggedIn = mode === 'local' || Boolean(user)
 
   const monthItems = useMemo(() => getMonthTransactions(transactions, month), [transactions, month])
   const summary = useMemo(() => summarize(monthItems), [monthItems])
@@ -69,12 +88,32 @@ export default function App() {
   const overBudget = budgetStatus.filter((item) => item.status === 'over')
   const nearBudget = budgetStatus.filter((item) => item.status === 'warning')
 
+  useEffect(() => {
+    if (isLoggedIn && showAuth) {
+      setShowAuth(false)
+      setView('dashboard')
+    }
+  }, [isLoggedIn, showAuth])
+
   if (authLoading) return <LoadingScreen />
 
-  if (mode === 'cloud' && !user) {
+  if (!isLoggedIn) {
     return (
       <>
-        <AuthScreen />
+        {showAuth ? (
+          <AuthScreen onBack={() => setShowAuth(false)} />
+        ) : (
+          <LandingPage onEnter={() => setShowAuth(true)} />
+        )}
+        <Toast toast={toast} />
+      </>
+    )
+  }
+
+  if (view === 'landing') {
+    return (
+      <>
+        <LandingPage isLoggedIn onEnter={() => setView('dashboard')} />
         <Toast toast={toast} />
       </>
     )
@@ -122,25 +161,29 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner">
-          <button type="button" className="brand" onClick={() => setTab('home')}>
-            <span className="brand-mark">💸</span>
+          <button type="button" className="brand" onClick={() => setView('landing')} title="Lihat halaman utama SakuFlow">
+            <span className="brand-mark"><LogoMark className="h-full w-full rounded-[10px]" /></span>
             <span className="brand__text">
-              <strong>Catatan Uang</strong>
-              <small>Harian</small>
+              <strong>SakuFlow</strong>
+              <small>Catatan uang harian</small>
             </span>
           </button>
 
           <nav className="top-nav" aria-label="Navigasi utama">
-            {TABS.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className={tab === item.id ? 'is-active' : ''}
-                onClick={() => setTab(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+            {TABS.map((item) => {
+              const Icon = item.icon
+              return (
+                <button
+                  type="button"
+                  key={item.id}
+                  className={tab === item.id ? 'is-active' : ''}
+                  onClick={() => setTab(item.id)}
+                >
+                  <Icon size={15} strokeWidth={2.2} />
+                  {item.label}
+                </button>
+              )
+            })}
           </nav>
 
           <div className="header-actions">
@@ -148,14 +191,14 @@ export default function App() {
               <span className="live-badge" title="Data tersinkron langsung"><i /> Live</span>
             )}
             <div className="month-switcher">
-              <button type="button" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bulan sebelumnya">‹</button>
+              <button type="button" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bulan sebelumnya"><ChevronLeft size={17} /></button>
               <span>{formatMonthLabel(month)}</span>
               <button
                 type="button"
                 onClick={() => setMonth(shiftMonth(month, 1))}
                 disabled={month >= currentMonthKey()}
                 aria-label="Bulan berikutnya"
-              >›</button>
+              ><ChevronRight size={17} /></button>
             </div>
             <div className="user-chip" title={mode === 'cloud' ? user?.email : 'Mode lokal'}>
               {mode === 'cloud' ? displayName.charAt(0).toUpperCase() : '⌂'}
@@ -171,18 +214,18 @@ export default function App() {
           <div className="page page--home">
             <div className="page-heading">
               <div>
-                <span className="eyebrow">{formatMonthLabel(month).toUpperCase()}</span>
-                <h1>Halo, {displayName} 👋</h1>
-                <p>Yuk lihat ke mana uangmu pergi bulan ini.</p>
+                <h1>Halo, {displayName}</h1>
+                <p>Yuk lihat ke mana uangmu pergi <span className="text-gradient font-extrabold">bulan ini</span>.</p>
               </div>
               <button type="button" className="button button--primary button--add-desktop" onClick={openAdd}>
-                + Catat uang
+                <span className="button__icon"><Plus size={13} strokeWidth={2.5} /></span>
+                Catat uang
               </button>
             </div>
 
             {transactions.length === 0 && (
               <div className="welcome-banner">
-                <span className="welcome-banner__icon">🌱</span>
+                <span className="welcome-banner__icon"><Sparkles size={26} /></span>
                 <div>
                   <strong>Langkah pertama dimulai dari satu catatan.</strong>
                   <p>Tambahkan uang masuk atau pengeluaran pertamamu untuk melihat peta uangmu.</p>
@@ -195,19 +238,19 @@ export default function App() {
 
             {overBudget.length > 0 && (
               <div className="alert-banner alert-banner--danger" role="status">
-                <span>🚨</span>
+                <span className="alert-banner__icon"><TriangleAlert size={20} /></span>
                 <p>
                   <strong>{overBudget.length} kategori sudah melewati budget:</strong>{' '}
-                  {overBudget.map((item) => `${item.emoji} ${item.label}`).join(', ')}. Cek pengeluaranmu, ya.
+                  {overBudget.map((item) => item.label).join(', ')}. Cek pengeluaranmu, ya.
                 </p>
               </div>
             )}
             {overBudget.length === 0 && nearBudget.length > 0 && (
               <div className="alert-banner alert-banner--warning" role="status">
-                <span>⚠️</span>
+                <span className="alert-banner__icon"><TriangleAlert size={20} /></span>
                 <p>
                   <strong>Hati-hati, budget hampir habis:</strong>{' '}
-                  {nearBudget.map((item) => `${item.emoji} ${item.label} (${Math.round(item.pct)}%)`).join(', ')}.
+                  {nearBudget.map((item) => `${item.label} (${Math.round(item.pct)}%)`).join(', ')}.
                 </p>
               </div>
             )}
@@ -224,12 +267,10 @@ export default function App() {
 
             <div className="grid-2">
               <section className="panel">
-                <span className="eyebrow">TREN 6 BULAN</span>
                 <h2 className="panel__title">Naik turun uangmu</h2>
                 <TrendChart trend={trend} />
               </section>
               <section className="panel">
-                <span className="eyebrow">PER KATEGORI</span>
                 <h2 className="panel__title">Pengeluaran terbesar</h2>
                 <CategoryBreakdown categories={categories} />
               </section>
@@ -238,10 +279,9 @@ export default function App() {
             <section className="panel">
               <div className="panel__header-row">
                 <div>
-                  <span className="eyebrow">TERBARU</span>
                   <h2 className="panel__title">Catatan terakhir</h2>
                 </div>
-                <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua →</button>
+                <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua <ArrowRight size={14} /></button>
               </div>
               <TransactionList items={[...monthItems].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 5)} onEdit={openEdit} onDelete={handleDelete} compact />
             </section>
@@ -250,12 +290,12 @@ export default function App() {
           <div className="page page--notes">
             <div className="page-heading">
               <div>
-                <span className="eyebrow">{formatMonthLabel(month).toUpperCase()}</span>
-                <h1>Catatan uang</h1>
+                <h1>Catatan <span className="text-gradient">uang</span></h1>
                 <p>{monthItems.length} transaksi bulan ini. Ketuk catatan untuk mengubahnya.</p>
               </div>
               <button type="button" className="button button--primary button--add-desktop" onClick={openAdd}>
-                + Catat uang
+                <span className="button__icon"><Plus size={13} strokeWidth={2.5} /></span>
+                Catat uang
               </button>
             </div>
             <section className="panel">
@@ -268,7 +308,7 @@ export default function App() {
       </main>
 
       {tab !== 'settings' && (
-        <button type="button" className="fab" onClick={openAdd} aria-label="Tambah catatan">+</button>
+        <button type="button" className="fab" onClick={openAdd} aria-label="Tambah catatan"><Plus size={24} strokeWidth={2.4} /></button>
       )}
 
       <nav className="bottom-nav" aria-label="Navigasi bawah">
@@ -279,7 +319,7 @@ export default function App() {
             className={tab === item.id ? 'is-active' : ''}
             onClick={() => setTab(item.id)}
           >
-            <span className="bottom-nav__icon">{item.icon}</span>
+            <span className="bottom-nav__icon"><item.icon size={19} strokeWidth={2.2} /></span>
             <span>{item.label}</span>
           </button>
         ))}

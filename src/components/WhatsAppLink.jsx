@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Bot, Check } from 'lucide-react'
 import { useApp } from '../context/useApp'
 import { supabase } from '../lib/supabase'
 
@@ -81,7 +82,7 @@ export default function WhatsAppLink() {
   if (!API_URL || mode !== 'cloud') {
     return (
       <section className="panel panel--tip">
-        <span className="panel__tip-icon">🤖</span>
+        <span className="panel__tip-icon"><Bot size={22} /></span>
         <div>
           <strong>Catat lewat WhatsApp (mode cloud)</strong>
           <p>Fitur bot perlu Supabase aktif dan <code>VITE_BOT_API_URL</code> diisi. Baca petunjuk di folder <code>bot/README.md</code>.</p>
@@ -92,7 +93,6 @@ export default function WhatsAppLink() {
 
   return (
     <section className="panel whatsapp-panel">
-      <span className="eyebrow">WHATSAPP BOT</span>
       <h2 className="panel__title">Catat cukup dengan chat</h2>
       <p className="whatsapp-panel__desc">
         Hubungkan nomormu, lalu kirim pesan seperti <em>"masuk uang 500 ribu"</em>. Catatannya langsung muncul di website.
@@ -102,7 +102,7 @@ export default function WhatsAppLink() {
         <p className="whatsapp-panel__muted">Mengecek status koneksi…</p>
       ) : status.linked ? (
         <div className="whatsapp-panel__linked">
-          <span className="whatsapp-panel__check">✓</span>
+          <span className="whatsapp-panel__check"><Check size={15} strokeWidth={3} /></span>
           <div>
             <strong>Terhubung</strong>
             <span>+{status.phone}</span>

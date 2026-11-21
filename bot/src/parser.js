@@ -106,7 +106,7 @@ export function parseMessage(text, now = new Date()) {
 }
 
 export const HELP_TEXT = [
-  'Halo! Aku bot Catatan Uang Harian 🤖',
+  'Halo! Aku bot Catatan Uang Harian.',
   '',
   'Cara pakai, tinggal chat seperti:',
   '• "masuk uang 500 ribu"',
@@ -118,5 +118,5 @@ export const HELP_TEXT = [
   '• "ringkasan" — lihat total bulan ini',
   '• "bantuan" — tampilkan pesan ini',
   '',
-  'Setiap catatan langsung muncul di website kamu ✨',
+  'Setiap catatan langsung muncul di website kamu.',
 ].join('\n')
