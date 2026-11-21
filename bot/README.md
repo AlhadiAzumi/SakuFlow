@@ -195,6 +195,42 @@ curl -X POST http://localhost:3001/webhook ^
 
 Semua balasan WA akan tampil di terminal dengan prefix `[DRY-RUN WA → ...]`.
 
+## Troubleshooting
+
+### Test Messaging Account berlabel merah `Disabled`
+
+Ini **masalah di sisi Meta**, bukan bug aplikasi. Selama akun test dinonaktifkan (biasanya saat peninjauan portofolio/bisnis), Meta belum mengeluarkan token yang bisa dipakai — jadi wajar kalau `WHATSAPP_TOKEN` masih kosong dan chat WA asli belum jalan.
+
+Yang dilakukan:
+
+1. Pantau email akun Meta + muat ulang **Business Support Home** sampai status portofolio berubah.
+2. Cek **WhatsApp Manager → Phone numbers**. Kalau ada tombol **Verify / Verify again** (SMS atau telepon), lakukan — verifikasi nomor sering mempercepat aktivasi.
+3. Pastikan tidak ada item lain yang masih pending di **Business Portfolio**.
+4. Jangan hapus/ganti nomor test saat peninjauan berjalan (bisa mengulang antrean).
+
+Selama menunggu, alur lokal tetap bisa diuji dengan `npm run send` — nomor yang sudah `verified: true` tetap tersimpan dan web tetap update realtime. Begitu status aktif: isi `WHATSAPP_TOKEN`, restart bot, lalu chat WA asli.
+
+### `npm run send` balas `401`
+
+Bot sudah memakai `WHATSAPP_APP_SECRET`, jadi webhook menolak pesan tanpa tanda tangan HMAC. Script `npm run send` sekarang membaca secret dari `bot/.env` dan mengirim header `X-Hub-Signature-256` otomatis. Kalau masih `401`, **restart bot** setelah mengubah `.env` (config dibaca sekali saat start).
+
+### Web klik "Kirim kode OTP" muncul `Failed to fetch`
+
+- Pastikan bot jalan dan `http://localhost:3001/health` balas `live`.
+- Kalau web dibuka lewat IP jaringan/HP, tambahkan origin itu di `WEB_ORIGIN` (atau pakai `WEB_ORIGIN=*`) lalu restart bot.
+
+### REST Supabase balas `403 permission denied`
+
+Tabel belum punya `GRANT`. Jalankan ulang `supabase/setup.sql` — file itu sudah termasuk grant untuk `anon`, `authenticated`, dan `service_role`.
+
+### Verifikasi webhook Meta balas `403`
+
+`hub.verify_token` tidak sama dengan `WHATSAPP_VERIFY_TOKEN` di `bot/.env`. Samakan, lalu restart bot.
+
+### Login gagal walau akun sudah dibuat
+
+Cek `email_confirmed_at`. Kalau kosong, konfirmasi lewat **Supabase → Authentication → Users**, atau matikan **Confirm email** di provider Email agar pendaftaran berikutnya langsung aktif.
+
 ## Batasan saat ini
 
 - Parser masih berbasis aturan. Kalimat sangat bebas belum selalu dipahami (rencana: fallback LLM).
