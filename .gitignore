@@ -1,0 +1,15 @@
+# Dependensi & build
+node_modules/
+dist/
+bot/node_modules/
+
+# Kredensial (jangan pernah di-commit)
+.env
+bot/.env
+.env.local
+.env.*.local
+
+# Log & sistem
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,133 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useApp } from '../context/useApp'
+import { supabase } from '../lib/supabase'
+
+const API_URL = (import.meta.env.VITE_BOT_API_URL || '').replace(/\/$/, '')
+
+const getToken = async () => {
+  if (!supabase) return null
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token || null
+}
+
+export default function WhatsAppLink() {
+  const { mode, showToast } = useApp()
+  const [phone, setPhone] = useState('')
+  const [status, setStatus] = useState({ linked: false, phone: null })
+  const [checking, setChecking] = useState(Boolean(API_URL) && mode === 'cloud')
+  const [loading, setLoading] = useState(false)
+
+  const callApi = useCallback(async (path, options = {}) => {
+    const token = await getToken()
+    if (!token) throw new Error('Sesi login tidak ditemukan. Masuk lagi, ya.')
+    let response
+    try {
+      response = await fetch(`${API_URL}${path}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          ...(options.headers || {}),
+        },
+      })
+    } catch {
+      throw new Error(`Tidak bisa menghubungi bot di ${API_URL}. Pastikan bot jalan (npm start) dan alamat web ini terdaftar di WEB_ORIGIN.`)
+    }
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(payload.error || 'Permintaan gagal.')
+    return payload
+  }, [])
+
+  useEffect(() => {
+    if (!API_URL || mode !== 'cloud') return
+    let active = true
+    callApi('/api/link/status')
+      .then((data) => { if (active) setStatus({ linked: Boolean(data.linked), phone: data.phone }) })
+      .catch(() => {})
+      .finally(() => { if (active) setChecking(false) })
+    return () => { active = false }
+  }, [callApi, mode])
+
+  const requestOtp = async (event) => {
+    event.preventDefault()
+    setLoading(true)
+    try {
+      const result = await callApi('/api/link/request', {
+        method: 'POST',
+        body: JSON.stringify({ phone }),
+      })
+      setStatus({ linked: false, phone: result.phone })
+      showToast('Kode OTP dikirim. Balas pesan bot dengan kode tersebut.')
+    } catch (error) {
+      showToast(error.message || 'Gagal mengirim kode OTP.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const disconnect = async () => {
+    setLoading(true)
+    try {
+      await callApi('/api/link', { method: 'DELETE' })
+      setStatus({ linked: false, phone: null })
+      showToast('Nomor WhatsApp diputuskan.')
+    } catch (error) {
+      showToast(error.message || 'Gagal memutuskan nomor.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!API_URL || mode !== 'cloud') {
+    return (
+      <section className="panel panel--tip">
+        <span className="panel__tip-icon">🤖</span>
+        <div>
+          <strong>Catat lewat WhatsApp (mode cloud)</strong>
+          <p>Fitur bot perlu Supabase aktif dan <code>VITE_BOT_API_URL</code> diisi. Baca petunjuk di folder <code>bot/README.md</code>.</p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="panel whatsapp-panel">
+      <span className="eyebrow">WHATSAPP BOT</span>
+      <h2 className="panel__title">Catat cukup dengan chat</h2>
+      <p className="whatsapp-panel__desc">
+        Hubungkan nomormu, lalu kirim pesan seperti <em>"masuk uang 500 ribu"</em>. Catatannya langsung muncul di website.
+      </p>
+
+      {checking ? (
+        <p className="whatsapp-panel__muted">Mengecek status koneksi…</p>
+      ) : status.linked ? (
+        <div className="whatsapp-panel__linked">
+          <span className="whatsapp-panel__check">✓</span>
+          <div>
+            <strong>Terhubung</strong>
+            <span>+{status.phone}</span>
+          </div>
+          <button type="button" className="button button--ghost" onClick={disconnect} disabled={loading}>Putuskan</button>
+        </div>
+      ) : (
+        <form className="whatsapp-panel__form" onSubmit={requestOtp}>
+          <label className="field">
+            <span className="field__label">Nomor WhatsApp (format 08…)</span>
+            <input
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="081234567890"
+              required
+            />
+          </label>
+          <button type="submit" className="button button--primary" disabled={loading}>
+            {loading ? 'Mengirim…' : 'Kirim kode OTP'}
+          </button>
+        </form>
+      )}
+      <p className="whatsapp-panel__hint">Setelah menerima kode, balas pesan bot dengan 6 digit angka tersebut.</p>
+    </section>
+  )
+}
