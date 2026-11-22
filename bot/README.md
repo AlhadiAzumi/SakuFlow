@@ -136,6 +136,8 @@ npm run baileys:reset
 npm start
 ```
 
+**Penting:** sebelum reset/scan ulang, putuskan perangkat lama dulu di HP lewat **WhatsApp → Perangkat Tertaut → SakuFlow Bot → Putuskan**. Reset lokal saja tidak menghapus pairing di HP; kalau dibiarkan, dua sesi bisa bertabrakan dan memicu error `Bad MAC` (pesan tidak bisa didekripsi, balasan OTP tidak muncul).
+
 > Baileys memakai protokol WhatsApp Web (unofficial), bukan API resmi Meta. Untuk pemakaian personal/portofolio dengan volume wajar ini paling praktis. Tetap jangan pakai nomor utama.
 
 ## 6. (Opsional) Balik ke Meta WhatsApp Cloud API

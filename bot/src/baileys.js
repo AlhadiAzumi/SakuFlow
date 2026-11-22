@@ -23,6 +23,23 @@ const processed = new Map()
 
 let connecting = false
 let reconnectTimer = null
+let decryptionFailures = 0
+
+// libsignal mencetak "Bad MAC" lewat console.error langsung, jadi kita beri
+// satu petunjuk yang jelas di terminal tanpa mengulanginya tiap pesan.
+function noteDecryptionFailure() {
+  decryptionFailures += 1
+  if (decryptionFailures > 1) return
+  console.warn(
+    '[Baileys] Ada pesan yang gagal didekripsi (Bad MAC). Sesi Signal tidak sinkron — ' +
+    'putuskan perangkat lama di WhatsApp > Perangkat Tertaut, lalu jalankan ' +
+    '`npm run baileys:reset` dan scan QR ulang.',
+  )
+}
+
+const maskPhone = (value) => value
+  ? `${value.slice(0, 4)}••••${value.slice(-4)}`
+  : '-'
 
 function cleanupProcessed() {
   if (processed.size <= 500) return
@@ -132,7 +149,9 @@ export async function connectBaileys() {
       }
 
       if (connection === 'open') {
+        decryptionFailures = 0
         console.log('[Baileys] WhatsApp terhubung. Bot siap menerima catatan.')
+        console.log('[Baileys] Identitas akun — HP:', maskPhone(cleanJidId(socket.user?.id)), '| LID:', cleanJidId(socket.user?.lid) || '-')
         return
       }
 
@@ -151,6 +170,12 @@ export async function connectBaileys() {
     socket.ev.on('messages.upsert', async (upsert) => {
       if (upsert.type !== 'notify' && upsert.type !== 'append') return
       for (const msg of upsert.messages || []) {
+        // StubType.CIPHERTEXT = 1: Baileys gagal mendekripsi pesan, jadi tidak
+        // ada teks yang bisa masuk ke handler OTP/parser.
+        if (msg?.messageStubType === 1 && !msg?.message) {
+          noteDecryptionFailure()
+          continue
+        }
         const message = await readMessage(msg, socket)
         if (!message) continue
         console.log('[Bot Masuk]', {
