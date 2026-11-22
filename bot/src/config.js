@@ -6,7 +6,8 @@ import dotenv from 'dotenv'
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) })
 
 const env = (key, fallback = '') => (process.env[key] || fallback).trim()
-const botMode = env('BOT_MODE', 'baileys').toLowerCase() === 'meta' ? 'meta' : 'baileys'
+// Meta Cloud API adalah satu-satunya transport yang tersedia di folder bot/.
+const botMode = 'meta'
 
 export const config = {
   port: Number(env('PORT', '3001')),
@@ -20,7 +21,7 @@ export const config = {
   appSecret: env('WHATSAPP_APP_SECRET'),
   whatsappToken: env('WHATSAPP_TOKEN'),
   phoneNumberId: env('WHATSAPP_PHONE_NUMBER_ID'),
-  apiVersion: env('WHATSAPP_API_VERSION', 'v21.0'),
+  apiVersion: env('WHATSAPP_API_VERSION', 'v25.0'),
   supabaseUrl: env('SUPABASE_URL'),
   serviceRoleKey: env('SUPABASE_SERVICE_ROLE_KEY'),
   dryRun: env('BOT_DRY_RUN', 'false') === 'true',

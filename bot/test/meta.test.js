@@ -4,6 +4,23 @@ import test from 'node:test'
 import { config } from '../src/config.js'
 import { getWebhookChallenge, isValidMetaSignature, sendMetaText } from '../src/meta.js'
 
+function withEnv(overrides, fn) {
+  const saved = {}
+  for (const [key, value] of Object.entries(overrides)) {
+    saved[key] = process.env[key]
+    if (value === null) delete process.env[key]
+    else process.env[key] = value
+  }
+  return Promise.resolve()
+    .then(fn)
+    .finally(() => {
+      for (const [key, value] of Object.entries(saved)) {
+        if (value === undefined) delete process.env[key]
+        else process.env[key] = value
+      }
+    })
+}
+
 test('verifikasi webhook mengembalikan challenge bila token cocok', () => {
   const original = config.verifyToken
   config.verifyToken = 'catatan-uang-secret'
@@ -41,12 +58,14 @@ test('tanda tangan HMAC diterima hanya bila sesuai', () => {
   }
 })
 
-test('kirim teks Meta memanggil Graph API dengan payload yang benar', async () => {
-  const originalToken = config.whatsappToken
-  const originalPhoneId = config.phoneNumberId
+test('kirim teks Meta memanggil Graph API v25 dengan payload yang benar', () => withEnv({
+  WHATSAPP_TOKEN: 'token-uji',
+  WHATSAPP_PHONE_NUMBER_ID: '123456789',
+  WHATSAPP_API_VERSION: 'v25.0',
+}, async () => {
   const originalFetch = globalThis.fetch
-  config.whatsappToken = 'token-uji'
-  config.phoneNumberId = '123456789'
+  const originalVersion = config.apiVersion
+  config.apiVersion = 'v25.0'
 
   let call
   globalThis.fetch = async (url, options) => {
@@ -57,7 +76,7 @@ test('kirim teks Meta memanggil Graph API dengan payload yang benar', async () =
   try {
     const result = await sendMetaText('081234567890', 'halo dari test')
     assert.deepEqual(result, { messages: [{ id: 'wamid.1' }] })
-    assert.match(call.url, /graph\.facebook\.com\/.+\/123456789\/messages/)
+    assert.match(call.url, /graph\.facebook\.com\/v25\.0\/123456789\/messages/)
     assert.equal(call.options.method, 'POST')
     assert.equal(call.options.headers.Authorization, 'Bearer token-uji')
     const body = JSON.parse(call.options.body)
@@ -65,13 +84,15 @@ test('kirim teks Meta memanggil Graph API dengan payload yang benar', async () =
     assert.equal(body.to, '6281234567890')
     assert.equal(body.text.body, 'halo dari test')
   } finally {
-    config.whatsappToken = originalToken
-    config.phoneNumberId = originalPhoneId
+    config.apiVersion = originalVersion
     globalThis.fetch = originalFetch
   }
-})
+}))
 
-test('kirim teks Meta gagal bila token belum diisi', async () => {
+test('kirim teks Meta gagal bila token belum diisi', () => withEnv({
+  WHATSAPP_TOKEN: null,
+  WHATSAPP_PHONE_NUMBER_ID: '123456789',
+}, async () => {
   const originalToken = config.whatsappToken
   config.whatsappToken = ''
   try {
@@ -79,4 +100,4 @@ test('kirim teks Meta gagal bila token belum diisi', async () => {
   } finally {
     config.whatsappToken = originalToken
   }
-})
+}))

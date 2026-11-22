@@ -3,23 +3,27 @@ import { config } from './config.js'
 import { normalizePhone } from './parser.js'
 
 export function isMetaConfigured() {
-  return Boolean(config.whatsappToken && config.phoneNumberId)
+  const token = process.env.WHATSAPP_TOKEN || config.whatsappToken
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || config.phoneNumberId
+  return Boolean(token && phoneNumberId)
 }
 
-// Kirim pesan lewat WhatsApp Cloud API. Sengaja tidak tergantung BOT_MODE,
-// supaya jalur serverless Vercel tetap bisa kirim walau env BOT_MODE kosong.
+// Kirim pesan lewat WhatsApp Cloud API. Token & Phone Number ID dibaca langsung
+// dari process.env agar perilakunya sama di lokal maupun serverless Vercel.
 export async function sendMetaText(to, body) {
   const phone = normalizePhone(to)
-  if (!isMetaConfigured()) {
+  const token = process.env.WHATSAPP_TOKEN || config.whatsappToken
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || config.phoneNumberId
+  if (!token || !phoneNumberId) {
     throw new Error('Meta WhatsApp belum dikonfigurasi. Isi WHATSAPP_TOKEN dan WHATSAPP_PHONE_NUMBER_ID.')
   }
 
   const response = await fetch(
-    `https://graph.facebook.com/${config.apiVersion}/${config.phoneNumberId}/messages`,
+    `https://graph.facebook.com/${config.apiVersion}/${phoneNumberId}/messages`,
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${config.whatsappToken}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -46,10 +50,10 @@ export function isValidMetaSignature(rawBody, signature) {
   return a.length === b.length && crypto.timingSafeEqual(a, b)
 }
 
-export function getWebhookChallenge(query = {}) {
+export function getWebhookChallenge(query = {}, expectedToken = config.verifyToken) {
   const mode = query['hub.mode']
   const challenge = query['hub.challenge']
   const token = query['hub.verify_token']
-  const valid = mode === 'subscribe' && (!config.verifyToken || token === config.verifyToken)
+  const valid = mode === 'subscribe' && (!expectedToken || token === expectedToken)
   return valid && challenge ? String(challenge) : null
 }

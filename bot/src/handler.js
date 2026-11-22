@@ -11,7 +11,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
   // Balasan dikirim ke JID asli penerima (bisa @lid) agar enkripsi Signal
   // memakai session chat yang sama dengan pesan masuk.
   const replyTo = message.replyJid || phone
-  // `send` bisa diinjeksikan serverless Meta supaya tidak menyentuh Baileys.
+  // `send` bisa diinjeksikan oleh pemanggil (mis. serverless) bila perlu.
   const reply = (body) => send(replyTo, body)
   const text = String(message.text?.body || '').trim()
   if (!text) {

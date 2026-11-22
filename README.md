@@ -156,8 +156,9 @@ src/
 bot/                       server bot WhatsApp (Node + Express)
   src/parser.js            parser regex pesan
   src/store.js             adapter Supabase (service_role) + dry-run
-  src/server.js            Express + API linking (webhook Meta tetap ada)
-  src/baileys.js           transport WA default (scan QR)
+  src/server.js            Express + webhook Meta + API linking
+  src/meta.js              kirim pesan & verifikasi webhook Cloud API
+  api/index.js             entry Serverless Function untuk Vercel
 scripts/generate-icons.mjs generator ikon PWA
 ```
 
@@ -165,26 +166,25 @@ scripts/generate-icons.mjs generator ikon PWA
 
 Bot sudah tersedia di folder `bot/` dan memakai database Supabase yang sama dengan
 web. Chat seperti **"masuk uang 500 ribu"** langsung muncul di website lewat Realtime.
-Panduan lengkap ada di **`bot/README.md`**. Untuk menjalankan jalur Meta Cloud API
-dari Vercel (tanpa menghapus Baileys), lihat **`docs/DEPLOY-VERCEL.md`**.
+Panduan lengkap ada di **`bot/README.md`**. Untuk deploy `bot/` sebagai project
+Vercel terpisah dengan Meta Cloud API, lihat **`docs/DEPLOY-VERCEL.md`**.
 
 ```
-WhatsApp → Baileys (default, scan QR) → bot server (Node) → parse pesan → Supabase
-              atau Meta Cloud API webhook
+WhatsApp → Meta Cloud API → webhook /webhook + HMAC → parse pesan → Supabase
                                                           ↓ Realtime
                                                     Web React langsung update
 ```
 
 Singkatnya:
 
-1. Jalankan `npm install` di folder `bot/`, salin `.env.example` → `.env`, isi kredensial Supabase **service_role** (jangan pernah dipakai di web). Kredensial Meta tidak perlu diisi untuk mode default.
+1. Jalankan `npm install` di folder `bot/`, salin `.env.example` → `.env`, isi kredensial Supabase **service_role** dan kredensial Meta (`WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`).
 2. Isi `VITE_BOT_API_URL=http://localhost:3001` di `.env` website, lalu jalankan ulang web.
-3. Jalankan `npm start` di folder `bot/`, lalu scan QR dengan nomor cadangan.
+3. Daftarkan `https://<domain>/webhook` di Meta → WhatsApp → Configuration, lalu subscribe field `messages`.
 4. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu balas kode 6 digit itu di WA.
 5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `ringkasan`, dll.
-6. Tiap `message.id` hanya diproses sekali. Jalur Meta opsional (`BOT_MODE=meta`) tetap memakai HMAC-SHA256.
+6. Tiap `message.id` hanya diproses sekali. Webhook dilindungi HMAC-SHA256.
 
-Bisa dicoba dulu tanpa QR/Meta/Supabase dengan `BOT_DRY_RUN=true` — balasan bot muncul di terminal.
+Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true` — balasan bot muncul di terminal.
 
 ## Ide lanjutan
 

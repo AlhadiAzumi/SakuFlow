@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return handleOptions(req, res)
 
   if (req.method === 'GET') {
-    const challenge = getWebhookChallenge(req.query || {})
+    const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || undefined
+    const challenge = getWebhookChallenge(req.query || {}, verifyToken)
     return challenge
       ? sendPlain(req, res, 200, challenge)
       : sendPlain(req, res, 403, 'Forbidden')

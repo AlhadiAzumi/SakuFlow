@@ -10,6 +10,16 @@ import { sendText } from './whatsapp.js'
 
 const app = express()
 
+// Saat di-Vercel lewat rewrite /(.*) → /api/index.js, beberapa runtime
+// meneruskan path tujuan sebagai req.url. Kembalikan path asli bila tersedia.
+app.use((req, _res, next) => {
+  const original = req.headers['x-vercel-forwarded-path'] || req.headers['x-vercel-original-path']
+  if (original && String(original).startsWith('/') && String(req.url).startsWith('/api/')) {
+    req.url = String(original)
+  }
+  next()
+})
+
 // WEB_ORIGIN=* mengizinkan semua origin (praktis untuk coba lewat IP jaringan/HP).
 app.use(cors({ origin: config.webOrigins.includes('*') ? true : config.webOrigins }))
 
@@ -17,7 +27,7 @@ app.get('/', (_req, res) => {
   res.json({
     app: 'Bot WhatsApp Catatan Uang Harian',
     mode: store.isDryRun() ? 'dry-run' : 'live',
-    botMode: config.botMode,
+    botMode: 'meta-cloud',
     health: '/health',
     webhook: 'POST /webhook (atau GET /webhook untuk verifikasi Meta)',
     api: ['POST /api/link/request', 'GET /api/link/status', 'DELETE /api/link'],
@@ -25,11 +35,12 @@ app.get('/', (_req, res) => {
 })
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, mode: store.isDryRun() ? 'dry-run' : 'live', botMode: config.botMode })
+  res.json({ ok: true, mode: store.isDryRun() ? 'dry-run' : 'live', botMode: 'meta-cloud' })
 })
 
 app.get('/webhook', (req, res) => {
-  const challenge = getWebhookChallenge(req.query)
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || config.verifyToken
+  const challenge = getWebhookChallenge(req.query, verifyToken)
   if (challenge) return res.status(200).type('text/plain').send(challenge)
   return res.sendStatus(403)
 })
@@ -46,7 +57,7 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
     return res.sendStatus(400)
   }
 
-  // Balasan error lewat jalur aktif (Baileys saat mode baileys, Meta saat mode meta).
+  // Balasan error tetap lewat Meta Cloud API.
   await processMetaWebhook(payload, { reply: (to, body) => sendText(to, body) })
   return res.sendStatus(200)
 })
@@ -95,17 +106,13 @@ app.delete('/api/link', requireUser, async (req, res) => {
   }
 })
 
-app.listen(config.port, () => {
-  const runMode = store.isDryRun() ? 'DRY-RUN' : 'LIVE'
-  console.log(`Bot Catatan Uang berjalan di http://localhost:${config.port} (${config.botMode.toUpperCase()} · ${runMode})`)
+// Di Vercel, function diekspor dan dipanggil oleh runtime — jangan listen.
+if (!process.env.VERCEL) {
+  const port = Number(process.env.PORT || config.port || 3001)
+  app.listen(port, () => {
+    const runMode = store.isDryRun() ? 'DRY-RUN' : 'LIVE'
+    console.log(`Bot Meta Cloud API berjalan di http://localhost:${port} (${runMode})`)
+  })
+}
 
-  if (config.botMode !== 'baileys') return
-  if (store.isDryRun()) {
-    console.log('[Baileys] Dilewati karena BOT_DRY_RUN=true. Balasan tampil di terminal.')
-    return
-  }
-  console.log('[Baileys] Menyiapkan koneksi. Scan QR dengan nomor cadangan saat muncul.')
-  import('./baileys.js')
-    .then(({ connectBaileys }) => connectBaileys())
-    .catch((error) => console.error('[Baileys] Gagal start:', error))
-})
+export default app

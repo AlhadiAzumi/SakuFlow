@@ -4,20 +4,17 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "build": "echo \"Serverless function ready\"",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "test": "node --test test/*.test.js",
     "simulate": "node scripts/simulate.js",
-    "send": "node scripts/send-message.js",
-    "baileys:reset": "node scripts/reset-baileys.js"
+    "send": "node scripts/send-message.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
-    "@whiskeysockets/baileys": "^6.7.24",
     "cors": "^2.8.5",
     "dotenv": "^18.0.10",
-    "express": "^5.1.0",
-    "pino": "^9.14.0",
-    "qrcode-terminal": "^0.12.0"
+    "express": "^5.1.0"
   }
 }

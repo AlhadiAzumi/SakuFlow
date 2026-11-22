@@ -1,103 +1,112 @@
-# Deploy Meta Cloud API di Vercel (Baileys tetap ada)
+# Deploy Bot Meta Cloud API ke Vercel
 
-Arsitektur yang dipakai:
+Folder `bot/` sekarang **Meta-only** (Baileys sudah dihapus) dan siap di-deploy sebagai project Vercel tersendiri.
 
 ```
-Vercel  → website (Vite) + /api/webhook + /api/link/*
-Supabase → database + Realtime
-Lokal / VPS → bot Baileys (opsional, jalur terpisah)
+Meta WhatsApp Cloud API
+   ↓ webhook POST /webhook
+Vercel Serverless (bot/api/index.js → Express app)
+   ↓
+Supabase (service_role) → Realtime → website SakuFlow
 ```
-
-Kode Baileys di `bot/src/baileys.js` **tidak dihapus dan tidak dipanggil** oleh serverless Vercel. Kamu bisa tetap `cd bot && npm start` dengan `BOT_MODE` default (`baileys`) kapan saja.
 
 ## 1. Siapkan Meta Business
 
 1. Buka **Business Support Home** → verifikasi bisnis (centang hijau). Status *Test Messaging Account* yang masih `Disabled` umumnya karena verifikasi ini belum selesai.
-2. Buka [Meta for Developers](https://developers.facebook.com/apps/) → buat/opses aplikasi → **Add Product → WhatsApp**.
-3. Pilih **WhatsApp Business Account (WABA)**, lalu salin:
+2. Buka [Meta for Developers](https://developers.facebook.com/apps/) → pilih/buat App → **Add Product → WhatsApp**.
+3. Pilih WABA, lalu salin:
    - **Phone Number ID** → `WHATSAPP_PHONE_NUMBER_ID`
    - **App Secret** (App Settings → Basic) → `WHATSAPP_APP_SECRET`
 4. Di **WhatsApp → API Setup**, ambil token:
-   - Temporary token (aktif 24 jam) untuk mencoba, atau
+   - Temporary token (24 jam) untuk mencoba, atau
    - Permanent token lewat System User dengan izin `whatsapp_business_messaging`.
    - Masukkan ke `WHATSAPP_TOKEN`.
-5. Masih di **API Setup → To**, tambahkan nomor HP penerima lalu verifikasi dengan kode yang dikirim Meta. Nomor ini yang boleh mencoba chat.
-6. **App → Webhook → Configuration**:
-   - Callback URL: `https://<project>.vercel.app/api/webhook`
-   - Verify token: bebas, misal `catatan-uang-secret` (samakan dengan `WHATSAPP_VERIFY_TOKEN`)
-   - Klik **Verify and Save**, lalu subscribe field **`messages`**.
+5. Di **API Setup → To**, tambahkan & verifikasi nomor HP penerima.
+6. **WhatsApp → Configuration → Webhook**:
+   - Callback URL: `https://<project>.vercel.app/webhook`
+   - Verify token: bebas, misal `catatan-uang-secret` — samakan dengan `WHATSAPP_VERIFY_TOKEN`
+   - Verify & Save → subscribe field **`messages`**.
 
-## 2. Environment variable di Vercel
+> Beda dengan deploy lama di root repo yang memakai `/api/webhook`. Kalau root directory Vercel-mu `bot/`, URL-nya `/webhook`.
 
-Project Settings → Environment Variables. **Jangan** pakai prefix `VITE_` untuk secret.
+## 2. Deploy `bot/`
 
-| Variable | Contoh | Fungsi |
-|---|---|---|
-| `SUPABASE_URL` | `https://xxxx.supabase.co` | server only |
-| `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` | server only, jangan pernah di-`VITE_` |
-| `WHATSAPP_TOKEN` | `EAAG...` | kirim pesan |
-| `WHATSAPP_PHONE_NUMBER_ID` | `123456789` | kirim pesan |
-| `WHATSAPP_APP_SECRET` | `abc...` | verifikasi HMAC webhook |
-| `WHATSAPP_VERIFY_TOKEN` | `catatan-uang-secret` | verifikasi GET webhook |
-| `WEB_ORIGIN` | `https://<project>.vercel.app` | CORS untuk `/api/link/*` |
-| `BOT_MODE` | `meta` | opsional; jalur `/api/` tetap pakai Cloud API |
-| `VITE_SUPABASE_URL` | `https://xxxx.supabase.co` | browser |
-| `VITE_SUPABASE_ANON_KEY` | `eyJ...` | browser |
-| `VITE_BOT_API_URL` | `https://<project>.vercel.app` | browser; boleh kosong bila sama domain |
+Di Vercel → **Add New → Project** → import repo → **Root Directory: `bot/`**.
 
-`vercel.json` sudah mengatur build Vite (`npm run build` → `dist/`), jadi tidak perlu konfigurasi tambahan.
+Konfigurasi build terdeteksi otomatis:
 
-## 3. Deploy & cek
+| Pengaturan | Nilai |
+|---|---|
+| Root Directory | `bot` |
+| Build Command | `npm run build` (no-op: `echo "Serverless function ready"`) |
+| Output Directory | tidak perlu diisi |
+
+`bot/vercel.json` me-rewrite semua path ke `/api/index.js`, dan `bot/api/index.js` mengekspor Express `app`. `app.listen()` hanya jalan saat `VERCEL` tidak diset, jadi tidak ada port yang dibuka di serverless.
+
+## 3. Environment Variables (project `bot/`)
+
+Jangan pakai prefix `VITE_` untuk secret.
+
+| Variable | Contoh |
+|---|---|
+| `SUPABASE_URL` | `https://xxxx.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` |
+| `WHATSAPP_TOKEN` | `EAAG...` |
+| `WHATSAPP_PHONE_NUMBER_ID` | `123456789` |
+| `WHATSAPP_APP_SECRET` | `abc...` |
+| `WHATSAPP_VERIFY_TOKEN` | `catatan-uang-secret` |
+| `WHATSAPP_API_VERSION` | `v25.0` |
+| `WEB_ORIGIN` | `https://<website>.vercel.app` |
+| `BOT_DRY_RUN` | `false` |
+
+Variabel `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, dan `VITE_BOT_API_URL` tetap diisi di **project website**, bukan di project bot.
+
+## 4. Cek & uji
 
 ```bash
-git push origin main   # Vercel auto-deploy
+curl https://<project>.vercel.app/health
 ```
 
-Lalu buka:
+Contoh respons sehat:
 
+```json
+{ "ok": true, "mode": "live", "botMode": "meta-cloud" }
 ```
-https://<project>.vercel.app/api/health
+
+Lalu uji verifikasi webhook (ganti `TOKEN_KAMU` dengan verify token aslimu — jangan kirim ke sini):
+
+```bash
+curl "https://<project>.vercel.app/webhook?hub.mode=subscribe&hub.challenge=TEST123&hub.verify_token=TOKEN_KAMU"
 ```
 
-Semua flag penting harus `true`: `metaConfigured`, `verifyTokenConfigured`, `appSecretConfigured`, `supabaseConfigured`.
+Harus balas `TEST123`. Terakhir, kirim `masuk uang 10 ribu` dari nomor yang terdaftar di **API Setup → To**, lalu cek **Functions → Logs** dan tabel `transactions`.
 
-## 4. Uji coba
-
-1. Dari nomor yang sudah terdaftar di **API Setup → To**, kirim `masuk uang 10 ribu`.
-2. Cek **Vercel → Functions → Logs** dan tabel `transactions` di Supabase.
-3. Untuk OTP: buka Setelan → Hubungkan WhatsApp di website, lalu balas 6 digit dari bot.
-
-Endpoint yang tersedia:
+## Endpoint
 
 | Method | Path | Fungsi |
 |---|---|---|
-| GET | `/api/health` | status konfigurasi (tanpa secret) |
-| GET | `/api/webhook` | verifikasi Meta |
-| POST | `/api/webhook` | terima pesan WhatsApp |
-| POST | `/api/link/request` | kirim OTP |
-| GET | `/api/link/status` | cek status hubungan |
-| DELETE | `/api/link` | putuskan nomor |
+| GET | `/health` | Status bot |
+| GET | `/webhook` | Verifikasi `hub.challenge` |
+| POST | `/webhook` | Terima pesan (HMAC) |
+| POST | `/api/link/request` | Kirim OTP |
+| GET | `/api/link/status` | Cek status linking |
+| DELETE | `/api/link` | Putuskan nomor |
 
-## 5. Troubleshooting
+## Troubleshooting
 
 | Gejala | Penyebab / solusi |
 |---|---|
-| Webhook verification `403` | `hub.verify_token` beda dengan `WHATSAPP_VERIFY_TOKEN` |
+| Verifikasi webhook `403` | `hub.verify_token` beda dengan `WHATSAPP_VERIFY_TOKEN` |
 | Webhook `401` | `WHATSAPP_APP_SECRET` salah; HMAC tidak cocok |
-| OTP tidak terkirim | `/api/health` → `metaConfigured: false`, atau nomor belum terdaftar di *To* |
-| Token tiba-tiba mati | Temporary token hanya 24 jam; buat permanent token |
-| *Test Messaging Account Disabled* | Verifikasi bisnis Meta belum approve — ini di sisi Meta |
-| Error CORS di browser | `WEB_ORIGIN` belum sama dengan domain website |
-| Balasan tidak muncul | Cek Log function Vercel; pastikan field `messages` sudah di-subscribe |
+| Tidak ada balasan | Field `messages` belum di-subscribe, atau nomor belum di *To* |
+| OTP tidak sampai | Cek `WHATSAPP_TOKEN` + `PHONE_NUMBER_ID`, dan nomor harus terdaftar |
+| Token mati mendadak | Temporary token hanya 24 jam |
+| *Test Messaging Account Disabled* | Verifikasi bisnis Meta belum approve — di sisi Meta |
+| Error CORS di website | `WEB_ORIGIN` belum sama dengan domain website |
+| Deploy gagal build | Pastikan Root Directory = `bot/` agar script `build` terbaca |
 
-## Catatan Baileys
+## Catatan
 
-- Deploy Vercel **tidak mengubah** `bot/.env` dan tidak menyentuh folder `bot/auth/`.
-- Untuk memakai Baileys lagi, jalankan seperti biasa:
-
-```bash
-cd bot
-npm start
-```
-
-- Jangan menaruh `BOT_MODE=meta` di `bot/.env` kalau masih mau Baileys lokal. Environment Vercel dan `bot/.env` adalah dua tempat yang berbeda.
+- Deploy ini **tidak mengubah** project website di root repo. Website tetap memakai `VITE_BOT_API_URL` yang mengarah ke domain bot.
+- File `auth/`, QR, dan sesi Baileys sudah tidak ada di folder `bot/`.
+- Untuk menjalankan lokal: `cd bot && npm start` dengan `.env` yang sama.

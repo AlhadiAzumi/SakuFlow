@@ -9,8 +9,7 @@ export function clearProcessedMessages() {
 }
 
 // Dipakai Express (mode meta/lokal) maupun serverless Vercel.
-// `send` diinjeksikan supaya serverless selalu pakai Cloud API dan tidak
-// pernah menyentuh koneksi Baileys.
+// `send` diinjeksikan supaya pemanggil bisa mengganti jalur pengiriman bila perlu.
 export async function processMetaWebhook(payload, { send, reply = sendMetaText } = {}) {
   let handled = 0
 
