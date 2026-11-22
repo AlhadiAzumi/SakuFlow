@@ -156,7 +156,8 @@ src/
 bot/                       server bot WhatsApp (Node + Express)
   src/parser.js            parser regex pesan
   src/store.js             adapter Supabase (service_role) + dry-run
-  src/server.js            webhook Meta + API linking
+  src/server.js            Express + API linking (webhook Meta tetap ada)
+  src/baileys.js           transport WA default (scan QR)
 scripts/generate-icons.mjs generator ikon PWA
 ```
 
@@ -167,20 +168,22 @@ web. Chat seperti **"masuk uang 500 ribu"** langsung muncul di website lewat Rea
 Panduan lengkap ada di **`bot/README.md`**.
 
 ```
-WhatsApp → Meta Cloud API webhook → bot server (Node) → parse pesan → Supabase
+WhatsApp → Baileys (default, scan QR) → bot server (Node) → parse pesan → Supabase
+              atau Meta Cloud API webhook
                                                           ↓ Realtime
                                                     Web React langsung update
 ```
 
 Singkatnya:
 
-1. Jalankan `npm install` di folder `bot/`, salin `.env.example` → `.env`, isi kredensial Supabase **service_role** (jangan pernah dipakai di web) dan Meta.
+1. Jalankan `npm install` di folder `bot/`, salin `.env.example` → `.env`, isi kredensial Supabase **service_role** (jangan pernah dipakai di web). Kredensial Meta tidak perlu diisi untuk mode default.
 2. Isi `VITE_BOT_API_URL=http://localhost:3001` di `.env` website, lalu jalankan ulang web.
-3. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu balas kode 6 digit itu di WA.
-4. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `ringkasan`, dll.
-5. Webhook diverifikasi dengan HMAC-SHA256, dan tiap `message.id` hanya diproses sekali.
+3. Jalankan `npm start` di folder `bot/`, lalu scan QR dengan nomor cadangan.
+4. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu balas kode 6 digit itu di WA.
+5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `ringkasan`, dll.
+6. Tiap `message.id` hanya diproses sekali. Jalur Meta opsional (`BOT_MODE=meta`) tetap memakai HMAC-SHA256.
 
-Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true` — balasan bot muncul di terminal.
+Bisa dicoba dulu tanpa QR/Meta/Supabase dengan `BOT_DRY_RUN=true` — balasan bot muncul di terminal.
 
 ## Ide lanjutan
 

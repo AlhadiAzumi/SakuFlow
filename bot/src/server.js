@@ -1,16 +1,14 @@
 import crypto from 'node:crypto'
 import cors from 'cors'
 import express from 'express'
-import { getCategory } from '../../src/lib/categories.js'
 import { config } from './config.js'
-import { HELP_TEXT, normalizePhone, parseMessage } from './parser.js'
+import { handleMessage } from './handler.js'
+import { normalizePhone } from './parser.js'
 import * as store from './store.js'
 import { sendText } from './whatsapp.js'
 
 const app = express()
 const processed = new Map()
-const rupiah = (value) => `Rp${new Intl.NumberFormat('id-ID').format(Math.round(value || 0))}`
-const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 
 // WEB_ORIGIN=* mengizinkan semua origin (praktis untuk coba lewat IP jaringan/HP).
 app.use(cors({ origin: config.webOrigins.includes('*') ? true : config.webOrigins }))
@@ -19,6 +17,7 @@ app.get('/', (_req, res) => {
   res.json({
     app: 'Bot WhatsApp Catatan Uang Harian',
     mode: store.isDryRun() ? 'dry-run' : 'live',
+    botMode: config.botMode,
     health: '/health',
     webhook: 'POST /webhook (atau GET /webhook untuk verifikasi Meta)',
     api: ['POST /api/link/request', 'GET /api/link/status', 'DELETE /api/link'],
@@ -26,7 +25,7 @@ app.get('/', (_req, res) => {
 })
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, mode: store.isDryRun() ? 'dry-run' : 'live' })
+  res.json({ ok: true, mode: store.isDryRun() ? 'dry-run' : 'live', botMode: config.botMode })
 })
 
 app.get('/webhook', (req, res) => {
@@ -45,81 +44,6 @@ function isValidSignature(rawBody, signature) {
   const a = Buffer.from(expected)
   const b = Buffer.from(String(signature))
   return a.length === b.length && crypto.timingSafeEqual(a, b)
-}
-
-async function handleMessage(message) {
-  const phone = normalizePhone(message.from)
-  const text = String(message.text?.body || '').trim()
-  if (!text) {
-    await sendText(phone, 'Aku belum bisa membaca pesan ini. Coba kirim teks, ya.')
-    return
-  }
-
-  if (await store.hasPendingOtp(phone)) {
-    if (/^\d{4,8}$/.test(text)) {
-      const userId = await store.verifyOtp(phone, text)
-      await sendText(phone, userId
-        ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
-        : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
-      return
-    }
-  }
-
-  const parsed = parseMessage(text)
-
-  if (parsed.intent === 'help') {
-    await sendText(phone, HELP_TEXT)
-    return
-  }
-
-  if (parsed.intent === 'summary') {
-    const userId = await store.getLinkedUser(phone)
-    if (!userId) {
-      await sendText(phone, 'Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
-      return
-    }
-    const now = new Date()
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const totals = await store.getMonthTotals(userId, monthKey)
-    await sendText(phone, [
-      `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()}`,
-      `Uang masuk: ${rupiah(totals.income)}`,
-      `Uang keluar: ${rupiah(totals.expense)}`,
-      `Sisa: ${rupiah(totals.income - totals.expense)}`,
-      `${totals.count} transaksi tercatat.`,
-    ].join('\n'))
-    return
-  }
-
-  if (parsed.intent === 'transaction') {
-    const userId = await store.getLinkedUser(phone)
-    if (!userId) {
-      await sendText(phone, 'Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
-      return
-    }
-    await store.insertTransaction({
-      user_id: userId,
-      type: parsed.type,
-      amount: parsed.amount,
-      category: parsed.category,
-      note: parsed.note,
-      date: parsed.date,
-      source: 'whatsapp',
-      bot_message_id: message.id || null,
-      created_at: new Date().toISOString(),
-    })
-    const category = getCategory(parsed.type, parsed.category)
-    const totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
-    await sendText(phone, [
-      `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
-      `${rupiah(parsed.amount)} • ${category.label}`,
-      `Total bulan ini — masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
-      'Cek websitenya, datanya langsung muncul.',
-    ].join('\n'))
-    return
-  }
-
-  await sendText(phone, `Aku belum paham pesan itu.\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
 }
 
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
@@ -203,5 +127,16 @@ app.delete('/api/link', requireUser, async (req, res) => {
 })
 
 app.listen(config.port, () => {
-  console.log(`Bot Catatan Uang berjalan di http://localhost:${config.port} (${store.isDryRun() ? 'DRY-RUN' : 'LIVE'})`)
+  const runMode = store.isDryRun() ? 'DRY-RUN' : 'LIVE'
+  console.log(`Bot Catatan Uang berjalan di http://localhost:${config.port} (${config.botMode.toUpperCase()} · ${runMode})`)
+
+  if (config.botMode !== 'baileys') return
+  if (store.isDryRun()) {
+    console.log('[Baileys] Dilewati karena BOT_DRY_RUN=true. Balasan tampil di terminal.')
+    return
+  }
+  console.log('[Baileys] Menyiapkan koneksi. Scan QR dengan nomor cadangan saat muncul.')
+  import('./baileys.js')
+    .then(({ connectBaileys }) => connectBaileys())
+    .catch((error) => console.error('[Baileys] Gagal start:', error))
 })

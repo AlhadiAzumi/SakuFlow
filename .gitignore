@@ -8,6 +8,7 @@ bot/node_modules/
 bot/.env
 .env.local
 .env.*.local
+bot/auth/
 
 # Log & sistem
 *.log

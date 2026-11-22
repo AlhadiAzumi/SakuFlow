@@ -5,8 +5,10 @@ Bot ini menerima chat seperti **"masuk uang 500 ribu"**, lalu menulis transaksi 
 ```
 Kamu chat WA
    ↓
-Meta WhatsApp Cloud API → webhook /webhook (bot server)
-   ↓ cek signature HMAC + deduplikasi message id
+Baileys (default)  →  messages.upsert
+   atau
+Meta Cloud API     →  webhook /webhook + cek HMAC
+   ↓ deduplikasi message id
 parse pesan (regex) → cari akun dari nomor WA
    ↓ insert ke public.transactions (service_role)
 Supabase Realtime
@@ -14,14 +16,17 @@ Supabase Realtime
 Website langsung update + bot balas "struk"
 ```
 
+Mode default adalah **Baileys**: cukup scan QR, tanpa Meta Developer, tanpa token, dan tanpa Cloudflare Tunnel. Jalur Meta tetap disimpan sebagai opsi.
+
 ## Yang sudah ada
 
 - **Parser regex** untuk nominal `ribu`/`rb`/`k`/`juta`/`jt`/`Rp...`, tipe masuk/keluar, kategori, dan tanggal (`hari ini`, `kemarin`, `tanggal N`, `YYYY-MM-DD`).
 - **Link akun via OTP**: user isi nomor di website, bot kirim 6 digit kode, user balas kode itu di WA.
 - **Balasan struk** tiap transaksi + perintah `ringkasan` dan `bantuan`.
 - **Idempoten**: pesan dengan `message.id` sama tidak diproses dua kali (juga dijaga unique index di DB).
-- **Verifikasi webhook** memakai HMAC-SHA256 (`X-Hub-Signature-256`).
-- **Mode dry-run**: bisa dicoba end-to-end tanpa kredensial Meta maupun Supabase.
+- **Verifikasi webhook** memakai HMAC-SHA256 (`X-Hub-Signature-256`) pada jalur Meta.
+- **Dual mode**: Baileys sebagai default, Meta Cloud API bisa dipakai lewat `BOT_MODE=meta`.
+- **Mode dry-run**: bisa dicoba end-to-end tanpa QR, kredensial Meta, maupun Supabase.
 
 ## 1. Pasang dependency
 
@@ -72,7 +77,7 @@ create policy "Users can read own WhatsApp link"
 copy .env.example .env
 ```
 
-Isi:
+Isi yang wajib:
 
 ```env
 PORT=3001
@@ -84,13 +89,18 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...   # dari Project Settings → API
 BOT_DRY_RUN=false
 ```
 
-Kredensial Meta bisa dikosongkan dulu kalau cuma mau coba lewat `curl` (lihat bagian Testing).
+Untuk **Baileys, `.env` tidak perlu diubah sama sekali**—semua kredensial Meta boleh dikosongkan. Mode default-nya sudah `baileys`. Kalau nanti mau balik ke Meta, tambahkan baris opsional:
+
+```env
+BOT_MODE=meta
+```
 
 File `.env` dibaca otomatis saat bot start (memakai `dotenv`). Setiap kali mengubah `.env`,
 **restart bot** (`Ctrl+C` lalu `npm start`). Cek hasilnya di `http://localhost:3001/health`:
 
-- `{"ok":true,"mode":"live"}` → Supabase sudah terbaca.
-- `{"ok":true,"mode":"dry-run"}` → masih ada yang salah.
+- `{"ok":true,"mode":"live","botMode":"baileys"}` → Supabase terbaca dan bot siap scan QR.
+- `{"ok":true,"mode":"live","botMode":"meta"}` → jalur Meta aktif.
+- `{"ok":true,"mode":"dry-run","botMode":"baileys"}` → uji lokal tanpa QR.
 
 Penyebab paling umum `mode` tetap `dry-run`:
 
@@ -109,18 +119,39 @@ VITE_BOT_API_URL=http://localhost:3001
 
 Lalu jalankan ulang `npm run dev` di proyek utama. Menu **Setelan → Catat cukup dengan chat** akan muncul pada mode cloud.
 
-## 5. Siapkan Meta WhatsApp Cloud API
+## 5. Jalankan bot — Baileys (default)
 
-1. Buka [developers.facebook.com](https://developers.facebook.com) → buat App → tambahkan produk **WhatsApp**.
-2. Di **WhatsApp → API Setup**, salin **Phone number ID** dan buat **Temporary access token** (atau token permanen lewat System User).
-3. Di **App Settings → Basic**, salin **App Secret**.
-4. Tambahkan webhook:
+```bash
+npm start
+```
+
+QR akan muncul di terminal. Scan lewat **WhatsApp → Perangkat tertaut → Tautkan perangkat**, pakai **nomor cadangan**. Setelah itu bot langsung menerima chat.
+
+Session tersimpan di `bot/auth/`. Folder ini sudah masuk `.gitignore`, jadi tidak akan ter-push ke GitHub. Kalau sesi logout atau mau ganti nomor:
+
+```bash
+npm run baileys:reset
+npm start
+```
+
+> Baileys memakai protokol WhatsApp Web (unofficial), bukan API resmi Meta. Untuk pemakaian personal/portofolio dengan volume wajar ini paling praktis. Tetap jangan pakai nomor utama.
+
+## 6. (Opsional) Balik ke Meta WhatsApp Cloud API
+
+Kalau verifikasi Meta sudah approve dan mau memakai jalur resmi:
+
+1. Tambahkan `BOT_MODE=meta` ke `.env` bot.
+2. Buka [developers.facebook.com](https://developers.facebook.com) → buat App → tambahkan produk **WhatsApp**.
+3. Di **WhatsApp → API Setup**, salin **Phone number ID** dan buat **Temporary access token** (atau token permanen lewat System User).
+4. Di **App Settings → Basic**, salin **App Secret**.
+5. Tambahkan webhook:
    - Callback URL: `https://domain-anda/webhook` (harus HTTPS; untuk lokal pakai tunnel seperti Cloudflare Tunnel / ngrok).
    - Verify token: bebas, misal `catatan-uang-secret` — isi juga di `WHATSAPP_VERIFY_TOKEN`.
-5. Subscribe ke field `messages`.
-6. Isi `.env` bot:
+6. Subscribe ke field `messages`.
+7. Isi `.env` bot:
 
 ```env
+BOT_MODE=meta
 WHATSAPP_VERIFY_TOKEN=catatan-uang-secret
 WHATSAPP_APP_SECRET=...
 WHATSAPP_TOKEN=...
@@ -128,13 +159,7 @@ WHATSAPP_PHONE_NUMBER_ID=...
 WHATSAPP_API_VERSION=v21.0
 ```
 
-7. Jalankan bot:
-
-```bash
-npm start
-```
-
-Untuk deploy, pakai platform dengan HTTPS (Railway, Render, Fly.io, VPS + Caddy/Nginx).
+8. Restart bot. Endpoint `/webhook` tetap aktif di kedua mode, jadi `npm run send` tetap bisa dipakai untuk simulasi.
 
 ## Cara pakai
 
@@ -175,11 +200,11 @@ npm test
 # Coba parse satu kalimat (tanpa bot jalan)
 npm run simulate -- "masuk uang 500 ribu"
 
-# Kirim pesan WA simulasi ke bot yang sedang jalan (cocok untuk uji linking/Realtime
-# sebelum kredensial Meta dipasang — balasan bot muncul di terminal)
+# Kirim pesan WA simulasi ke bot yang sedang jalan. Jalankan dengan BOT_DRY_RUN=true
+# supaya balasan tampil di terminal (tanpa perlu QR maupun token Meta).
 npm run send -- 6281234567890 "masuk uang 500 ribu"
 
-# Dry-run: jalankan bot tanpa kredensial
+# Dry-run: jalankan bot tanpa QR / kredensial Meta / Supabase
 set BOT_DRY_RUN=true
 set BOT_DRY_OTP_CODE=123456
 npm start
@@ -199,16 +224,16 @@ Semua balasan WA akan tampil di terminal dengan prefix `[DRY-RUN WA → ...]`.
 
 ### Test Messaging Account berlabel merah `Disabled`
 
-Ini **masalah di sisi Meta**, bukan bug aplikasi. Selama akun test dinonaktifkan (biasanya saat peninjauan portofolio/bisnis), Meta belum mengeluarkan token yang bisa dipakai — jadi wajar kalau `WHATSAPP_TOKEN` masih kosong dan chat WA asli belum jalan.
+Ini **masalah di sisi Meta**, bukan bug aplikasi. Sekarang ini **tidak menghalangi bot** karena mode default sudah Baileys — cukup scan QR dan chat WA asli langsung jalan.
 
-Yang dilakukan:
+Kalau tetap ingin menunggu jalur Meta:
 
 1. Pantau email akun Meta + muat ulang **Business Support Home** sampai status portofolio berubah.
 2. Cek **WhatsApp Manager → Phone numbers**. Kalau ada tombol **Verify / Verify again** (SMS atau telepon), lakukan — verifikasi nomor sering mempercepat aktivasi.
 3. Pastikan tidak ada item lain yang masih pending di **Business Portfolio**.
 4. Jangan hapus/ganti nomor test saat peninjauan berjalan (bisa mengulang antrean).
 
-Selama menunggu, alur lokal tetap bisa diuji dengan `npm run send` — nomor yang sudah `verified: true` tetap tersimpan dan web tetap update realtime. Begitu status aktif: isi `WHATSAPP_TOKEN`, restart bot, lalu chat WA asli.
+Begitu status aktif: tambahkan `BOT_MODE=meta` dan isi `WHATSAPP_TOKEN`, restart bot, lalu chat WA asli lewat webhook.
 
 ### `npm run send` balas `401`
 
@@ -237,3 +262,4 @@ Cek `email_confirmed_at`. Kalau kosong, konfirmasi lewat **Supabase → Authenti
 - Belum bisa edit/hapus transaksi lewat WA (masih lewat website).
 - Mode dry-run menyimpan data di memory, hilang saat bot dimatikan.
 - Nomor WA dipakai sebagai identitas; pastikan user melakukan verifikasi OTP.
+- Baileys bukan API resmi: sesi bisa logout dan perlu scan QR ulang. Pakai `npm run baileys:reset`.

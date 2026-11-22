@@ -6,9 +6,11 @@ import dotenv from 'dotenv'
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) })
 
 const env = (key, fallback = '') => (process.env[key] || fallback).trim()
+const botMode = env('BOT_MODE', 'baileys').toLowerCase() === 'meta' ? 'meta' : 'baileys'
 
 export const config = {
   port: Number(env('PORT', '3001')),
+  botMode,
   webOrigins: [...new Set([
     ...env('WEB_ORIGIN', 'http://localhost:5173').split(','),
     'http://localhost:5173',

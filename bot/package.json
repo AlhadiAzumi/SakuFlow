@@ -8,10 +8,12 @@
     "start": "node src/server.js",
     "test": "node --test test/*.test.js",
     "simulate": "node scripts/simulate.js",
-    "send": "node scripts/send-message.js"
+    "send": "node scripts/send-message.js",
+    "baileys:reset": "node scripts/reset-baileys.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
+    "@whiskeysockets/baileys": "^6.7.24",
     "cors": "^2.8.5",
     "dotenv": "^18.0.10",
     "express": "^5.1.0"
