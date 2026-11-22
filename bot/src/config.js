@@ -13,10 +13,11 @@ export const config = {
   port: Number(env('PORT', '3001')),
   botMode,
   webOrigins: [...new Set([
-    ...env('WEB_ORIGIN', 'http://localhost:5173').split(','),
+    ...env('WEB_ORIGIN', '').split(',').map((s) => s.trim().replace(/\/$/, '')),
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-  ].map((s) => s.trim()).filter(Boolean))],
+    'https://sakuflow-mu.vercel.app',
+  ].filter(Boolean))],
   verifyToken: env('WHATSAPP_VERIFY_TOKEN'),
   appSecret: env('WHATSAPP_APP_SECRET'),
   whatsappToken: env('WHATSAPP_TOKEN'),

@@ -6,7 +6,6 @@ import { getWebhookChallenge, isValidMetaSignature, sendWhatsAppMessage } from '
 import { processMetaWebhook } from './meta-webhook.js'
 import { normalizePhone } from './parser.js'
 import * as store from './store.js'
-import { sendText } from './whatsapp.js'
 
 const app = express()
 
@@ -20,8 +19,32 @@ app.use((req, _res, next) => {
   next()
 })
 
-// WEB_ORIGIN=* mengizinkan semua origin (praktis untuk coba lewat IP jaringan/HP).
-app.use(cors({ origin: config.webOrigins.includes('*') ? true : config.webOrigins }))
+// Daftar origin diambil dari WEB_ORIGIN (bisa lebih dari satu, dipisah koma)
+// lalu digabung dengan origin lokal dan production. Trailing slash dibuang
+// supaya "" maupun "https://x/" dianggap sama.
+const configuredOrigins = (process.env.WEB_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean)
+
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  'http://localhost:5173',
+  'https://sakuflow-mu.vercel.app',
+])]
+
+const corsOptions = {
+  origin: allowedOrigins.includes('*') ? true : allowedOrigins,
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Hub-Signature-256'],
+  optionsSuccessStatus: 204,
+}
+
+// Pasang sebelum semua route. middleware cors bawaan menjawab OPTIONS
+// (preflight) lebih awal sehingga browser tidak memblokir POST dari Vercel.
+const corsMiddleware = cors(corsOptions)
+app.use(corsMiddleware)
+app.options(/.*/, corsMiddleware)
 
 app.get('/', (_req, res) => {
   res.json({
@@ -100,8 +123,21 @@ app.post('/api/link/request', requireUser, async (req, res) => {
     if (phone.length < 10) return res.status(400).json({ error: 'Nomor WhatsApp tidak valid.' })
     const code = config.dryOtpCode || String(crypto.randomInt(100000, 1000000))
     await store.requestLink(req.user.id, phone, code)
-    await sendText(phone, `Kode verifikasi Catatan Uang Harian: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`)
-    return res.json({ ok: true, phone, message: 'Kode OTP dikirim ke WhatsApp kamu.' })
+
+    // Kode tetap tersimpan dan dikembalikan ke UI walau WhatsApp gagal
+    // (misalnya karena pengguna belum membuka chat dalam 24 jam).
+    let delivered = false
+    try {
+      const result = await sendWhatsAppMessage(
+        phone,
+        `Kode verifikasi SakuFlow: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`,
+      )
+      delivered = !result?.dry
+    } catch (error) {
+      console.error('[OTP] Gagal mengirim kode lewat WhatsApp:', error.message)
+    }
+
+    return res.json({ ok: true, otp: code, delivered, phone })
   } catch (error) {
     return res.status(500).json({ error: error.message })
   }

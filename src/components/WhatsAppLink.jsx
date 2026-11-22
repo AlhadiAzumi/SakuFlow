@@ -17,6 +17,8 @@ export default function WhatsAppLink() {
   const [status, setStatus] = useState({ linked: false, phone: null })
   const [checking, setChecking] = useState(Boolean(API_URL) && mode === 'cloud')
   const [loading, setLoading] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [delivered, setDelivered] = useState(false)
 
   const callApi = useCallback(async (path, options = {}) => {
     const token = await getToken()
@@ -58,7 +60,11 @@ export default function WhatsAppLink() {
         body: JSON.stringify({ phone }),
       })
       setStatus({ linked: false, phone: result.phone })
-      showToast('Kode OTP dikirim. Balas pesan bot dengan kode tersebut.')
+      setOtp(String(result.otp || ''))
+      setDelivered(Boolean(result.delivered))
+      showToast(result.delivered
+        ? 'Kode OTP dikirim ke WhatsApp. Balas pesan bot dengan kode tersebut.'
+        : 'Kode OTP siap. Kirim manual lewat tautan WhatsApp di bawah, ya.')
     } catch (error) {
       showToast(error.message || 'Gagal mengirim kode OTP.', 'error')
     } finally {
@@ -71,6 +77,7 @@ export default function WhatsAppLink() {
     try {
       await callApi('/api/link', { method: 'DELETE' })
       setStatus({ linked: false, phone: null })
+      setOtp('')
       showToast('Nomor WhatsApp diputuskan.')
     } catch (error) {
       showToast(error.message || 'Gagal memutuskan nomor.', 'error')
@@ -110,24 +117,42 @@ export default function WhatsAppLink() {
           <button type="button" className="button button--ghost" onClick={disconnect} disabled={loading}>Putuskan</button>
         </div>
       ) : (
-        <form className="whatsapp-panel__form" onSubmit={requestOtp}>
-          <label className="field">
-            <span className="field__label">Nomor WhatsApp (format 08…)</span>
-            <input
-              type="tel"
-              inputMode="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="081234567890"
-              required
-            />
-          </label>
-          <button type="submit" className="button button--primary" disabled={loading}>
-            {loading ? 'Mengirim…' : 'Kirim kode OTP'}
-          </button>
-        </form>
+        <>
+          <form className="whatsapp-panel__form" onSubmit={requestOtp}>
+            <label className="field">
+              <span className="field__label">Nomor WhatsApp (format 08…)</span>
+              <input
+                type="tel"
+                inputMode="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                placeholder="081234567890"
+                required
+              />
+            </label>
+            <button type="submit" className="button button--primary" disabled={loading}>
+              {loading ? 'Mengirim…' : 'Kirim kode OTP'}
+            </button>
+          </form>
+
+          {otp && (
+            <div className="whatsapp-panel__otp" role="status">
+              <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
+              <code className="whatsapp-panel__otp-code">{otp}</code>
+              <p>Salin kode ini, lalu kirim ke bot WhatsApp agar nomormu langsung terhubung.</p>
+              <a href="https://wa.me/15551889428" target="_blank" rel="noreferrer">
+                Buka WhatsApp bot
+              </a>
+              {!delivered && (
+                <span className="whatsapp-panel__otp-note">
+                  Pesan otomatis tidak terkirim. Silakan kirim manual lewat tautan tersebut.
+                </span>
+              )}
+            </div>
+          )}
+        </>
       )}
-      <p className="whatsapp-panel__hint">Setelah menerima kode, balas pesan bot dengan 6 digit angka tersebut.</p>
+      <p className="whatsapp-panel__hint">Balas bot dengan 6 digit kode OTP dari menu Setelan SakuFlow.</p>
     </section>
   )
 }

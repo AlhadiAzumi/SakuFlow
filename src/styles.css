@@ -885,6 +885,12 @@ code {
 .whatsapp-panel__linked > div { flex: 1; }
 .whatsapp-panel__linked strong { display: block; font-size: 13px; }
 .whatsapp-panel__linked span:not(.whatsapp-panel__check) { display: block; font-size: 12px; color: var(--muted); }
+.whatsapp-panel__otp { margin-top: 14px; border: 1px solid #bfdbfe; background: var(--primary-soft); border-radius: 14px; padding: 14px; }
+.whatsapp-panel__otp-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
+.whatsapp-panel__otp-code { display: block; color: var(--primary); font-size: 26px; font-weight: 800; letter-spacing: 6px; font-variant-numeric: tabular-nums; }
+.whatsapp-panel__otp p { margin: 10px 0 8px; font-size: 12px; color: var(--muted); }
+.whatsapp-panel__otp a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; }
+.whatsapp-panel__otp-note { display: block; margin-top: 8px; font-size: 11px; color: #b45309; }
 
 /* ---------- Landing helper classes ---------- */
 
