@@ -67,3 +67,32 @@ test('verifikasi OTP mengembalikan hasil database', async () => {
   assert.equal(result.verified, true)
   assert.equal(result.phone, phone)
 })
+
+test('status, riwayat, dan clear bekerja untuk nomor yang terhubung', async () => {
+  const phone = '6285555555555'
+  await store.requestLink('user-clear', phone, '111111')
+  await store.verifyOtp(phone, '111111')
+
+  await collectReply('keluar 10rb kopi', phone)
+  await collectReply('masuk gaji 2 juta', phone)
+
+  const status = await collectReply('status', phone)
+  assert.match(status, /sudah terhubung/)
+  assert.match(status, /Total catatan tersimpan: 2/)
+
+  const history = await collectReply('riwayat', phone)
+  assert.match(history, /2 catatan terakhir/)
+  assert.match(history, /kopi/)
+  assert.match(history, /gaji/i)
+
+  const clear = await collectReply('clear', phone)
+  assert.match(clear, /sudah dihapus \(2 catatan\)/)
+  assert.match(clear, /Koneksi WhatsApp dan pengaturan tetap aman/)
+
+  const after = await collectReply('riwayat', phone)
+  assert.match(after, /Belum ada catatan tersimpan/)
+
+  const statusAfter = await collectReply('status', phone)
+  assert.match(statusAfter, /sudah terhubung/)
+  assert.match(statusAfter, /Total catatan tersimpan: 0/)
+})

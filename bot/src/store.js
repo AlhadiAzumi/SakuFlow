@@ -171,6 +171,55 @@ export async function getMonthTotals(userId, monthKey) {
   }
 }
 
+// Dipakai perintah "status": total seluruh catatan milik user (lintas bulan).
+export async function countTransactions(userId) {
+  if (!admin) return dryTransactions.filter((item) => item.user_id === userId).length
+  const { count, error } = await requireAdmin()
+    .from('transactions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+  if (error) throw error
+  return count || 0
+}
+
+// Dipakai perintah "riwayat".
+export async function listRecentTransactions(userId, limit = 5) {
+  if (!admin) {
+    return dryTransactions
+      .filter((item) => item.user_id === userId)
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))
+        || String(b.created_at || '').localeCompare(String(a.created_at || '')))
+      .slice(0, limit)
+  }
+  const { data, error } = await requireAdmin()
+    .from('transactions')
+    .select('date, type, amount, category, note')
+    .eq('user_id', userId)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
+
+// Dipakai perintah "clear": hapus semua transaksi user ini, bukan link/akunnya.
+// Mengembalikan jumlah baris yang terhapus supaya bisa dilaporkan ke WhatsApp.
+export async function deleteAllTransactions(userId) {
+  if (!admin) {
+    const before = dryTransactions.length
+    for (let i = dryTransactions.length - 1; i >= 0; i -= 1) {
+      if (dryTransactions[i].user_id === userId) dryTransactions.splice(i, 1)
+    }
+    return before - dryTransactions.length
+  }
+  const { count, error } = await requireAdmin()
+    .from('transactions')
+    .delete({ count: 'exact' })
+    .eq('user_id', userId)
+  if (error) throw error
+  return count || 0
+}
+
 export async function resolveUser(accessToken) {
   if (!admin) return DEMO_USER
   const { data, error } = await requireAdmin().auth.getUser(accessToken)

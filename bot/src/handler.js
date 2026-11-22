@@ -67,6 +67,65 @@ export async function handleMessage(message, { send = sendText } = {}) {
     return { type: 'help', ok: true, phone }
   }
 
+  if (parsed.intent === 'status') {
+    const userId = await store.getLinkedUser(phone)
+    if (!userId) {
+      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP 6 digit.')
+      return { type: 'status', ok: false, phone, reason: 'not_linked' }
+    }
+    let count = 0
+    try {
+      count = await store.countTransactions(userId)
+    } catch (error) {
+      console.error('[Bot] Gagal menghitung transaksi untuk status:', error)
+    }
+    await reply([
+      'Status: nomor WhatsApp kamu sudah terhubung dengan akun SakuFlow.',
+      `Total catatan tersimpan: ${count}.`,
+      'Ketik "ringkasan" untuk rekap bulan ini atau "riwayat" untuk 5 catatan terakhir.',
+    ].join('\n'))
+    return { type: 'status', ok: true, phone, userId, count }
+  }
+
+  if (parsed.intent === 'history') {
+    const userId = await store.getLinkedUser(phone)
+    if (!userId) {
+      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
+      return { type: 'history', ok: false, phone, reason: 'not_linked' }
+    }
+    const items = await store.listRecentTransactions(userId, 5)
+    if (!items.length) {
+      await reply('Belum ada catatan tersimpan. Kirim misalnya "keluar 25rb kopi" untuk mulai mencatat.')
+    } else {
+      await reply([
+        `${items.length} catatan terakhir:`,
+        ...items.map((item) => {
+          const category = getCategory(item.type, item.category)
+          const note = item.note ? ` • ${String(item.note).slice(0, 40)}` : ''
+          return `• ${item.date} • ${category.label} • ${rupiah(item.amount)}${note}`
+        }),
+        '',
+        'Ketik "ringkasan" untuk total bulan ini.',
+      ].join('\n'))
+    }
+    return { type: 'history', ok: true, phone, userId, count: items.length }
+  }
+
+  if (parsed.intent === 'clear') {
+    const userId = await store.getLinkedUser(phone)
+    if (!userId) {
+      await reply('Nomor ini belum terhubung, jadi tidak ada riwayat yang bisa dihapus. Hubungkan WhatsApp lewat Setelan dulu, ya.')
+      return { type: 'clear', ok: false, phone, reason: 'not_linked' }
+    }
+    const deleted = await store.deleteAllTransactions(userId)
+    await reply([
+      `Semua riwayat transaksi kamu sudah dihapus (${deleted} catatan).`,
+      'Data di website ikut terhapus. Koneksi WhatsApp dan pengaturan tetap aman.',
+      'Ketik "riwayat" untuk memastikan.',
+    ].join('\n'))
+    return { type: 'clear', ok: true, phone, userId, deleted }
+  }
+
   if (parsed.intent === 'summary') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {

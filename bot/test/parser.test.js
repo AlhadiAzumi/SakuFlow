@@ -50,6 +50,13 @@ test('perintah bantuan dan ringkasan', () => {
   assert.equal(parseMessage('halo', NOW).intent, 'help')
 })
 
+test('perintah status, riwayat, dan clear', () => {
+  assert.equal(parseMessage('status', NOW).intent, 'status')
+  assert.equal(parseMessage('riwayat', NOW).intent, 'history')
+  assert.equal(parseMessage('clear', NOW).intent, 'clear')
+  assert.equal(parseMessage('HAPUS SEMUA RIWAYAT', NOW).intent, 'clear')
+})
+
 test('pesan tanpa nominal tidak dikenali', () => {
   assert.equal(parseMessage('hai kemana uangku', NOW).intent, 'unknown')
 })

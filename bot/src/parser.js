@@ -89,6 +89,9 @@ export function parseMessage(text, now = new Date()) {
 
   if (!raw) return { intent: 'unknown' }
   if (/^(bantuan|help|panduan|\?|halo|hi|hai)$/.test(lower)) return { intent: 'help' }
+  if (/^(status|status koneksi|koneksi)$/.test(lower)) return { intent: 'status' }
+  if (/^(riwayat|terakhir|catatan terakhir|transaksi terakhir|history)$/.test(lower)) return { intent: 'history' }
+  if (/^(clear|hapus semua|hapus semua riwayat|hapus riwayat|reset|hapus semua catatan)$/.test(lower)) return { intent: 'clear' }
   if (/\b(ringkasan|rekap|summary|total bulan)\b/.test(lower)) return { intent: 'summary' }
 
   const amount = extractAmount(lower)
@@ -116,6 +119,9 @@ export const HELP_TEXT = [
   '',
   'Perintah lain:',
   '• "ringkasan" — lihat total bulan ini',
+  '• "riwayat" — 5 catatan terakhir kamu',
+  '• "status" — cek koneksi WhatsApp & jumlah catatan',
+  '• "clear" — hapus semua riwayat transaksi kamu',
   '• "bantuan" — tampilkan pesan ini',
   '',
   'Setiap catatan langsung muncul di website kamu.',
