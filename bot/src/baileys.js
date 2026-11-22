@@ -10,7 +10,8 @@ import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
 import { normalizePhone } from './parser.js'
-import { clearBaileysSocket, sendText, setBaileysSocket } from './whatsapp.js'
+import { getSelfIdentifiers, isSelfChatTarget } from './self-chat.js'
+import { clearBaileysSocket, sendText, sentMessageIds, setBaileysSocket } from './whatsapp.js'
 
 const authDir = fileURLToPath(new URL('../auth', import.meta.url))
 const processed = new Map()
@@ -32,10 +33,17 @@ function scheduleReconnect() {
   }, 1500)
 }
 
-async function readMessage(message) {
-  if (message.key?.fromMe) return null
-  const remoteJid = message.key?.remoteJid
-  if (!remoteJid || remoteJid === 'status@broadcast') return null
+async function readMessage(message, socket) {
+  const key = message.key || {}
+  const id = key.id
+  if (!id || processed.has(id) || sentMessageIds.has(id)) return null
+
+  const targets = [key.remoteJid, key.remoteJidAlt].filter(Boolean)
+  if (!targets.length || key.remoteJid === 'status@broadcast') return null
+
+  const selfIds = getSelfIdentifiers(socket?.user)
+  const isSelfChat = targets.some((target) => isSelfChatTarget(target, selfIds))
+  if (key.fromMe && !isSelfChat) return null
 
   const text = message.message?.conversation
     || message.message?.extendedTextMessage?.text
@@ -43,14 +51,13 @@ async function readMessage(message) {
     || ''
   if (!text.trim()) return null
 
-  const id = message.key.id
-  if (!id || processed.has(id)) return null
   processed.set(id, Date.now())
   cleanupProcessed()
 
+  const fromTarget = targets.find((target) => String(target).includes('@s.whatsapp.net')) || targets[0]
   return {
     id,
-    from: normalizePhone(remoteJid.split('@')[0]),
+    from: normalizePhone(String(fromTarget).split('@')[0]),
     text: { body: text },
   }
 }
@@ -105,7 +112,7 @@ export async function connectBaileys() {
     socket.ev.on('messages.upsert', async ({ messages, type }) => {
       if (type !== 'notify') return
       for (const raw of messages || []) {
-        const message = await readMessage(raw)
+        const message = await readMessage(raw, socket)
         if (!message) continue
         try {
           await handleMessage(message)

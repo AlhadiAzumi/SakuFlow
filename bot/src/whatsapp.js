@@ -3,6 +3,17 @@ import { normalizePhone } from './parser.js'
 
 let baileysSocket = null
 
+// ID balasan bot yang baru dikirim. Dipakai supaya pesan keluar tidak memicu
+// balasan ulang saat dibaca kembali lewat messages.upsert (self-chat).
+export const sentMessageIds = new Set()
+
+function rememberSentMessage(id) {
+  if (!id) return
+  sentMessageIds.add(id)
+  const timer = setTimeout(() => sentMessageIds.delete(id), 30_000)
+  timer.unref?.()
+}
+
 export function setBaileysSocket(socket) {
   baileysSocket = socket
 }
@@ -26,7 +37,9 @@ export async function sendText(to, body) {
       throw new Error('Baileys belum terhubung. Scan QR di terminal dulu, ya.')
     }
     const jid = phone.endsWith('@s.whatsapp.net') ? phone : `${phone}@s.whatsapp.net`
-    return baileysSocket.sendMessage(jid, { text: body })
+    const sentMsg = await baileysSocket.sendMessage(jid, { text: body })
+    rememberSentMessage(sentMsg?.key?.id)
+    return sentMsg
   }
 
   // Jalur lama: Meta WhatsApp Cloud API.
