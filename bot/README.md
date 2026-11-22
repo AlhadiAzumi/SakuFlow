@@ -125,7 +125,9 @@ Lalu jalankan ulang `npm run dev` di proyek utama. Menu **Setelan → Catat cuku
 npm start
 ```
 
-QR akan muncul di terminal. Scan lewat **WhatsApp → Perangkat tertaut → Tautkan perangkat**, pakai **nomor cadangan**. Setelah itu bot langsung menerima chat.
+QR akan muncul di terminal. Scan lewat **WhatsApp → Perangkat tertaut → Tautkan perangkat**. Setelah itu bot langsung menerima chat.
+
+Boleh pakai **nomor utama** lewat mode **Self-Chat**: buka ruang **Chat ke Diri Sendiri**, lalu kirim perintah di sana. Bot mengenali chat diri sendiri dari nomor/LID miliknya sendiri (termasuk `remoteJidAlt`), jadi pesan `fromMe` ke kontak lain atau grup tetap diabaikan. Balasan bot juga otomatis diabaikan supaya tidak memicu balasan berulang.
 
 Session tersimpan di `bot/auth/`. Folder ini sudah masuk `.gitignore`, jadi tidak akan ter-push ke GitHub. Kalau sesi logout atau mau ganti nomor:
 
