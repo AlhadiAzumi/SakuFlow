@@ -38,10 +38,32 @@ function scheduleReconnect() {
   }, 1500)
 }
 
+// Baileys membungkus pesan self-chat / ephemeral di beberapa lapisan.
+export function extractText(message) {
+  const content = message?.deviceSentMessage?.message
+    || message?.ephemeralMessage?.message
+    || message?.viewOnceMessage?.message
+    || message
+  return String(
+    content?.conversation
+    || content?.extendedTextMessage?.text
+    || content?.imageMessage?.caption
+    || '',
+  ).trim()
+}
+
+// Abaikan pesan lama (misalnya riwayat yang masuk lagi saat reconnect).
+export function isFresh(message) {
+  const timestamp = Number(message?.messageTimestamp)
+  if (!Number.isFinite(timestamp) || timestamp <= 0) return true
+  return Date.now() / 1000 - timestamp <= 60
+}
+
 async function readMessage(message, socket) {
   const key = message.key || {}
   const id = key.id
   if (!id || processed.has(id) || sentMessageIds.has(id)) return null
+  if (!isFresh(message)) return null
 
   const remoteJid = key.remoteJid || ''
   const remoteJidAlt = key.remoteJidAlt || ''
@@ -52,17 +74,13 @@ async function readMessage(message, socket) {
   const isSelfChat = isSelfChatFromKey({ remoteJid, remoteJidAlt }, identity)
   if (key.fromMe && !isSelfChat) return null
 
-  const text = message.message?.conversation
-    || message.message?.extendedTextMessage?.text
-    || message.message?.imageMessage?.caption
-    || ''
-  if (!text.trim()) return null
+  const text = extractText(message.message)
+  if (!text) return null
 
   processed.set(id, Date.now())
   cleanupProcessed()
 
   const senderPhone = resolveSenderPhone(key, identity, isSelfChat)
-  console.log('[Bot Masuk]', { senderPhone, text })
 
   return {
     id,
@@ -123,16 +141,22 @@ export async function connectBaileys() {
       }
     })
 
-    socket.ev.on('messages.upsert', async ({ messages, type }) => {
-      if (type !== 'notify') return
-      for (const raw of messages || []) {
-        const message = await readMessage(raw, socket)
+    socket.ev.on('messages.upsert', async (upsert) => {
+      if (upsert.type !== 'notify' && upsert.type !== 'append') return
+      for (const msg of upsert.messages || []) {
+        const message = await readMessage(msg, socket)
         if (!message) continue
+        console.log('[Bot Masuk]', {
+          type: upsert.type,
+          remoteJid: msg.key?.remoteJid,
+          senderPhone: message.from,
+          text: message.text.body,
+        })
         try {
           await handleMessage(message)
         } catch (error) {
           console.error('[Baileys] Gagal memproses pesan:', error)
-          await sendText(message.from, 'Waduh, gagal menyimpan catatan. Coba lagi sebentar, ya.').catch(() => {})
+          await sendText(message.replyJid || message.from, 'Waduh, gagal menyimpan catatan. Coba lagi sebentar, ya.').catch(() => {})
         }
       }
     })
