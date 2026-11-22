@@ -165,7 +165,8 @@ scripts/generate-icons.mjs generator ikon PWA
 
 Bot sudah tersedia di folder `bot/` dan memakai database Supabase yang sama dengan
 web. Chat seperti **"masuk uang 500 ribu"** langsung muncul di website lewat Realtime.
-Panduan lengkap ada di **`bot/README.md`**.
+Panduan lengkap ada di **`bot/README.md`**. Untuk menjalankan jalur Meta Cloud API
+dari Vercel (tanpa menghapus Baileys), lihat **`docs/DEPLOY-VERCEL.md`**.
 
 ```
 WhatsApp → Baileys (default, scan QR) → bot server (Node) → parse pesan → Supabase

@@ -165,6 +165,8 @@ WHATSAPP_API_VERSION=v21.0
 
 8. Restart bot. Endpoint `/webhook` tetap aktif di kedua mode, jadi `npm run send` tetap bisa dipakai untuk simulasi.
 
+> **Deploy Vercel:** kalau mau memakai Meta Cloud API dari serverless, jalur yang disarankan ada di [`docs/DEPLOY-VERCEL.md`](../docs/DEPLOY-VERCEL.md). Endpoint-nya `/api/webhook`, `/api/health`, dan `/api/link/*`. Kode Baileys di folder ini tetap dipertahankan dan bisa dipakai lokal lewat `npm start` dengan mode default.
+
 ## Cara pakai
 
 **Sekali linking:**

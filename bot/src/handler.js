@@ -6,12 +6,13 @@ import { sendText } from './whatsapp.js'
 const rupiah = (value) => `Rp${new Intl.NumberFormat('id-ID').format(Math.round(value || 0))}`
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 
-export async function handleMessage(message) {
+export async function handleMessage(message, { send = sendText } = {}) {
   const phone = normalizePhone(message.from)
   // Balasan dikirim ke JID asli penerima (bisa @lid) agar enkripsi Signal
   // memakai session chat yang sama dengan pesan masuk.
   const replyTo = message.replyJid || phone
-  const reply = (body) => sendText(replyTo, body)
+  // `send` bisa diinjeksikan serverless Meta supaya tidak menyentuh Baileys.
+  const reply = (body) => send(replyTo, body)
   const text = String(message.text?.body || '').trim()
   if (!text) {
     await reply('Aku belum bisa membaca pesan ini. Coba kirim teks, ya.')

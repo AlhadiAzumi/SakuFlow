@@ -2,13 +2,13 @@ import crypto from 'node:crypto'
 import cors from 'cors'
 import express from 'express'
 import { config } from './config.js'
-import { handleMessage } from './handler.js'
+import { getWebhookChallenge, isValidMetaSignature } from './meta.js'
+import { processMetaWebhook } from './meta-webhook.js'
 import { normalizePhone } from './parser.js'
 import * as store from './store.js'
 import { sendText } from './whatsapp.js'
 
 const app = express()
-const processed = new Map()
 
 // WEB_ORIGIN=* mengizinkan semua origin (praktis untuk coba lewat IP jaringan/HP).
 app.use(cors({ origin: config.webOrigins.includes('*') ? true : config.webOrigins }))
@@ -29,25 +29,13 @@ app.get('/health', (_req, res) => {
 })
 
 app.get('/webhook', (req, res) => {
-  const mode = req.query['hub.mode']
-  const challenge = req.query['hub.challenge']
-  const token = req.query['hub.verify_token']
-  const valid = mode === 'subscribe' && (!config.verifyToken || token === config.verifyToken)
-  if (valid && challenge) return res.status(200).type('text/plain').send(challenge)
+  const challenge = getWebhookChallenge(req.query)
+  if (challenge) return res.status(200).type('text/plain').send(challenge)
   return res.sendStatus(403)
 })
 
-function isValidSignature(rawBody, signature) {
-  if (config.dryRun || !config.appSecret) return true
-  if (!signature) return false
-  const expected = `sha256=${crypto.createHmac('sha256', config.appSecret).update(rawBody).digest('hex')}`
-  const a = Buffer.from(expected)
-  const b = Buffer.from(String(signature))
-  return a.length === b.length && crypto.timingSafeEqual(a, b)
-}
-
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
-  if (!isValidSignature(req.body, req.headers['x-hub-signature-256'])) {
+  if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
     return res.sendStatus(401)
   }
 
@@ -58,28 +46,9 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
     return res.sendStatus(400)
   }
 
-  res.sendStatus(200)
-
-  for (const entry of payload.entry || []) {
-    for (const change of entry.changes || []) {
-      for (const message of change.value?.messages || []) {
-        if (!message.id || processed.has(message.id)) continue
-        processed.set(message.id, Date.now())
-        try {
-          await handleMessage(message)
-        } catch (error) {
-          console.error('Gagal memproses pesan:', error)
-          await sendText(normalizePhone(message.from), 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.').catch(() => {})
-        }
-      }
-    }
-  }
-
-  // Bersihkan penanda pesan lama agar memory tidak terus bertambah.
-  if (processed.size > 500) {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000
-    for (const [id, time] of processed) if (time < cutoff) processed.delete(id)
-  }
+  // Balasan error lewat jalur aktif (Baileys saat mode baileys, Meta saat mode meta).
+  await processMetaWebhook(payload, { reply: (to, body) => sendText(to, body) })
+  return res.sendStatus(200)
 })
 
 app.use(express.json())

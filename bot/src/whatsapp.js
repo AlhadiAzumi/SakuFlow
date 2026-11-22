@@ -1,4 +1,5 @@
 import { config } from './config.js'
+import { sendMetaText } from './meta.js'
 import { normalizePhone } from './parser.js'
 import { addSelfId, isBlockedKey } from './self-chat.js'
 
@@ -65,28 +66,7 @@ export async function sendText(to, body) {
     return sentMsg
   }
 
-  // Jalur lama: Meta WhatsApp Cloud API.
+  // Jalur Meta WhatsApp Cloud API (dipakai juga oleh api/ di Vercel).
   if (!config.whatsappToken || !config.phoneNumberId) return logDryRun(phone, body)
-
-  const response = await fetch(
-    `https://graph.facebook.com/${config.apiVersion}/${config.phoneNumberId}/messages`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.whatsappToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: phone,
-        text: { body },
-      }),
-    },
-  )
-
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(`Gagal kirim WA: ${payload?.error?.message || response.status}`)
-  }
-  return payload
+  return sendMetaText(phone, body)
 }
