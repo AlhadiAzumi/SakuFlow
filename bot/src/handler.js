@@ -40,7 +40,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
   const text = String(message.text?.body || '').trim()
   if (!text) {
     await reply('Aku belum bisa membaca pesan ini. Coba kirim teks, ya.')
-    return
+    return { type: 'empty', ok: false, phone }
   }
 
   if (await store.hasPendingOtp(phone)) {
@@ -49,7 +49,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
       await reply(userId
         ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
-      return
+      return { type: 'otp', ok: Boolean(userId), verified: Boolean(userId), phone, userId: userId || null }
     }
   }
 
@@ -57,21 +57,21 @@ export async function handleMessage(message, { send = sendText } = {}) {
   // dibalas supaya user tahu bot aktif dan tahu status koneksi nomornya.
   if (/^(halo|hi|hai|menu|permisi|p|ck)$/i.test(text)) {
     await reply(await buildGuideText(phone))
-    return
+    return { type: 'guide', ok: true, phone }
   }
 
   const parsed = parseMessage(text)
 
   if (parsed.intent === 'help') {
     await reply(HELP_TEXT)
-    return
+    return { type: 'help', ok: true, phone }
   }
 
   if (parsed.intent === 'summary') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
       await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
-      return
+      return { type: 'summary', ok: false, phone, reason: 'not_linked' }
     }
     const now = new Date()
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -83,14 +83,14 @@ export async function handleMessage(message, { send = sendText } = {}) {
       `Sisa: ${rupiah(totals.income - totals.expense)}`,
       `${totals.count} transaksi tercatat.`,
     ].join('\n'))
-    return
+    return { type: 'summary', ok: true, phone, userId, totals }
   }
 
   if (parsed.intent === 'transaction') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
       await reply('Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
-      return
+      return { type: 'transaction', ok: false, phone, reason: 'not_linked' }
     }
     await store.insertTransaction({
       user_id: userId,
@@ -118,8 +118,9 @@ export async function handleMessage(message, { send = sendText } = {}) {
       `Total bulan ini — masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
       'Cek websitenya, datanya langsung muncul.',
     ].join('\n'))
-    return
+    return { type: 'transaction', ok: true, phone, userId, amount: parsed.amount, category: parsed.category }
   }
 
   await reply(await buildGuideText(phone))
+  return { type: 'guide', ok: true, phone }
 }

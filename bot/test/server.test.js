@@ -74,3 +74,64 @@ test('request OTP mengembalikan kode walau WhatsApp gagal', async () => {
   assert.equal(data.delivered, false)
   assert.equal(data.phone, '6281234567890')
 })
+
+test('webhook memakai payload.entry dan mencatat log OTP', async () => {
+  // Bersihkan link demo dari test sebelumnya supaya status mengambil nomor ini.
+  await fetch(`${base}/api/link`, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer token-uji' },
+  })
+
+  const phone = '0811111111111'
+  const request = await fetch(`${base}/api/link/request`, {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer token-uji',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ phone }),
+  })
+  const { otp, phone: normalizedPhone } = await request.json()
+
+  const webhookBody = JSON.stringify({
+    object: 'whatsapp_business_account',
+    entry: [{
+      id: 'entry-otp',
+      changes: [{
+        value: {
+          messages: [{
+            id: `wamid.otp.${Date.now()}`,
+            from: normalizedPhone,
+            text: { body: otp },
+          }],
+        },
+      }],
+    }],
+  })
+
+  const logs = []
+  const originalLog = console.log
+  console.log = (...args) => logs.push(args.map((item) => String(item)).join(' '))
+
+  let response
+  try {
+    response = await fetch(`${base}/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: webhookBody,
+    })
+  } finally {
+    console.log = originalLog
+  }
+
+  assert.equal(response.status, 200)
+  assert.equal(await response.text(), 'EVENT_RECEIVED')
+  assert.ok(logs.some((line) => line.includes('[Msg Extracted]')))
+  assert.ok(logs.some((line) => line.includes('[DB / OTP Result]')))
+
+  const status = await fetch(`${base}/api/link/status`, {
+    headers: { Authorization: 'Bearer token-uji' },
+  })
+  const statusData = await status.json()
+  assert.equal(statusData.linked, true)
+})

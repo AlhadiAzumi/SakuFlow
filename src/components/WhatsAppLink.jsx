@@ -51,6 +51,33 @@ export default function WhatsAppLink() {
     return () => { active = false }
   }, [callApi, mode])
 
+  // Saat kode OTP tampil, pantau status koneksi tiap 3 detik. Begitu nomor
+  // terhubung dari sisi bot, UI langsung berubah tanpa refresh manual.
+  useEffect(() => {
+    if (!otp || !API_URL || mode !== 'cloud') return undefined
+    let active = true
+    let timer
+
+    const checkStatus = async () => {
+      try {
+        const data = await callApi('/api/link/status')
+        if (!active) return
+        if (data.linked) {
+          setStatus({ linked: true, phone: data.phone })
+          setOtp('')
+          showToast('Nomor WhatsApp berhasil dihubungkan.')
+          return
+        }
+      } catch {
+        // Jangan hentikan polling hanya karena satu request gagal.
+      }
+      if (active) timer = setTimeout(checkStatus, 3000)
+    }
+
+    checkStatus()
+    return () => { active = false; clearTimeout(timer) }
+  }, [otp, callApi, mode, showToast])
+
   const requestOtp = async (event) => {
     event.preventDefault()
     setLoading(true)

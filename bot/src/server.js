@@ -46,6 +46,13 @@ const corsMiddleware = cors(corsOptions)
 app.use(corsMiddleware)
 app.options(/.*/, corsMiddleware)
 
+// Validasi env Supabase sejak cold start supaya log Vercel langsung jelas.
+const supabaseUrl = process.env.SUPABASE_URL || config.supabaseUrl
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || config.serviceRoleKey
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error('[Supabase] SUPABASE_URL dan/atau SUPABASE_SERVICE_ROLE_KEY kosong. Isi keduanya di Vercel Environment Variables agar query OTP dan transaksi berjalan.')
+}
+
 app.get('/', (_req, res) => {
   res.json({
     app: 'Bot WhatsApp Catatan Uang Harian',
@@ -71,31 +78,32 @@ app.get('/webhook', (req, res) => {
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   console.log('[Webhook Masuk]', JSON.stringify(req.body))
 
-  const rawText = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : String(req.body || '')
-  let rawPayload = rawText
-  try {
-    rawPayload = JSON.parse(rawText)
-  } catch {
-    // Teks apa adanya tetap dicetak bukan JSON valid.
-  }
-  console.log('[Webhook Parsed]', JSON.stringify(rawPayload))
-
   try {
     if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
       return res.status(401).send('UNAUTHORIZED')
     }
 
+    // Di Vercel req.body adalah Buffer. Parse ke objek JSON dulu, lalu semua
+    // proses di bawah memakai payload.entry (bukan req.body.entry).
     let payload
     try {
-      payload = JSON.parse(rawText)
+      payload = Buffer.isBuffer(req.body) ? JSON.parse(req.body.toString('utf8')) : req.body
     } catch {
       return res.status(400).send('INVALID_JSON')
     }
+    if (!payload || typeof payload !== 'object') return res.status(400).send('INVALID_JSON')
+
+    console.log('[Webhook Parsed]', JSON.stringify(payload))
+    console.log('[Webhook Entries]', Array.isArray(payload.entry) ? payload.entry.length : 0)
 
     // Di Vercel, function dimatikan begitu response dikirim. Ekstraksi pesan,
     // pengecekan Supabase, parser, dan kirim balasan Meta (termasuk sapaan
     // seperti "halo") harus tuntas di sini sebelum status 200 dikirim.
-    await processMetaWebhook(payload, { send: sendWhatsAppMessage })
+    await processMetaWebhook(payload, {
+      send: sendWhatsAppMessage,
+      onExtracted: ({ from, text }) => console.log('[Msg Extracted]', { from, text }),
+      onResult: (result) => console.log('[DB / OTP Result]', result),
+    })
   } catch (err) {
     console.error('[Webhook Error]', err)
   }

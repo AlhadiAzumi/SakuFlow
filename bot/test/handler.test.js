@@ -51,3 +51,19 @@ test('panduan menampilkan status nomor yang sudah terhubung', async () => {
   assert.match(reply, /Status nomor: sudah terhubung/)
   assert.doesNotMatch(reply, /belum terhubung/)
 })
+
+test('verifikasi OTP mengembalikan hasil database', async () => {
+  config.dryRun = true
+  const phone = '6287777777777'
+  await store.requestLink('user-otp', phone, '654321')
+
+  const result = await handleMessage(
+    { id: 'otp-result-test', from: phone, text: { body: '654321' } },
+    { send: async () => ({ dry: true }) },
+  )
+
+  assert.equal(result.type, 'otp')
+  assert.equal(result.ok, true)
+  assert.equal(result.verified, true)
+  assert.equal(result.phone, phone)
+})

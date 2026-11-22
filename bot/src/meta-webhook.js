@@ -10,8 +10,14 @@ export function clearProcessedMessages() {
 
 // Dipakai Express (mode meta/lokal) maupun serverless Vercel.
 // `send` diinjeksikan supaya pemanggil bisa mengganti jalur pengiriman bila perlu.
-export async function processMetaWebhook(payload, { send, reply = sendWhatsAppMessage } = {}) {
-  let handled = 0
+// `onExtracted` / `onResult` dipakai webhook untuk log diagnostik di Runtime Logs.
+export async function processMetaWebhook(payload, {
+  send,
+  reply = sendWhatsAppMessage,
+  onExtracted = (info) => console.log('[Msg Extracted]', info),
+  onResult = (result) => console.log('[DB / OTP Result]', result),
+} = {}) {
+  const results = []
 
   for (const entry of payload?.entry || []) {
     for (const change of entry.changes || []) {
@@ -19,15 +25,20 @@ export async function processMetaWebhook(payload, { send, reply = sendWhatsAppMe
         if (!message.id || processed.has(message.id)) continue
         processed.set(message.id, Date.now())
 
+        const from = normalizePhone(message.from)
+        const text = String(message.text?.body || '').trim()
+        onExtracted({ from, text })
+
         try {
-          await handleMessage(message, { send })
-          handled += 1
+          const result = await handleMessage(message, { send })
+          onResult(result)
+          results.push(result)
         } catch (error) {
           console.error('Gagal memproses pesan:', error)
-          await reply(
-            normalizePhone(message.from),
-            'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.',
-          ).catch(() => {})
+          const result = { type: 'error', ok: false, from, text, error: error.message }
+          onResult(result)
+          results.push(result)
+          await reply(from, 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.').catch(() => {})
         }
       }
     }
@@ -38,5 +49,5 @@ export async function processMetaWebhook(payload, { send, reply = sendWhatsAppMe
     for (const [id, time] of processed) if (time < cutoff) processed.delete(id)
   }
 
-  return handled
+  return results
 }
