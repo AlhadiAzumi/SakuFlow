@@ -45,12 +45,12 @@ export async function sendWhatsAppMessage(to, body) {
     },
   )
 
-  const replyData = await response.json().catch(() => ({}))
-  console.log('[Meta Reply]', response.status, JSON.stringify(replyData))
+  const data = await response.json().catch(() => ({}))
+  console.log('[Meta Reply]', response.status, JSON.stringify(data))
   if (!response.ok) {
-    throw new Error(`Gagal kirim WA: ${replyData?.error?.message || response.status}`)
+    throw new Error(`Gagal kirim WA: ${data?.error?.message || response.status}`)
   }
-  return replyData
+  return data
 }
 
 // Alias untuk modul lama yang masih mengimpor sendMetaText.

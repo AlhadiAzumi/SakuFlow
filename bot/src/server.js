@@ -134,4 +134,6 @@ if (!process.env.VERCEL) {
   })
 }
 
+// Diekspor ulang supaya sendWhatsAppMessage juga bisa diakses dari server.js.
+export { sendWhatsAppMessage }
 export default app
