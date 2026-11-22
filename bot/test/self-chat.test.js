@@ -1,37 +1,66 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { getSelfIdentifiers, isSelfChatTarget } from '../src/self-chat.js'
+import {
+  extractCleanId,
+  getBotIdentity,
+  isSelfChatFromKey,
+  resolveSenderPhone,
+} from '../src/self-chat.js'
 
-test('identitas diri dari user.id dengan suffix device', () => {
-  const ids = getSelfIdentifiers({ id: '6281234567890:12@s.whatsapp.net' })
-  assert.ok(ids.has('6281234567890'))
-  assert.ok(ids.has('6281234567890@s.whatsapp.net'))
+test('ekstrak ID bersih dari device suffix dan domain', () => {
+  assert.equal(extractCleanId('6285167811268:14@s.whatsapp.net'), '6285167811268')
+  assert.equal(extractCleanId('80501142515803:14@lid'), '80501142515803')
+  assert.equal(extractCleanId('6285167811268@s.whatsapp.net'), '6285167811268')
+  assert.equal(extractCleanId(''), '')
 })
 
-test('identitas diri dari user.id tanpa suffix', () => {
-  const ids = getSelfIdentifiers({ id: '6281234567890@s.whatsapp.net' })
-  assert.ok(ids.has('6281234567890'))
-  assert.ok(ids.has('6281234567890@s.whatsapp.net'))
+test('identitas bot: nomor HP dari user.id dan LID dari user.lid', () => {
+  assert.deepEqual(
+    getBotIdentity({ id: '6285167811268:14@s.whatsapp.net', lid: '80501142515803:14@lid' }),
+    { ownPhone: '6285167811268', ownLid: '80501142515803' },
+  )
 })
 
-test('identitas diri dari user.lid', () => {
-  const ids = getSelfIdentifiers({ id: '6281234567890:12@s.whatsapp.net', lid: '123456789' })
-  assert.ok(ids.has('123456789'))
-  assert.ok(ids.has('123456789@lid'))
+test('identitas bot: user.id berupa LID tidak dianggap nomor HP', () => {
+  assert.deepEqual(
+    getBotIdentity({ id: '80501142515803:14@lid' }),
+    { ownPhone: '', ownLid: '80501142515803' },
+  )
 })
 
-test('target self-chat diterima untuk PN, device suffix, dan LID', () => {
-  const ids = getSelfIdentifiers({ id: '6281234567890:12@s.whatsapp.net', lid: '123456789@lid' })
-  assert.equal(isSelfChatTarget('6281234567890@s.whatsapp.net', ids), true)
-  assert.equal(isSelfChatTarget('6281234567890:12@s.whatsapp.net', ids), true)
-  assert.equal(isSelfChatTarget('123456789@lid', ids), true)
-  assert.equal(isSelfChatTarget('123456789:5@lid', ids), true)
+test('self-chat terdeteksi lewat PN maupun LID (remoteJid / remoteJidAlt)', () => {
+  const identity = getBotIdentity({
+    id: '6285167811268:14@s.whatsapp.net',
+    lid: '80501142515803:14@lid',
+  })
+
+  assert.equal(isSelfChatFromKey({ remoteJid: '6285167811268@s.whatsapp.net' }, identity), true)
+  assert.equal(isSelfChatFromKey({ remoteJid: '6285167811268:14@s.whatsapp.net' }, identity), true)
+  assert.equal(isSelfChatFromKey({ remoteJid: '80501142515803@lid' }, identity), true)
+  assert.equal(isSelfChatFromKey({ remoteJidAlt: '80501142515803:14@lid' }, identity), true)
 })
 
-test('target selain diri sendiri ditolak (kontak lain / grup / status)', () => {
-  const ids = getSelfIdentifiers({ id: '6281234567890:12@s.whatsapp.net', lid: '123456789' })
-  assert.equal(isSelfChatTarget('6289999999999@s.whatsapp.net', ids), false)
-  assert.equal(isSelfChatTarget('120363012345678901@g.us', ids), false)
-  assert.equal(isSelfChatTarget('status@broadcast', ids), false)
-  assert.equal(isSelfChatTarget(null, ids), false)
+test('self-chat ditolak untuk kontak lain, grup, dan status', () => {
+  const identity = getBotIdentity({
+    id: '6285167811268:14@s.whatsapp.net',
+    lid: '80501142515803:14@lid',
+  })
+
+  assert.equal(isSelfChatFromKey({ remoteJid: '6289999999999@s.whatsapp.net' }, identity), false)
+  assert.equal(isSelfChatFromKey({ remoteJid: '120363012345678901@g.us' }, identity), false)
+  assert.equal(isSelfChatFromKey({ remoteJid: 'status@broadcast' }, identity), false)
+})
+
+test('self-chat dipetakan ke nomor HP asli, bukan angka LID', () => {
+  const identity = getBotIdentity({
+    id: '6285167811268:14@s.whatsapp.net',
+    lid: '80501142515803:14@lid',
+  })
+
+  const key = { remoteJid: '80501142515803@lid', remoteJidAlt: '6285167811268@s.whatsapp.net' }
+  assert.equal(resolveSenderPhone(key, identity, true), '6285167811268')
+
+  // Pesan masuk biasa tetap memakai nomor pengirim aslinya.
+  const otherKey = { remoteJid: '081234567890@s.whatsapp.net' }
+  assert.equal(resolveSenderPhone(otherKey, identity, false), '6281234567890')
 })

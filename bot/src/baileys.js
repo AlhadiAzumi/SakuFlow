@@ -9,8 +9,7 @@ import {
 import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
-import { normalizePhone } from './parser.js'
-import { getSelfIdentifiers, isSelfChatTarget } from './self-chat.js'
+import { getBotIdentity, isSelfChatFromKey, resolveSenderPhone } from './self-chat.js'
 import { clearBaileysSocket, sendText, sentMessageIds, setBaileysSocket } from './whatsapp.js'
 
 const authDir = fileURLToPath(new URL('../auth', import.meta.url))
@@ -38,11 +37,13 @@ async function readMessage(message, socket) {
   const id = key.id
   if (!id || processed.has(id) || sentMessageIds.has(id)) return null
 
-  const targets = [key.remoteJid, key.remoteJidAlt].filter(Boolean)
-  if (!targets.length || key.remoteJid === 'status@broadcast') return null
+  const remoteJid = key.remoteJid || ''
+  const remoteJidAlt = key.remoteJidAlt || ''
+  if (!remoteJid && !remoteJidAlt) return null
+  if (remoteJid === 'status@broadcast' || remoteJidAlt === 'status@broadcast') return null
 
-  const selfIds = getSelfIdentifiers(socket?.user)
-  const isSelfChat = targets.some((target) => isSelfChatTarget(target, selfIds))
+  const identity = getBotIdentity(socket?.user)
+  const isSelfChat = isSelfChatFromKey({ remoteJid, remoteJidAlt }, identity)
   if (key.fromMe && !isSelfChat) return null
 
   const text = message.message?.conversation
@@ -54,10 +55,12 @@ async function readMessage(message, socket) {
   processed.set(id, Date.now())
   cleanupProcessed()
 
-  const fromTarget = targets.find((target) => String(target).includes('@s.whatsapp.net')) || targets[0]
+  const senderPhone = resolveSenderPhone(key, identity, isSelfChat)
+  console.log('[Bot Masuk]', { senderPhone, text })
+
   return {
     id,
-    from: normalizePhone(String(fromTarget).split('@')[0]),
+    from: senderPhone,
     text: { body: text },
   }
 }
