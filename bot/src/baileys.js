@@ -10,7 +10,13 @@ import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
 import { getBotIdentity, isSelfChatFromKey, resolveSenderPhone } from './self-chat.js'
-import { clearBaileysSocket, sendText, sentMessageIds, setBaileysSocket } from './whatsapp.js'
+import {
+  clearBaileysSocket,
+  messageStore,
+  sendText,
+  sentMessageIds,
+  setBaileysSocket,
+} from './whatsapp.js'
 
 const authDir = fileURLToPath(new URL('../auth', import.meta.url))
 const processed = new Map()
@@ -61,6 +67,9 @@ async function readMessage(message, socket) {
   return {
     id,
     from: senderPhone,
+    // JID asli tempat pesan diterima (@lid atau @s.whatsapp.net) dipakai
+    // sebagai tujuan balasan agar kunci enkripsi Signal tetap konsisten.
+    replyJid: remoteJid || remoteJidAlt,
     text: { body: text },
   }
 }
@@ -81,6 +90,8 @@ export async function connectBaileys() {
       browser: ['SakuFlow Bot', 'Chrome', '1.0.0'],
       markOnlineOnConnect: false,
       syncFullHistory: false,
+      // Saat HP meminta retry dekripsi, Baileys butuh isi pesan aslinya.
+      getMessage: async (key) => messageStore.get(key?.id)?.message || undefined,
     })
 
     setBaileysSocket(socket)

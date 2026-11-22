@@ -8,16 +8,20 @@ const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 
 
 export async function handleMessage(message) {
   const phone = normalizePhone(message.from)
+  // Balasan dikirim ke JID asli penerima (bisa @lid) agar enkripsi Signal
+  // memakai session chat yang sama dengan pesan masuk.
+  const replyTo = message.replyJid || phone
+  const reply = (body) => sendText(replyTo, body)
   const text = String(message.text?.body || '').trim()
   if (!text) {
-    await sendText(phone, 'Aku belum bisa membaca pesan ini. Coba kirim teks, ya.')
+    await reply('Aku belum bisa membaca pesan ini. Coba kirim teks, ya.')
     return
   }
 
   if (await store.hasPendingOtp(phone)) {
     if (/^\d{4,8}$/.test(text)) {
       const userId = await store.verifyOtp(phone, text)
-      await sendText(phone, userId
+      await reply(userId
         ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
       return
@@ -27,20 +31,20 @@ export async function handleMessage(message) {
   const parsed = parseMessage(text)
 
   if (parsed.intent === 'help') {
-    await sendText(phone, HELP_TEXT)
+    await reply(HELP_TEXT)
     return
   }
 
   if (parsed.intent === 'summary') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
-      await sendText(phone, 'Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
+      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
       return
     }
     const now = new Date()
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     const totals = await store.getMonthTotals(userId, monthKey)
-    await sendText(phone, [
+    await reply([
       `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()}`,
       `Uang masuk: ${rupiah(totals.income)}`,
       `Uang keluar: ${rupiah(totals.expense)}`,
@@ -53,7 +57,7 @@ export async function handleMessage(message) {
   if (parsed.intent === 'transaction') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
-      await sendText(phone, 'Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
+      await reply('Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
       return
     }
     await store.insertTransaction({
@@ -69,7 +73,7 @@ export async function handleMessage(message) {
     })
     const category = getCategory(parsed.type, parsed.category)
     const totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
-    await sendText(phone, [
+    await reply([
       `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
       `${rupiah(parsed.amount)} • ${category.label}`,
       `Total bulan ini — masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
@@ -78,5 +82,5 @@ export async function handleMessage(message) {
     return
   }
 
-  await sendText(phone, `Aku belum paham pesan itu.\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
+  await reply(`Aku belum paham pesan itu.\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
 }
