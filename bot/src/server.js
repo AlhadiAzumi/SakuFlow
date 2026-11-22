@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import cors from 'cors'
 import express from 'express'
 import { config } from './config.js'
-import { getWebhookChallenge, isValidMetaSignature } from './meta.js'
+import { getWebhookChallenge, isValidMetaSignature, sendWhatsAppMessage } from './meta.js'
 import { processMetaWebhook } from './meta-webhook.js'
 import { normalizePhone } from './parser.js'
 import * as store from './store.js'
@@ -46,6 +46,8 @@ app.get('/webhook', (req, res) => {
 })
 
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
+  console.log('[Webhook Masuk]', JSON.stringify(req.body))
+
   const rawText = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : String(req.body || '')
   let rawPayload = rawText
   try {
@@ -53,7 +55,7 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   } catch {
     // Teks apa adanya tetap dicetak bukan JSON valid.
   }
-  console.log('[Webhook Raw]', JSON.stringify(rawPayload))
+  console.log('[Webhook Parsed]', JSON.stringify(rawPayload))
 
   try {
     if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
@@ -67,9 +69,10 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
       return res.status(400).send('INVALID_JSON')
     }
 
-    // Di Vercel, function dimatikan begitu response dikirim. Semua proses
-    // (Supabase, parser, dan kirim balasan Meta) harus selesai di sini.
-    await processMetaWebhook(payload, { reply: (to, body) => sendText(to, body) })
+    // Di Vercel, function dimatikan begitu response dikirim. Ekstraksi pesan,
+    // pengecekan Supabase, parser, dan kirim balasan Meta (termasuk sapaan
+    // seperti "halo") harus tuntas di sini sebelum status 200 dikirim.
+    await processMetaWebhook(payload, { send: sendWhatsAppMessage })
   } catch (err) {
     console.error('[Webhook Error]', err)
   }

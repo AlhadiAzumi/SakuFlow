@@ -12,14 +12,25 @@ export function isMetaConfigured() {
 // dari process.env agar perilakunya sama di lokal maupun serverless Vercel.
 export async function sendWhatsAppMessage(to, body) {
   const phone = normalizePhone(to)
+  const text = String(body || '')
+
+  // Hanya dry-run bila BOT_DRY_RUN benar-benar diset "true". Di Vercel
+  // biasanya tidak diset, jadi pengiriman tetap berjalan walaupun config lokal
+  // pernah berisi dry-run.
+  if (process.env.BOT_DRY_RUN === 'true') {
+    console.log('[Meta Reply] DRY-RUN', phone, JSON.stringify({ text }))
+    return { dry: true }
+  }
+
   const token = process.env.WHATSAPP_TOKEN || config.whatsappToken
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || config.phoneNumberId
+  const apiVersion = process.env.WHATSAPP_API_VERSION || config.apiVersion || 'v25.0'
   if (!token || !phoneNumberId) {
     throw new Error('Meta WhatsApp belum dikonfigurasi. Isi WHATSAPP_TOKEN dan WHATSAPP_PHONE_NUMBER_ID.')
   }
 
-  const res = await fetch(
-    `https://graph.facebook.com/${config.apiVersion}/${phoneNumberId}/messages`,
+  const response = await fetch(
+    `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
     {
       method: 'POST',
       headers: {
@@ -29,17 +40,17 @@ export async function sendWhatsAppMessage(to, body) {
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         to: phone,
-        text: { body: String(body || '') },
+        text: { body: text },
       }),
     },
   )
 
-  const data = await res.json().catch(() => ({}))
-  console.log('[Meta Reply Response]', res.status, JSON.stringify(data))
-  if (!res.ok) {
-    throw new Error(`Gagal kirim WA: ${data?.error?.message || res.status}`)
+  const replyData = await response.json().catch(() => ({}))
+  console.log('[Meta Reply]', response.status, JSON.stringify(replyData))
+  if (!response.ok) {
+    throw new Error(`Gagal kirim WA: ${replyData?.error?.message || response.status}`)
   }
-  return data
+  return replyData
 }
 
 // Alias untuk modul lama yang masih mengimpor sendMetaText.

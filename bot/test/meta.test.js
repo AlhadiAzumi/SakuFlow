@@ -109,12 +109,57 @@ test('sendWhatsAppMessage mencatat status dan body respons Meta', () => withEnv(
       () => sendWhatsAppMessage('081234567890', 'halo'),
       /token expired/,
     )
-    const replyLog = logs.find((line) => line.includes('[Meta Reply Response]'))
+    const replyLog = logs.find((line) => line.includes('[Meta Reply]'))
     assert.ok(replyLog)
     assert.match(replyLog, /400/)
     assert.match(replyLog, /token expired/)
   } finally {
     console.log = originalLog
+    globalThis.fetch = originalFetch
+  }
+}))
+
+test('BOT_DRY_RUN=true menahan pengiriman ke Meta', () => withEnv({
+  BOT_DRY_RUN: 'true',
+  WHATSAPP_TOKEN: null,
+  WHATSAPP_PHONE_NUMBER_ID: null,
+}, async () => {
+  const originalFetch = globalThis.fetch
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true
+    return {}
+  }
+
+  try {
+    const result = await sendWhatsAppMessage('081234567890', 'halo')
+    assert.deepEqual(result, { dry: true })
+    assert.equal(fetchCalled, false)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+}))
+
+test('BOT_DRY_RUN=false tetap mengirim walau config.dryRun true', () => withEnv({
+  BOT_DRY_RUN: 'false',
+  WHATSAPP_TOKEN: 'token-uji',
+  WHATSAPP_PHONE_NUMBER_ID: '123456789',
+}, async () => {
+  const originalDryRun = config.dryRun
+  const originalFetch = globalThis.fetch
+  config.dryRun = true
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true
+    return { ok: true, status: 200, json: async () => ({ messages: [{ id: 'wamid.2' }] }) }
+  }
+
+  try {
+    const result = await sendWhatsAppMessage('081234567890', 'halo')
+    assert.equal(fetchCalled, true)
+    assert.deepEqual(result, { messages: [{ id: 'wamid.2' }] })
+  } finally {
+    config.dryRun = originalDryRun
     globalThis.fetch = originalFetch
   }
 }))
