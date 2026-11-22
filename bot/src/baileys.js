@@ -6,6 +6,8 @@ import {
   makeWASocket,
   useMultiFileAuthState,
 } from '@whiskeysockets/baileys'
+import pino from 'pino'
+import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
 import { normalizePhone } from './parser.js'
 import { clearBaileysSocket, sendText, setBaileysSocket } from './whatsapp.js'
@@ -60,17 +62,12 @@ export async function connectBaileys() {
   try {
     const { state, saveCreds } = await useMultiFileAuthState(path.resolve(authDir))
 
-    let version
-    try {
-      ({ version } = await fetchLatestBaileysVersion())
-    } catch {
-      // Kalau gagal cek versi, Baileys pakai versi default bawaan.
-    }
+    const { version } = await fetchLatestBaileysVersion()
 
     const socket = makeWASocket({
       version,
       auth: state,
-      printQRInTerminal: true,
+      logger: pino({ level: 'silent' }),
       browser: ['SakuFlow Bot', 'Chrome', '1.0.0'],
       markOnlineOnConnect: false,
       syncFullHistory: false,
@@ -82,6 +79,11 @@ export async function connectBaileys() {
 
     socket.ev.on('connection.update', (update) => {
       const { connection, lastDisconnect } = update
+
+      if (update.qr) {
+        qrcode.generate(update.qr, { small: true })
+        console.log('[Baileys] Silakan scan QR di atas melalui WhatsApp > Perangkat Tertaut.')
+      }
 
       if (connection === 'open') {
         console.log('[Baileys] WhatsApp terhubung. Bot siap menerima catatan.')
