@@ -188,7 +188,7 @@ export async function connectBaileys() {
           await handleMessage(message)
         } catch (error) {
           console.error('[Baileys] Gagal memproses pesan:', error)
-          await sendText(message.replyJid || message.from, 'Waduh, gagal menyimpan catatan. Coba lagi sebentar, ya.').catch(() => {})
+          await sendText(message.replyJid || message.from, 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.').catch(() => {})
         }
       }
     })

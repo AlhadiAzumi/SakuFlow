@@ -69,7 +69,7 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
           await handleMessage(message)
         } catch (error) {
           console.error('Gagal memproses pesan:', error)
-          await sendText(normalizePhone(message.from), 'Waduh, gagal menyimpan catatan. Coba lagi sebentar, ya.').catch(() => {})
+          await sendText(normalizePhone(message.from), 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.').catch(() => {})
         }
       }
     }

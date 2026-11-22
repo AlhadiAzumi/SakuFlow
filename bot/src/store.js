@@ -135,6 +135,18 @@ export async function insertTransaction(record) {
   return data
 }
 
+// Tanggal akhir bulan harus dihitung, bukan di-hardcode "-31" (November,
+// April, Juni, September cuma 30 hari; Februari 28/29).
+export function monthRange(monthKey) {
+  const [year, month] = String(monthKey).split('-').map(Number)
+  const pad = (n) => String(n).padStart(2, '0')
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  return {
+    start: `${year}-${pad(month)}-01`,
+    end: `${year}-${pad(month)}-${pad(lastDay)}`,
+  }
+}
+
 export async function getMonthTotals(userId, monthKey) {
   if (!admin) {
     const items = dryTransactions.filter((item) => item.user_id === userId && String(item.date).startsWith(monthKey))
@@ -144,12 +156,13 @@ export async function getMonthTotals(userId, monthKey) {
       count: items.length,
     }
   }
+  const { start, end } = monthRange(monthKey)
   const { data, error } = await requireAdmin()
     .from('transactions')
     .select('type, amount')
     .eq('user_id', userId)
-    .gte('date', `${monthKey}-01`)
-    .lte('date', `${monthKey}-31`)
+    .gte('date', start)
+    .lte('date', end)
   if (error) throw error
   return {
     income: (data || []).filter((i) => i.type === 'income').reduce((s, i) => s + Number(i.amount || 0), 0),

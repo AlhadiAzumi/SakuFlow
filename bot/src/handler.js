@@ -72,7 +72,14 @@ export async function handleMessage(message) {
       created_at: new Date().toISOString(),
     })
     const category = getCategory(parsed.type, parsed.category)
-    const totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
+    // Transaksi sudah tersimpan. Kalau rekap gagal, jangan sampai user
+    // dikabari "gagal menyimpan" — kirim konfirmasi dengan rekap kosong.
+    let totals = { income: 0, expense: 0, count: 0 }
+    try {
+      totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
+    } catch (error) {
+      console.error('[Bot] Gagal mengambil rekap setelah transaksi tersimpan:', error)
+    }
     await reply([
       `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
       `${rupiah(parsed.amount)} • ${category.label}`,
