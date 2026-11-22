@@ -9,7 +9,7 @@ import {
 import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
-import { getOwnPhone, isSelfChatKey, seedSelfIds } from './self-chat.js'
+import { cleanJidId, getOwnPhone, isBlockedKey, isSelfChatKey, seedSelfIds } from './self-chat.js'
 import {
   clearBaileysSocket,
   messageStore,
@@ -59,19 +59,10 @@ export function isFresh(message) {
   return Date.now() / 1000 - timestamp <= 60
 }
 
-// Whitelist ketat: blokir grup, broadcast, newsletter, dan pesan dengan
-// participant sebelum apa pun yang lain diperiksa.
-export function isBlockedKey(key) {
-  const remoteJid = key?.remoteJid || ''
-  if (!remoteJid) return true
-  if (remoteJid.endsWith('@g.us')) return true
-  if (remoteJid.endsWith('@broadcast')) return true
-  if (remoteJid.endsWith('@newsletter')) return true
-  if (key?.participant) return true
-  return false
-}
+// Dipakai ulang oleh modul kirim pesan; diekspos juga untuk keperluan test.
+export { isBlockedKey }
 
-async function readMessage(message) {
+async function readMessage(message, socket) {
   const key = message.key || {}
   const remoteJid = key.remoteJid || ''
   const remoteJidAlt = key.remoteJidAlt || ''
@@ -83,8 +74,9 @@ async function readMessage(message) {
   if (!id || sentMessageIds.has(id) || processed.has(id)) return null
   if (!isFresh(message)) return null
 
-  // Berlaku untuk fromMe true maupun false. Di luar whitelist = diamkan.
-  if (!isSelfChatKey({ remoteJid, remoteJidAlt })) return null
+  // Tanpa pengecualian: berlaku untuk fromMe true maupun false.
+  const isSelfChat = isSelfChatKey({ remoteJid, remoteJidAlt })
+  if (!isSelfChat) return null
 
   const text = extractText(message.message)
   if (!text) return null
@@ -92,9 +84,10 @@ async function readMessage(message) {
   processed.set(id, Date.now())
   cleanupProcessed()
 
+  const senderPhone = cleanJidId(socket?.user?.id) || getOwnPhone()
   return {
     id,
-    from: getOwnPhone(),
+    from: senderPhone,
     // JID asli tempat pesan diterima (@lid atau @s.whatsapp.net) dipakai
     // sebagai tujuan balasan agar kunci enkripsi Signal tetap konsisten.
     replyJid: remoteJid,
@@ -158,7 +151,7 @@ export async function connectBaileys() {
     socket.ev.on('messages.upsert', async (upsert) => {
       if (upsert.type !== 'notify' && upsert.type !== 'append') return
       for (const msg of upsert.messages || []) {
-        const message = await readMessage(msg)
+        const message = await readMessage(msg, socket)
         if (!message) continue
         console.log('[Bot Masuk]', {
           type: upsert.type,

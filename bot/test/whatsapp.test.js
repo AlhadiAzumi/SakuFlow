@@ -63,15 +63,28 @@ test('OTP ke nomor utama menangkap JID @lid hasil kirim', async () => {
   assert.ok(knownSelfIds.has('99887766554433'))
 })
 
-test('kirim ke nomor orang lain tidak menambah whitelist', async () => {
+test('JID @lid dari hasil kirim masuk whitelist', async () => {
   knownSelfIds.clear()
   seedSelfIds({ user: { id: '6285167811268:14@s.whatsapp.net' } })
   config.botMode = 'baileys'
   config.dryRun = false
   const sent = []
-  fakeSocket(sent, '6289999999999@s.whatsapp.net')
+  fakeSocket(sent, '99887766554433@lid')
+
+  await sendText('6289999999999', '123456')
+
+  assert.ok(knownSelfIds.has('99887766554433'))
+})
+
+test('group JID hasil kirim tidak pernah masuk whitelist', async () => {
+  knownSelfIds.clear()
+  seedSelfIds({ user: { id: '6285167811268:14@s.whatsapp.net' } })
+  config.botMode = 'baileys'
+  config.dryRun = false
+  const sent = []
+  fakeSocket(sent, '120363043564710845@g.us')
 
   await sendText('6289999999999', 'halo')
 
-  assert.equal(knownSelfIds.has('6289999999999'), false)
+  assert.equal(knownSelfIds.has('120363043564710845'), false)
 })

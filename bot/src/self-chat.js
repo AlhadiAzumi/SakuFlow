@@ -1,15 +1,26 @@
-import { normalizePhone } from './parser.js'
-
-// Bersihkan JID/LID jadi ID mentah: buang :device dan @domain.
-// "6285167811268:14@s.whatsapp.net" -> "6285167811268"
-// "80501142515803:14@lid"           -> "80501142515803"
-export function extractCleanId(value) {
-  if (!value) return ''
-  return String(value).split(':')[0].split('@')[0]
+// Ambil bagian sebelum ':' (device) dan '@' (domain).
+// '80501142515803:14@lid' -> '80501142515803'
+// '6285167811268@s.whatsapp.net' -> '6285167811268'
+export function cleanJidId(jid) {
+  if (!jid) return ''
+  return String(jid).split(':')[0].split('@')[0]
 }
 
-// Whitelist ID milik sendiri. Diisi dari sock.user, state.creds.me, dan
-// remoteJid hasil kirim pesan (bisa berupa JID @lid ruang self-chat).
+// Alias lama, dipakai beberapa modul/test.
+export const extractCleanId = cleanJidId
+
+// Blokir grup, broadcast/status, channel, dan pesan dengan participant.
+export function isBlockedKey(key) {
+  const remoteJid = key?.remoteJid || ''
+  if (!remoteJid) return true
+  if (remoteJid.endsWith('@g.us')) return true
+  if (remoteJid.endsWith('@broadcast') || remoteJid === 'status@broadcast') return true
+  if (remoteJid.endsWith('@newsletter')) return true
+  if (Boolean(key?.participant)) return true
+  return false
+}
+
+// Whitelist ketat: hanya ID milik akun bot sendiri.
 export const knownSelfIds = new Set()
 let ownPhone = ''
 
@@ -17,36 +28,29 @@ export function getOwnPhone() {
   return ownPhone
 }
 
-export function addSelfId(value) {
-  const clean = extractCleanId(value)
+export function addSelfId(jid) {
+  const clean = cleanJidId(jid)
   if (clean) knownSelfIds.add(clean)
   return clean
 }
 
-// Isi ulang whitelist setiap koneksi siap / sesi berubah.
+// Isi dari sock.user DAN state.creds.me (dua-duanya, tanpa syarat).
 export function seedSelfIds({ user, creds } = {}) {
-  const candidates = [user?.id, creds?.me?.id]
-  const primary = candidates.find((value) => value && !String(value).includes('@lid')) || ''
-  ownPhone = extractCleanId(primary)
-
-  if (ownPhone) {
-    const normalized = normalizePhone(ownPhone)
-    if (normalized) ownPhone = normalized
-    knownSelfIds.add(ownPhone)
-  }
-
   addSelfId(user?.id)
   addSelfId(user?.lid)
   addSelfId(creds?.me?.id)
   addSelfId(creds?.me?.lid)
 
+  const primary = [user?.id, creds?.me?.id]
+    .find((value) => value && !String(value).includes('@lid'))
+  ownPhone = cleanJidId(primary)
+
   return ownPhone
 }
 
-// Satu-satunya gerbang self-chat: cocokkan remoteJid / remoteJidAlt dengan
-// whitelist. Pemisah ':' dan '@' sudah dibuang oleh extractCleanId.
+// Satu-satunya gerbang self-chat. Berlaku untuk fromMe true maupun false.
 export function isSelfChatKey(key) {
-  const rawRemote = extractCleanId(key?.remoteJid)
-  const rawAlt = extractCleanId(key?.remoteJidAlt)
-  return knownSelfIds.has(rawRemote) || Boolean(rawAlt && knownSelfIds.has(rawAlt))
+  const rawRemote = cleanJidId(key?.remoteJid)
+  const rawAlt = cleanJidId(key?.remoteJidAlt)
+  return knownSelfIds.has(rawRemote) || knownSelfIds.has(rawAlt)
 }

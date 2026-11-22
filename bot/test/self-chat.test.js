@@ -2,8 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   addSelfId,
-  extractCleanId,
+  cleanJidId,
   getOwnPhone,
+  isBlockedKey,
   isSelfChatKey,
   knownSelfIds,
   seedSelfIds,
@@ -14,11 +15,20 @@ function reset() {
   seedSelfIds({ user: { id: '6285167811268:14@s.whatsapp.net', lid: '80501142515803:14@lid' } })
 }
 
-test('ekstrak ID bersih dari device suffix dan domain', () => {
-  assert.equal(extractCleanId('6285167811268:14@s.whatsapp.net'), '6285167811268')
-  assert.equal(extractCleanId('80501142515803:14@lid'), '80501142515803')
-  assert.equal(extractCleanId('6285167811268@s.whatsapp.net'), '6285167811268')
-  assert.equal(extractCleanId(''), '')
+test('cleanJidId membuang device suffix dan domain', () => {
+  assert.equal(cleanJidId('80501142515803:14@lid'), '80501142515803')
+  assert.equal(cleanJidId('6285167811268:14@s.whatsapp.net'), '6285167811268')
+  assert.equal(cleanJidId('6285167811268@s.whatsapp.net'), '6285167811268')
+  assert.equal(cleanJidId(''), '')
+})
+
+test('blokir grup, broadcast/status, newsletter, participant, dan JID kosong', () => {
+  assert.equal(isBlockedKey({ remoteJid: '' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '120363043564710845@g.us' }), true)
+  assert.equal(isBlockedKey({ remoteJid: 'status@broadcast' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '120363043564710845@newsletter' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '6285167811268@s.whatsapp.net', participant: '628999@s.whatsapp.net' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '6285167811268@s.whatsapp.net' }), false)
 })
 
 test('whitelist terisi dari sock.user dan state.creds.me', () => {

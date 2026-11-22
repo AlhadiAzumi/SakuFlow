@@ -1,6 +1,6 @@
 import { config } from './config.js'
 import { normalizePhone } from './parser.js'
-import { addSelfId, extractCleanId, getOwnPhone, isSelfChatKey } from './self-chat.js'
+import { addSelfId, isBlockedKey } from './self-chat.js'
 
 let baileysSocket = null
 
@@ -12,7 +12,7 @@ export const sentMessageIds = new Set()
 // meminta retry dekripsi (("Waiting for this message...")).
 export const messageStore = new Map()
 
-function rememberSentMessage(sentMsg, to) {
+function rememberSentMessage(sentMsg) {
   const id = sentMsg?.key?.id
   if (!id) return
 
@@ -24,15 +24,13 @@ function rememberSentMessage(sentMsg, to) {
   const storeTimer = setTimeout(() => messageStore.delete(id), 5 * 60_000)
   storeTimer.unref?.()
 
-  // Amankan JID hasil kirim. Hanya ditambahkan kalau tujuannya memang milik
-  // sendiri (balasan self-chat atau OTP ke nomor utama), supaya nomor orang
-  // lain tidak pernah masuk whitelist. Ini yang menangkap JID @lid self-chat.
-  const raw = String(to || '')
-  const toClean = extractCleanId(raw)
-  const isOwnTarget = raw.includes('@')
-    ? isSelfChatKey({ remoteJid: raw })
-    : Boolean(toClean && toClean === getOwnPhone())
-  if (isOwnTarget) addSelfId(sentMsg?.key?.remoteJid)
+  // WhatsApp mengembalikan JID @lid ruang self-chat di sentMsg.key.remoteJid.
+  // Ambil setiap kirim yang berhasil, kecuali JID grup/broadcast/channel —
+  // supaya group JID tidak pernah masuk whitelist.
+  const sentRemoteJid = sentMsg?.key?.remoteJid
+  if (sentRemoteJid && !isBlockedKey({ remoteJid: sentRemoteJid })) {
+    addSelfId(sentRemoteJid)
+  }
 }
 
 export function setBaileysSocket(socket) {
@@ -63,7 +61,7 @@ export async function sendText(to, body) {
     // pesan supaya jalur kunci Signal tetap konsisten dalam satu sesi chat.
     const jid = isJid ? raw : `${phone}@s.whatsapp.net`
     const sentMsg = await baileysSocket.sendMessage(jid, { text: body })
-    rememberSentMessage(sentMsg, jid)
+    rememberSentMessage(sentMsg)
     return sentMsg
   }
 
