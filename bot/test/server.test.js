@@ -104,6 +104,11 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
             from: normalizedPhone,
             text: { body: otp },
           }],
+          statuses: [{
+            id: 'wamid.status.uji',
+            status: 'delivered',
+            recipient_id: normalizedPhone,
+          }],
         },
       }],
     }],
@@ -126,8 +131,10 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
 
   assert.equal(response.status, 200)
   assert.equal(await response.text(), 'EVENT_RECEIVED')
+  assert.ok(logs.some((line) => line.includes('[Payload JSON]')))
   assert.ok(logs.some((line) => line.includes('[Msg Extracted]')))
   assert.ok(logs.some((line) => line.includes('[DB / OTP Result]')))
+  assert.ok(logs.some((line) => line.includes('[WA Status]')))
 
   const status = await fetch(`${base}/api/link/status`, {
     headers: { Authorization: 'Bearer token-uji' },

@@ -76,32 +76,52 @@ app.get('/webhook', (req, res) => {
 })
 
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
-  console.log('[Webhook Masuk]', JSON.stringify(req.body))
-
   try {
-    if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
+    // Normalisasi paling awal: di Vercel req.body adalah Buffer (atau string),
+    // jadi ubah dulu ke objek JSON sebelum ada pengecekan object/entry apa pun.
+    const rawBody = req.body
+    let payload = rawBody
+    if (Buffer.isBuffer(payload)) {
+      payload = JSON.parse(payload.toString('utf8'))
+    } else if (typeof payload === 'string') {
+      payload = JSON.parse(payload)
+    }
+    req.body = payload
+
+    console.log('[Webhook Masuk]', JSON.stringify(req.body))
+    console.log('[Payload JSON]', JSON.stringify(payload))
+
+    // HMAC tetap dihitung atas body mentah, bukan objek hasil parse.
+    if (!isValidMetaSignature(rawBody, req.headers['x-hub-signature-256'])) {
       return res.status(401).send('UNAUTHORIZED')
     }
-
-    // Di Vercel req.body adalah Buffer. Parse ke objek JSON dulu, lalu semua
-    // proses di bawah memakai payload.entry (bukan req.body.entry).
-    let payload
-    try {
-      payload = Buffer.isBuffer(req.body) ? JSON.parse(req.body.toString('utf8')) : req.body
-    } catch {
-      return res.status(400).send('INVALID_JSON')
-    }
     if (!payload || typeof payload !== 'object') return res.status(400).send('INVALID_JSON')
-
-    console.log('[Webhook Parsed]', JSON.stringify(payload))
     console.log('[Webhook Entries]', Array.isArray(payload.entry) ? payload.entry.length : 0)
 
-    // Di Vercel, function dimatikan begitu response dikirim. Ekstraksi pesan,
-    // pengecekan Supabase, parser, dan kirim balasan Meta (termasuk sapaan
-    // seperti "halo") harus tuntas di sini sebelum status 200 dikirim.
+    // Log isi pesan dan status delivery dari Meta supaya terlihat di Runtime Logs.
+    for (const entry of payload.entry || []) {
+      for (const change of entry?.changes || []) {
+        const value = change?.value
+        if (!value) continue
+
+        for (const message of value.messages || []) {
+          const from = normalizePhone(message.from)
+          const text = String(message.text?.body || '').trim()
+          console.log('[Msg Extracted]', { from, text })
+        }
+        if (value.statuses) {
+          console.log('[WA Status]', JSON.stringify(value.statuses))
+        }
+      }
+    }
+
+    // Di Vercel, function dimatikan begitu response dikirim. Semua query
+    // Supabase, verifikasi OTP / simpan transaksi, dan kirim balasan Meta
+    // harus tuntas di sini sebelum status 200 dikirim.
     await processMetaWebhook(payload, {
       send: sendWhatsAppMessage,
-      onExtracted: ({ from, text }) => console.log('[Msg Extracted]', { from, text }),
+      // Pesan sudah dicatat di atas, jadi hindari duplikasi log.
+      onExtracted: () => {},
       onResult: (result) => console.log('[DB / OTP Result]', result),
     })
   } catch (err) {
