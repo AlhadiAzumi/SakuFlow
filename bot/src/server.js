@@ -3,7 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import { config } from './config.js'
 import { getWebhookChallenge, isValidMetaSignature, sendWhatsAppMessage } from './meta.js'
-import { processMetaWebhook } from './meta-webhook.js'
+import { handleMessage } from './handler.js'
 import { normalizePhone } from './parser.js'
 import * as store from './store.js'
 
@@ -75,10 +75,13 @@ app.get('/webhook', (req, res) => {
   return res.sendStatus(403)
 })
 
+// Satu-satunya route POST /webhook. Menyimpan id pesan yang sudah diproses
+// agar pengiriman ulang dari Meta tidak menulis transaksi dua kali.
+const processedWebhookMessages = new Map()
+
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   try {
-    // Normalisasi paling awal: di Vercel req.body adalah Buffer (atau string),
-    // jadi ubah dulu ke objek JSON sebelum ada pengecekan object/entry apa pun.
+    // Normalisasi paling awal, sebelum pengecekan object/entry apa pun.
     const rawBody = req.body
     let payload = rawBody
     if (Buffer.isBuffer(payload)) {
@@ -91,39 +94,53 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
     console.log('[Webhook Masuk]', JSON.stringify(req.body))
     console.log('[Payload JSON]', JSON.stringify(payload))
 
-    // HMAC tetap dihitung atas body mentah, bukan objek hasil parse.
+    // HMAC dihitung dari body mentah, bukan dari objek hasil parse.
     if (!isValidMetaSignature(rawBody, req.headers['x-hub-signature-256'])) {
       return res.status(401).send('UNAUTHORIZED')
     }
     if (!payload || typeof payload !== 'object') return res.status(400).send('INVALID_JSON')
-    console.log('[Webhook Entries]', Array.isArray(payload.entry) ? payload.entry.length : 0)
 
-    // Log isi pesan dan status delivery dari Meta supaya terlihat di Runtime Logs.
-    for (const entry of payload.entry || []) {
-      for (const change of entry?.changes || []) {
-        const value = change?.value
-        if (!value) continue
+    // Meta kadang mengirim update status tanpa messages. Tetap dicatat, lalu
+    // lewat ke response 200 di bawah (bukan return di tengah).
+    const value = payload.entry?.[0]?.changes?.[0]?.value
+    if (value?.statuses) {
+      console.log('[WA Delivery Status]', JSON.stringify(value.statuses))
+    }
 
-        for (const message of value.messages || []) {
-          const from = normalizePhone(message.from)
-          const text = String(message.text?.body || '').trim()
-          console.log('[Msg Extracted]', { from, text })
+    const message = value?.messages?.[0]
+    if (message) {
+      const from = normalizePhone(message.from)
+      const text = String(message.text?.body || '').trim()
+      console.log('[Msg Extracted]', { from, text })
+
+      const seenAt = message.id ? processedWebhookMessages.get(message.id) : null
+      const isDuplicate = seenAt && Date.now() - seenAt < 24 * 60 * 60 * 1000
+      if (!isDuplicate) {
+        if (message.id) processedWebhookMessages.set(message.id, Date.now())
+
+        // Tangkap balasan dari handler, lalu kirimnya secara eksplisit di sini.
+        let replyText = ''
+        let result
+        try {
+          result = await handleMessage(message, {
+            send: async (_to, body) => {
+              replyText = String(body || '')
+              return { captured: true }
+            },
+          })
+          console.log('[DB / OTP Result]', result)
+        } catch (error) {
+          console.error('[Webhook Error]', error)
+          result = { type: 'error', ok: false, from, text, error: error.message }
+          console.log('[DB / OTP Result]', result)
+          replyText = 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.'
         }
-        if (value.statuses) {
-          console.log('[WA Status]', JSON.stringify(value.statuses))
+
+        if (replyText) {
+          await sendWhatsAppMessage(from, replyText)
         }
       }
     }
-
-    // Di Vercel, function dimatikan begitu response dikirim. Semua query
-    // Supabase, verifikasi OTP / simpan transaksi, dan kirim balasan Meta
-    // harus tuntas di sini sebelum status 200 dikirim.
-    await processMetaWebhook(payload, {
-      send: sendWhatsAppMessage,
-      // Pesan sudah dicatat di atas, jadi hindari duplikasi log.
-      onExtracted: () => {},
-      onResult: (result) => console.log('[DB / OTP Result]', result),
-    })
   } catch (err) {
     console.error('[Webhook Error]', err)
   }

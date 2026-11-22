@@ -134,7 +134,7 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
   assert.ok(logs.some((line) => line.includes('[Payload JSON]')))
   assert.ok(logs.some((line) => line.includes('[Msg Extracted]')))
   assert.ok(logs.some((line) => line.includes('[DB / OTP Result]')))
-  assert.ok(logs.some((line) => line.includes('[WA Status]')))
+  assert.ok(logs.some((line) => line.includes('[WA Delivery Status]')))
 
   const status = await fetch(`${base}/api/link/status`, {
     headers: { Authorization: 'Bearer token-uji' },
