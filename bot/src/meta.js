@@ -48,7 +48,10 @@ export async function sendWhatsAppMessage(to, body) {
   const data = await response.json().catch(() => ({}))
   console.log('[Meta Reply]', response.status, JSON.stringify(data))
   if (!response.ok) {
-    throw new Error(`Gagal kirim WA: ${data?.error?.message || response.status}`)
+    // Mode pencatatan satu arah: pesan masuk tetap diproses walau Meta menolak
+    // pesan keluar (mis. 130497/131030). Jangan lempar error sampai webhook crash.
+    console.warn('[Meta Outbound Blocked]', response.status, data?.error?.code)
+    return { ok: false, blocked: true }
   }
   return data
 }

@@ -68,7 +68,7 @@ test('verifikasi OTP mengembalikan hasil database', async () => {
   assert.equal(result.phone, phone)
 })
 
-test('status, riwayat, dan clear bekerja untuk nomor yang terhubung', async () => {
+test('status, riwayat, dan hapus 1 transaksi terakhir bekerja untuk nomor terhubung', async () => {
   const phone = '6285555555555'
   await store.requestLink('user-clear', phone, '111111')
   await store.verifyOtp(phone, '111111')
@@ -85,14 +85,24 @@ test('status, riwayat, dan clear bekerja untuk nomor yang terhubung', async () =
   assert.match(history, /kopi/)
   assert.match(history, /gaji/i)
 
+  // "clear" sekarang menghapus tepat satu catatan (yang terakhir), bukan semua.
   const clear = await collectReply('clear', phone)
-  assert.match(clear, /sudah dihapus \(2 catatan\)/)
-  assert.match(clear, /Koneksi WhatsApp dan pengaturan tetap aman/)
+  assert.match(clear, /Catatan terakhir dihapus/)
+  assert.match(clear, /Rp2\.000\.000/)
 
+  const remaining = await collectReply('riwayat', phone)
+  assert.match(remaining, /1 catatan terakhir/)
+  assert.match(remaining, /kopi/)
+  assert.doesNotMatch(remaining, /gaji/i)
+
+  await collectReply('hapus', phone)
   const after = await collectReply('riwayat', phone)
   assert.match(after, /Belum ada catatan tersimpan/)
 
   const statusAfter = await collectReply('status', phone)
   assert.match(statusAfter, /sudah terhubung/)
   assert.match(statusAfter, /Total catatan tersimpan: 0/)
+
+  const emptyDelete = await collectReply('batal', phone)
+  assert.match(emptyDelete, /Belum ada catatan yang bisa dihapus/)
 })

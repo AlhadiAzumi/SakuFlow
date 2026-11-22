@@ -89,32 +89,35 @@ test('kirim teks Meta memanggil Graph API v25 dengan payload yang benar', () => 
   }
 }))
 
-test('sendWhatsAppMessage mencatat status dan body respons Meta', () => withEnv({
+test('sendWhatsAppMessage tidak throw saat Meta memblokir pesan keluar', () => withEnv({
   WHATSAPP_TOKEN: 'token-uji',
   WHATSAPP_PHONE_NUMBER_ID: '123456789',
 }, async () => {
   const originalLog = console.log
+  const originalWarn = console.warn
   const originalFetch = globalThis.fetch
   const logs = []
+  const warnings = []
   console.log = (...args) => logs.push(args.map((item) => String(item)).join(' '))
+  console.warn = (...args) => warnings.push(args.map((item) => String(item)).join(' '))
 
   globalThis.fetch = async () => ({
     ok: false,
     status: 400,
-    json: async () => ({ error: { message: 'token expired' } }),
+    json: async () => ({ error: { message: 'Recipient not in allowed list', code: 130497 } }),
   })
 
   try {
-    await assert.rejects(
-      () => sendWhatsAppMessage('081234567890', 'halo'),
-      /token expired/,
-    )
+    const result = await sendWhatsAppMessage('081234567890', 'halo')
+    assert.deepEqual(result, { ok: false, blocked: true })
     const replyLog = logs.find((line) => line.includes('[Meta Reply]'))
     assert.ok(replyLog)
     assert.match(replyLog, /400/)
-    assert.match(replyLog, /token expired/)
+    assert.match(replyLog, /130497/)
+    assert.ok(warnings.some((line) => /\[Meta Outbound Blocked\] 400 130497/.test(line)))
   } finally {
     console.log = originalLog
+    console.warn = originalWarn
     globalThis.fetch = originalFetch
   }
 }))

@@ -193,7 +193,7 @@ export async function listRecentTransactions(userId, limit = 5) {
   }
   const { data, error } = await requireAdmin()
     .from('transactions')
-    .select('date, type, amount, category, note')
+    .select('id, date, type, amount, category, note')
     .eq('user_id', userId)
     .order('date', { ascending: false })
     .order('created_at', { ascending: false })
@@ -202,22 +202,25 @@ export async function listRecentTransactions(userId, limit = 5) {
   return data || []
 }
 
-// Dipakai perintah "clear": hapus semua transaksi user ini, bukan link/akunnya.
-// Mengembalikan jumlah baris yang terhapus supaya bisa dilaporkan ke WhatsApp.
-export async function deleteAllTransactions(userId) {
+// Dipakai perintah "hapus"/"clear": hapus tepat 1 transaksi terakhir milik user.
+// Urutan memakai kriteria yang sama dengan "riwayat" supaya konsisten.
+export async function deleteLastTransaction(userId) {
+  const [last] = await listRecentTransactions(userId, 1)
+  if (!last) return null
+
   if (!admin) {
-    const before = dryTransactions.length
-    for (let i = dryTransactions.length - 1; i >= 0; i -= 1) {
-      if (dryTransactions[i].user_id === userId) dryTransactions.splice(i, 1)
-    }
-    return before - dryTransactions.length
+    const index = dryTransactions.findIndex((item) => item.id === last.id)
+    if (index >= 0) dryTransactions.splice(index, 1)
+    return last
   }
-  const { count, error } = await requireAdmin()
+
+  const { error } = await requireAdmin()
     .from('transactions')
-    .delete({ count: 'exact' })
+    .delete()
+    .eq('id', last.id)
     .eq('user_id', userId)
   if (error) throw error
-  return count || 0
+  return last
 }
 
 export async function resolveUser(accessToken) {

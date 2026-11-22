@@ -50,11 +50,14 @@ test('perintah bantuan dan ringkasan', () => {
   assert.equal(parseMessage('halo', NOW).intent, 'help')
 })
 
-test('perintah status, riwayat, dan clear', () => {
+test('perintah status, riwayat, dan hapus transaksi terakhir', () => {
   assert.equal(parseMessage('status', NOW).intent, 'status')
   assert.equal(parseMessage('riwayat', NOW).intent, 'history')
-  assert.equal(parseMessage('clear', NOW).intent, 'clear')
-  assert.equal(parseMessage('HAPUS SEMUA RIWAYAT', NOW).intent, 'clear')
+  assert.equal(parseMessage('clear', NOW).intent, 'deleteLast')
+  assert.equal(parseMessage('hapus', NOW).intent, 'deleteLast')
+  assert.equal(parseMessage('HAPUS CATATAN', NOW).intent, 'deleteLast')
+  assert.equal(parseMessage('BATAL', NOW).intent, 'deleteLast')
+  assert.equal(parseMessage('hapus semua riwayat', NOW).intent, 'unknown')
 })
 
 test('pesan tanpa nominal tidak dikenali', () => {

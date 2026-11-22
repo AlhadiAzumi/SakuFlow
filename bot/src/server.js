@@ -129,13 +129,13 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
           const recipient = normalizePhone(from)
           try {
             const metaRes = await sendWhatsAppMessage(recipient, replyText)
-            console.log('[Step 5 - Reply Sent]', metaRes)
-          } catch (sendError) {
-            const message = String(sendError?.message || sendError)
-            console.error('[Step 5 - Reply Gagal]', message)
-            if (message.includes('#131030')) {
-              console.error(`[Meta] Daftarkan +${recipient} di Meta for Developers → WhatsApp → API Setup → Test recipients, lalu balas kode verifikasi yang dikirim Meta ke WhatsApp kamu.`)
+            if (metaRes?.blocked) {
+              console.warn('[Step 5 - Reply Diblokir] Meta menolak pesan keluar; mode satu arah tetap jalan.', metaRes)
+            } else {
+              console.log('[Step 5 - Reply Sent]', metaRes)
             }
+          } catch (sendError) {
+            console.error('[Step 5 - Reply Gagal]', String(sendError?.message || sendError))
           }
         }
       }

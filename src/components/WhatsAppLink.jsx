@@ -129,7 +129,7 @@ export default function WhatsAppLink() {
     <section className="panel whatsapp-panel">
       <h2 className="panel__title">Catat cukup dengan chat</h2>
       <p className="whatsapp-panel__desc">
-        Hubungkan nomormu, lalu kirim pesan seperti <em>"masuk uang 500 ribu"</em>. Catatannya langsung muncul di website.
+        Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di SakuFlow (bot tidak mengirim balasan chat).
       </p>
 
       {checking ? (

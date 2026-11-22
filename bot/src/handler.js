@@ -111,19 +111,24 @@ export async function handleMessage(message, { send = sendText } = {}) {
     return { type: 'history', ok: true, phone, userId, count: items.length }
   }
 
-  if (parsed.intent === 'clear') {
+  if (parsed.intent === 'deleteLast') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
-      await reply('Nomor ini belum terhubung, jadi tidak ada riwayat yang bisa dihapus. Hubungkan WhatsApp lewat Setelan dulu, ya.')
-      return { type: 'clear', ok: false, phone, reason: 'not_linked' }
+      await reply('Nomor ini belum terhubung, jadi tidak ada catatan yang bisa dihapus. Hubungkan WhatsApp lewat Setelan dulu, ya.')
+      return { type: 'delete_last', ok: false, phone, reason: 'not_linked' }
     }
-    const deleted = await store.deleteAllTransactions(userId)
+    const deleted = await store.deleteLastTransaction(userId)
+    if (!deleted) {
+      await reply('Belum ada catatan yang bisa dihapus. Kirim dulu misalnya "keluar 25rb kopi".')
+      return { type: 'delete_last', ok: true, phone, userId, deleted: false }
+    }
+    const category = getCategory(deleted.type, deleted.category)
     await reply([
-      `Semua riwayat transaksi kamu sudah dihapus (${deleted} catatan).`,
-      'Data di website ikut terhapus. Koneksi WhatsApp dan pengaturan tetap aman.',
-      'Ketik "riwayat" untuk memastikan.',
+      'Catatan terakhir dihapus.',
+      `${deleted.date} • ${category.label} • ${rupiah(deleted.amount)}`,
+      'Data di website juga ikut terhapus. Ketik "riwayat" untuk cek sisa catatan.',
     ].join('\n'))
-    return { type: 'clear', ok: true, phone, userId, deleted }
+    return { type: 'delete_last', ok: true, phone, userId, deleted: true }
   }
 
   if (parsed.intent === 'summary') {
