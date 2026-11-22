@@ -1,4 +1,4 @@
-import { getWebhookChallenge, isValidMetaSignature, sendMetaText } from '../bot/src/meta.js'
+import { getWebhookChallenge, isValidMetaSignature, sendWhatsAppMessage } from '../bot/src/meta.js'
 import { processMetaWebhook } from '../bot/src/meta-webhook.js'
 import { handleOptions, methodNotAllowed, readRawBody, sendPlain } from '../bot/src/vercel-api.js'
 
@@ -19,21 +19,33 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(req, res, ['GET', 'POST'])
 
   const raw = await readRawBody(req)
-  if (!isValidMetaSignature(raw, req.headers?.['x-hub-signature-256'])) {
-    return sendPlain(req, res, 401, 'Unauthorized')
-  }
-
-  let payload
+  const rawText = raw.toString('utf8')
+  let rawPayload = rawText
   try {
-    payload = JSON.parse(raw.toString('utf8'))
+    rawPayload = JSON.parse(rawText)
   } catch {
-    return sendPlain(req, res, 400, 'Invalid JSON')
+    // Teks apa adanya tetap dicetak bukan JSON valid.
   }
+  console.log('[Webhook Raw]', JSON.stringify(rawPayload))
 
   try {
-    await processMetaWebhook(payload, { send: sendMetaText })
-  } catch (error) {
-    console.error('[Meta Webhook] Gagal memproses payload:', error)
+    if (!isValidMetaSignature(raw, req.headers?.['x-hub-signature-256'])) {
+      return sendPlain(req, res, 401, 'UNAUTHORIZED')
+    }
+
+    let payload
+    try {
+      payload = JSON.parse(rawText)
+    } catch {
+      return sendPlain(req, res, 400, 'INVALID_JSON')
+    }
+
+    // Semua proses (Supabase, parser, dan kirim balasan Meta) harus selesai
+    // sebelum response dikirim karena Vercel mematikan function setelah itu.
+    await processMetaWebhook(payload, { send: sendWhatsAppMessage })
+  } catch (err) {
+    console.error('[Webhook Error]', err)
   }
-  return sendPlain(req, res, 200, 'OK')
+
+  return sendPlain(req, res, 200, 'EVENT_RECEIVED')
 }

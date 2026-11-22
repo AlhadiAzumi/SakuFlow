@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import crypto from 'node:crypto'
 import test from 'node:test'
 import { config } from '../src/config.js'
-import { getWebhookChallenge, isValidMetaSignature, sendMetaText } from '../src/meta.js'
+import { getWebhookChallenge, isValidMetaSignature, sendMetaText, sendWhatsAppMessage } from '../src/meta.js'
 
 function withEnv(overrides, fn) {
   const saved = {}
@@ -85,6 +85,36 @@ test('kirim teks Meta memanggil Graph API v25 dengan payload yang benar', () => 
     assert.equal(body.text.body, 'halo dari test')
   } finally {
     config.apiVersion = originalVersion
+    globalThis.fetch = originalFetch
+  }
+}))
+
+test('sendWhatsAppMessage mencatat status dan body respons Meta', () => withEnv({
+  WHATSAPP_TOKEN: 'token-uji',
+  WHATSAPP_PHONE_NUMBER_ID: '123456789',
+}, async () => {
+  const originalLog = console.log
+  const originalFetch = globalThis.fetch
+  const logs = []
+  console.log = (...args) => logs.push(args.map((item) => String(item)).join(' '))
+
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 400,
+    json: async () => ({ error: { message: 'token expired' } }),
+  })
+
+  try {
+    await assert.rejects(
+      () => sendWhatsAppMessage('081234567890', 'halo'),
+      /token expired/,
+    )
+    const replyLog = logs.find((line) => line.includes('[Meta Reply Response]'))
+    assert.ok(replyLog)
+    assert.match(replyLog, /400/)
+    assert.match(replyLog, /token expired/)
+  } finally {
+    console.log = originalLog
     globalThis.fetch = originalFetch
   }
 }))

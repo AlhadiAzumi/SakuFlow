@@ -46,20 +46,36 @@ app.get('/webhook', (req, res) => {
 })
 
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
-  if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
-    return res.sendStatus(401)
-  }
-
-  let payload
+  const rawText = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : String(req.body || '')
+  let rawPayload = rawText
   try {
-    payload = JSON.parse(req.body.toString('utf8'))
+    rawPayload = JSON.parse(rawText)
   } catch {
-    return res.sendStatus(400)
+    // Teks apa adanya tetap dicetak bukan JSON valid.
+  }
+  console.log('[Webhook Raw]', JSON.stringify(rawPayload))
+
+  try {
+    if (!isValidMetaSignature(req.body, req.headers['x-hub-signature-256'])) {
+      return res.status(401).send('UNAUTHORIZED')
+    }
+
+    let payload
+    try {
+      payload = JSON.parse(rawText)
+    } catch {
+      return res.status(400).send('INVALID_JSON')
+    }
+
+    // Di Vercel, function dimatikan begitu response dikirim. Semua proses
+    // (Supabase, parser, dan kirim balasan Meta) harus selesai di sini.
+    await processMetaWebhook(payload, { reply: (to, body) => sendText(to, body) })
+  } catch (err) {
+    console.error('[Webhook Error]', err)
   }
 
-  // Balasan error tetap lewat Meta Cloud API.
-  await processMetaWebhook(payload, { reply: (to, body) => sendText(to, body) })
-  return res.sendStatus(200)
+  // Meta tetap menerima 200 walau ada error internal, supaya tidak retry.
+  return res.status(200).send('EVENT_RECEIVED')
 })
 
 app.use(express.json())

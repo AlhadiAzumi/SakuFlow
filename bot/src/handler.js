@@ -6,10 +6,22 @@ import { sendText } from './whatsapp.js'
 const rupiah = (value) => `Rp${new Intl.NumberFormat('id-ID').format(Math.round(value || 0))}`
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 
+const GUIDE_TEXT = [
+  'Bot SakuFlow aktif.',
+  '',
+  'Hubungkan akun: buka website → Setelan → Hubungkan WhatsApp, lalu balas kode 6 digit di sini.',
+  '',
+  'Format catatan:',
+  '• masuk uang 500 ribu',
+  '• keluar 25rb buat kopi',
+  '• ringkasan',
+  '',
+  'Ketik "bantuan" untuk panduan lengkap.',
+].join('\n')
+
 export async function handleMessage(message, { send = sendText } = {}) {
   const phone = normalizePhone(message.from)
-  // Balasan dikirim ke JID asli penerima (bisa @lid) agar enkripsi Signal
-  // memakai session chat yang sama dengan pesan masuk.
+  // Balasan dikirim ke nomor WhatsApp pengirim.
   const replyTo = message.replyJid || phone
   // `send` bisa diinjeksikan oleh pemanggil (mis. serverless) bila perlu.
   const reply = (body) => send(replyTo, body)
@@ -27,6 +39,12 @@ export async function handleMessage(message, { send = sendText } = {}) {
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
       return
     }
+  }
+
+  // Sapaan / menu bukan transaksi, tapi tetap dibalas supaya user tahu bot aktif.
+  if (/^(halo|hi|hai|menu|permisi|p)$/i.test(text)) {
+    await reply(GUIDE_TEXT)
+    return
   }
 
   const parsed = parseMessage(text)
@@ -90,5 +108,5 @@ export async function handleMessage(message, { send = sendText } = {}) {
     return
   }
 
-  await reply(`Aku belum paham pesan itu.\n\nContoh: "masuk uang 500 ribu" atau "keluar 25rb buat kopi".\nKetik "bantuan" untuk panduan lengkap.`)
+  await reply(GUIDE_TEXT)
 }

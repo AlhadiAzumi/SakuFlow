@@ -1,6 +1,6 @@
 import { handleMessage } from './handler.js'
 import { normalizePhone } from './parser.js'
-import { sendMetaText } from './meta.js'
+import { sendWhatsAppMessage } from './meta.js'
 
 const processed = new Map()
 
@@ -10,7 +10,7 @@ export function clearProcessedMessages() {
 
 // Dipakai Express (mode meta/lokal) maupun serverless Vercel.
 // `send` diinjeksikan supaya pemanggil bisa mengganti jalur pengiriman bila perlu.
-export async function processMetaWebhook(payload, { send, reply = sendMetaText } = {}) {
+export async function processMetaWebhook(payload, { send, reply = sendWhatsAppMessage } = {}) {
   let handled = 0
 
   for (const entry of payload?.entry || []) {

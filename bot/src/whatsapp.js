@@ -1,5 +1,5 @@
 import { config } from './config.js'
-import { sendMetaText } from './meta.js'
+import { sendWhatsAppMessage } from './meta.js'
 import { normalizePhone } from './parser.js'
 
 function logDryRun(phone, body) {
@@ -15,5 +15,5 @@ export async function sendText(to, body) {
   if (config.dryRun || !config.whatsappToken || !config.phoneNumberId) {
     return logDryRun(phone, body)
   }
-  return sendMetaText(phone, body)
+  return sendWhatsAppMessage(phone, body)
 }

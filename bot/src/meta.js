@@ -10,7 +10,7 @@ export function isMetaConfigured() {
 
 // Kirim pesan lewat WhatsApp Cloud API. Token & Phone Number ID dibaca langsung
 // dari process.env agar perilakunya sama di lokal maupun serverless Vercel.
-export async function sendMetaText(to, body) {
+export async function sendWhatsAppMessage(to, body) {
   const phone = normalizePhone(to)
   const token = process.env.WHATSAPP_TOKEN || config.whatsappToken
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || config.phoneNumberId
@@ -18,7 +18,7 @@ export async function sendMetaText(to, body) {
     throw new Error('Meta WhatsApp belum dikonfigurasi. Isi WHATSAPP_TOKEN dan WHATSAPP_PHONE_NUMBER_ID.')
   }
 
-  const response = await fetch(
+  const res = await fetch(
     `https://graph.facebook.com/${config.apiVersion}/${phoneNumberId}/messages`,
     {
       method: 'POST',
@@ -34,12 +34,16 @@ export async function sendMetaText(to, body) {
     },
   )
 
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(`Gagal kirim WA: ${payload?.error?.message || response.status}`)
+  const data = await res.json().catch(() => ({}))
+  console.log('[Meta Reply Response]', res.status, JSON.stringify(data))
+  if (!res.ok) {
+    throw new Error(`Gagal kirim WA: ${data?.error?.message || res.status}`)
   }
-  return payload
+  return data
 }
+
+// Alias untuk modul lama yang masih mengimpor sendMetaText.
+export const sendMetaText = sendWhatsAppMessage
 
 export function isValidMetaSignature(rawBody, signature) {
   if (config.dryRun || !config.appSecret) return true

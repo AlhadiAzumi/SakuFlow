@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import { config } from './config.js'
 import * as store from './store.js'
 import { normalizePhone } from './parser.js'
-import { sendMetaText } from './meta.js'
+import { sendWhatsAppMessage } from './meta.js'
 
 function isOriginAllowed(origin) {
   if (!origin) return false
@@ -87,7 +87,7 @@ export async function linkRequest(req, res) {
     if (config.dryRun) {
       console.log(`[DRY-RUN OTP → ${phone}] ${code}`)
     } else {
-      await sendMetaText(phone, `Kode verifikasi Catatan Uang Harian: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`)
+      await sendWhatsAppMessage(phone, `Kode verifikasi Catatan Uang Harian: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`)
     }
     return sendJson(req, res, 200, { ok: true, phone, message: 'Kode OTP dikirim ke WhatsApp kamu.' })
   } catch (error) {
