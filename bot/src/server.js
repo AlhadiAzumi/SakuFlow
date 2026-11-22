@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import cors from 'cors'
 import express from 'express'
 import { config } from './config.js'
-import { getWebhookChallenge, isValidMetaSignature, sendWhatsAppMessage } from './meta.js'
+import { getWebhookChallenge, sendWhatsAppMessage } from './meta.js'
 import { handleMessage } from './handler.js'
 import { normalizePhone } from './parser.js'
 import * as store from './store.js'
@@ -75,15 +75,11 @@ app.get('/webhook', (req, res) => {
   return res.sendStatus(403)
 })
 
-// Satu-satunya route POST /webhook. Menyimpan id pesan yang sudah diproses
-// agar pengiriman ulang dari Meta tidak menulis transaksi dua kali.
-const processedWebhookMessages = new Map()
-
+// Satu-satunya route POST /webhook — tanpa filter signature/phone number id.
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   try {
-    // Normalisasi paling awal, sebelum pengecekan object/entry apa pun.
-    const rawBody = req.body
-    let payload = rawBody
+    // Step 0: normalisasi body mentah dari Vercel (Buffer/string) jadi objek.
+    let payload = req.body
     if (Buffer.isBuffer(payload)) {
       payload = JSON.parse(payload.toString('utf8'))
     } else if (typeof payload === 'string') {
@@ -93,59 +89,53 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
 
     console.log('[Webhook Masuk]', JSON.stringify(req.body))
     console.log('[Payload JSON]', JSON.stringify(payload))
+    console.log('[Step 1 - JSON Ready]')
 
-    // HMAC dihitung dari body mentah, bukan dari objek hasil parse.
-    if (!isValidMetaSignature(rawBody, req.headers['x-hub-signature-256'])) {
-      return res.status(401).send('UNAUTHORIZED')
-    }
-    if (!payload || typeof payload !== 'object') return res.status(400).send('INVALID_JSON')
+    // Step 2 & 3: telusuri semua entry/change, bukan hanya yang pertama.
+    for (const entry of payload?.entry || []) {
+      for (const change of entry?.changes || []) {
+        const value = change?.value
+        if (!value) continue
 
-    // Meta kadang mengirim update status tanpa messages. Tetap dicatat, lalu
-    // lewat ke response 200 di bawah (bukan return di tengah).
-    const value = payload.entry?.[0]?.changes?.[0]?.value
-    if (value?.statuses) {
-      console.log('[WA Delivery Status]', JSON.stringify(value.statuses))
-    }
-
-    const message = value?.messages?.[0]
-    if (message) {
-      const from = normalizePhone(message.from)
-      const text = String(message.text?.body || '').trim()
-      console.log('[Msg Extracted]', { from, text })
-
-      const seenAt = message.id ? processedWebhookMessages.get(message.id) : null
-      const isDuplicate = seenAt && Date.now() - seenAt < 24 * 60 * 60 * 1000
-      if (!isDuplicate) {
-        if (message.id) processedWebhookMessages.set(message.id, Date.now())
-
-        // Tangkap balasan dari handler, lalu kirimnya secara eksplisit di sini.
-        let replyText = ''
-        let result
-        try {
-          result = await handleMessage(message, {
-            send: async (_to, body) => {
-              replyText = String(body || '')
-              return { captured: true }
-            },
-          })
-          console.log('[DB / OTP Result]', result)
-        } catch (error) {
-          console.error('[Webhook Error]', error)
-          result = { type: 'error', ok: false, from, text, error: error.message }
-          console.log('[DB / OTP Result]', result)
-          replyText = 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.'
+        if (value.statuses) {
+          console.log('[Step 2 - WA Status]', JSON.stringify(value.statuses))
         }
 
-        if (replyText) {
-          await sendWhatsAppMessage(from, replyText)
+        for (const msg of value.messages || []) {
+          const from = msg.from
+          const text = msg.text?.body?.trim() || ''
+          console.log('[Step 3 - Msg]', { from, text })
+
+          // Step 4: verifikasi OTP / simpan transaksi. Balasan handler ditangkap
+          // supaya pengiriman Meta terjadi eksplisit di Step 5.
+          let replyText = ''
+          let dbResult
+          try {
+            dbResult = await handleMessage(msg, {
+              send: async (_to, body) => {
+                replyText = String(body || '')
+                return { captured: true }
+              },
+            })
+          } catch (error) {
+            console.error('[Webhook Crash]', error)
+            dbResult = { type: 'error', ok: false, from, text, error: error.message }
+            replyText = 'Waduh, gagal memproses catatan. Coba lagi sebentar, ya.'
+          }
+          console.log('[Step 4 - DB Result]', dbResult)
+
+          // Step 5: kirim balasan ke Meta dan tunggu sampai selesai.
+          if (!replyText) replyText = 'Pesan diterima.'
+          const metaRes = await sendWhatsAppMessage(from, replyText)
+          console.log('[Step 5 - Reply Sent]', metaRes)
         }
       }
     }
   } catch (err) {
-    console.error('[Webhook Error]', err)
+    console.error('[Webhook Crash]', err)
   }
 
-  // Meta tetap menerima 200 walau ada error internal, supaya tidak retry.
+  // Satu-satunya response 200, di baris paling akhir setelah semua await selesai.
   return res.status(200).send('EVENT_RECEIVED')
 })
 
