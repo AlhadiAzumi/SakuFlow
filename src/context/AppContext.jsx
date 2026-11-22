@@ -1,4 +1,5 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { formatRupiah } from '../lib/format'
 import { isCloudMode, supabase } from '../lib/supabase'
 
 const STORAGE_KEY = 'catatan-uang:transactions:v1'
@@ -60,6 +61,16 @@ export function AppProvider({ children }) {
   const [dataLoading, setDataLoading] = useState(true)
   const [settings, setSettings] = useState(defaultSettings)
   const [toast, setToast] = useState(null)
+  const [lastSyncedTx, setLastSyncedTx] = useState(null)
+
+  // Id yang dibuat/dihapus lewat web tidak perlu memicu toast realtime dobel.
+  const localInsertIds = useRef(new Set())
+  const localDeleteIds = useRef(new Set())
+  const rememberLocalId = useCallback((ref, id) => {
+    if (!id) return
+    ref.current.add(id)
+    setTimeout(() => ref.current.delete(id), 15000)
+  }, [])
 
   const showToast = useCallback((message, tone = 'success') => {
     setToast({ message, tone, id: Date.now() })
@@ -109,11 +120,13 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!userId) {
       if (isCloudMode) setTransactions([])
+      setLastSyncedTx(null)
       setDataLoading(false)
       return undefined
     }
     if (!isCloudMode) {
       setTransactions(readLocal())
+      setLastSyncedTx(null)
       setDataLoading(false)
       return undefined
     }
@@ -121,6 +134,7 @@ export function AppProvider({ children }) {
     let active = true
     let channel
     setDataLoading(true)
+    setLastSyncedTx(null)
     supabase
       .from('transactions')
       .select('*')
@@ -132,14 +146,29 @@ export function AppProvider({ children }) {
         if (error) {
           showToast('Gagal memuat catatan: ' + error.message, 'error')
         } else {
-          setTransactions(data || [])
+          const items = data || []
+          setTransactions(items)
+          // Kalau user baru saja kirim chat sebelum web dibuka, event realtime
+          // sudah terlewat. Ambil transaksi terbaru (maks. 24 jam) sebagai
+          // konfirmasi "Sinkron terakhir" saat halaman pertama dibuka.
+          const latest = items[0]
+          const age = latest ? Date.now() - new Date(latest.created_at || latest.date).getTime() : Infinity
+          if (latest && age <= 24 * 60 * 60 * 1000) {
+            setLastSyncedTx({
+              id: latest.id,
+              amount: latest.amount,
+              type: latest.type,
+              note: latest.note || '',
+              receivedAt: latest.created_at || new Date().toISOString(),
+            })
+          }
         }
         setDataLoading(false)
       })
 
     // Realtime: perubahan dari web, bot WhatsApp, atau tool lain langsung muncul di sini.
     channel = supabase
-      .channel(`transactions:${userId}`)
+      .channel(`tx-live-${userId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -147,14 +176,32 @@ export function AppProvider({ children }) {
         filter: `user_id=eq.${userId}`,
       }, (payload) => {
         if (!active) return
+
         if (payload.eventType === 'INSERT') {
-          setTransactions((prev) => prev.some((item) => item.id === payload.new.id)
+          const tx = payload.new
+          setTransactions((prev) => prev.some((item) => item.id === tx.id)
             ? prev
-            : [payload.new, ...prev])
+            : [tx, ...prev])
+          setLastSyncedTx({
+            id: tx.id,
+            amount: tx.amount,
+            type: tx.type,
+            note: tx.note || '',
+            receivedAt: tx.created_at || new Date().toISOString(),
+          })
+          if (!localInsertIds.current.has(tx.id)) {
+            const label = tx.type === 'income' ? 'Masuk' : 'Keluar'
+            showToast(`Catatan baru masuk: ${label} ${formatRupiah(tx.amount)}`)
+          }
+          localInsertIds.current.delete(tx.id)
         } else if (payload.eventType === 'UPDATE') {
           setTransactions((prev) => prev.map((item) => (item.id === payload.new.id ? payload.new : item)))
         } else if (payload.eventType === 'DELETE' && payload.old?.id) {
-          setTransactions((prev) => prev.filter((item) => item.id !== payload.old.id))
+          const id = payload.old.id
+          setTransactions((prev) => prev.filter((item) => item.id !== id))
+          setLastSyncedTx((prev) => (prev?.id === id ? null : prev))
+          if (!localDeleteIds.current.has(id)) showToast('Catatan terakhir dihapus')
+          localDeleteIds.current.delete(id)
         }
       })
       .subscribe()
@@ -163,7 +210,7 @@ export function AppProvider({ children }) {
       active = false
       if (channel) supabase.removeChannel(channel)
     }
-  }, [userId, showToast])
+  }, [userId, showToast, rememberLocalId])
 
   useEffect(() => {
     if (!isCloudMode || !userId) return undefined
@@ -225,8 +272,13 @@ export function AppProvider({ children }) {
   const addTransaction = useCallback(async (payload) => {
     const record = buildRecord(payload)
     if (isCloudMode) {
+      // Tandai dulu supaya event INSERT realtime tidak memunculkan toast dobel.
+      rememberLocalId(localInsertIds, record.id)
       const { data, error } = await supabase.from('transactions').insert(record).select().single()
-      if (error) throw error
+      if (error) {
+        localInsertIds.current.delete(record.id)
+        throw error
+      }
       setTransactions((prev) => [data, ...prev])
       return data
     }
@@ -236,7 +288,7 @@ export function AppProvider({ children }) {
       return next
     })
     return record
-  }, [buildRecord])
+  }, [buildRecord, rememberLocalId])
 
   const updateTransaction = useCallback(async (id, payload) => {
     const patch = {
@@ -262,15 +314,20 @@ export function AppProvider({ children }) {
 
   const deleteTransaction = useCallback(async (id) => {
     if (isCloudMode) {
+      rememberLocalId(localDeleteIds, id)
       const { error } = await supabase.from('transactions').delete().eq('id', id)
-      if (error) throw error
+      if (error) {
+        localDeleteIds.current.delete(id)
+        throw error
+      }
     }
     setTransactions((prev) => {
       const next = prev.filter((item) => item.id !== id)
       if (!isCloudMode) writeLocal(next)
       return next
     })
-  }, [])
+    setLastSyncedTx((prev) => (prev?.id === id ? null : prev))
+  }, [rememberLocalId])
 
   const signIn = useCallback(async (email, password) => {
     if (!isCloudMode) return
@@ -335,6 +392,7 @@ export function AppProvider({ children }) {
     authLoading,
     dataLoading,
     transactions,
+    lastSyncedTx,
     settings,
     updateSettings,
     toast,
@@ -349,7 +407,7 @@ export function AppProvider({ children }) {
     exportData,
     clearLocalData,
   }), [
-    authLoading, dataLoading, transactions, settings, updateSettings, toast, showToast,
+    authLoading, dataLoading, transactions, lastSyncedTx, settings, updateSettings, toast, showToast,
     addTransaction, updateTransaction, deleteTransaction,
     signIn, signUp, signInWithGoogle, signOut, exportData, clearLocalData,
     session?.user,

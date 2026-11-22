@@ -36,7 +36,7 @@ import {
   getTrend,
   summarize,
 } from './lib/analytics'
-import { currentMonthKey, formatMonthLabel, shiftMonth } from './lib/format'
+import { currentMonthKey, formatMonthLabel, formatRupiah, formatTimeAgo, shiftMonth } from './lib/format'
 
 const TABS = [
   { id: 'home', label: 'Beranda', icon: House },
@@ -66,7 +66,7 @@ function Toast({ toast }) {
 
 export default function App() {
   const {
-    mode, user, authLoading, dataLoading, transactions, settings, toast,
+    mode, user, authLoading, dataLoading, transactions, lastSyncedTx, settings, toast,
     addTransaction, updateTransaction, deleteTransaction, showToast,
   } = useApp()
 
@@ -76,6 +76,7 @@ export default function App() {
   const [month, setMonth] = useState(currentMonthKey())
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [syncTick, setSyncTick] = useState(Date.now())
 
   const isLoggedIn = mode === 'local' || Boolean(user)
 
@@ -95,6 +96,13 @@ export default function App() {
       setView('dashboard')
     }
   }, [isLoggedIn, showAuth])
+
+  // Supaya label "baru saja" berubah sendiri tanpa refresh halaman.
+  useEffect(() => {
+    if (!lastSyncedTx) return undefined
+    const timer = setInterval(() => setSyncTick(Date.now()), 30000)
+    return () => clearInterval(timer)
+  }, [lastSyncedTx])
 
   if (authLoading) return <LoadingScreen />
 
@@ -213,6 +221,19 @@ export default function App() {
           <LoadingScreen />
         ) : tab === 'home' ? (
           <div className="page page--home">
+            {lastSyncedTx && (
+              <div
+                className="sync-pill"
+                title={lastSyncedTx.note || 'Transaksi terakhir tersinkron'}
+                role="status"
+              >
+                <i />
+                Sinkron terakhir: {formatTimeAgo(lastSyncedTx.receivedAt, syncTick)} •{' '}
+                {lastSyncedTx.type === 'income' ? 'Masuk' : 'Keluar'}{' '}
+                {formatRupiah(lastSyncedTx.amount)}
+              </div>
+            )}
+
             <div className="page-heading">
               <div>
                 <h1>Halo, {displayName}</h1>

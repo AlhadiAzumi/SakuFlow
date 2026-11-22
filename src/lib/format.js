@@ -60,3 +60,16 @@ export const formatDayHeading = (dateKey) => {
   if (dateKey === toDateKey(yesterday)) return 'Kemarin'
   return formatDateLabel(dateKey)
 }
+
+// Dipakai indikator "Sinkron terakhir" di Beranda.
+export const formatTimeAgo = (value, now = Date.now()) => {
+  const time = new Date(value).getTime()
+  if (!Number.isFinite(time)) return 'baru saja'
+  const diff = Math.max(0, now - time)
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'baru saja'
+  if (minutes < 60) return `${minutes} menit lalu`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} jam lalu`
+  return `${Math.floor(hours / 24)} hari lalu`
+}
