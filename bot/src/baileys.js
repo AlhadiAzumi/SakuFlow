@@ -9,7 +9,7 @@ import {
 import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import { handleMessage } from './handler.js'
-import { getBotIdentity, isSelfChatFromKey, resolveSenderPhone } from './self-chat.js'
+import { getOwnPhone, isSelfChatKey, seedSelfIds } from './self-chat.js'
 import {
   clearBaileysSocket,
   messageStore,
@@ -59,20 +59,32 @@ export function isFresh(message) {
   return Date.now() / 1000 - timestamp <= 60
 }
 
-async function readMessage(message, socket) {
-  const key = message.key || {}
-  const id = key.id
-  if (!id || processed.has(id) || sentMessageIds.has(id)) return null
-  if (!isFresh(message)) return null
+// Whitelist ketat: blokir grup, broadcast, newsletter, dan pesan dengan
+// participant sebelum apa pun yang lain diperiksa.
+export function isBlockedKey(key) {
+  const remoteJid = key?.remoteJid || ''
+  if (!remoteJid) return true
+  if (remoteJid.endsWith('@g.us')) return true
+  if (remoteJid.endsWith('@broadcast')) return true
+  if (remoteJid.endsWith('@newsletter')) return true
+  if (key?.participant) return true
+  return false
+}
 
+async function readMessage(message) {
+  const key = message.key || {}
   const remoteJid = key.remoteJid || ''
   const remoteJidAlt = key.remoteJidAlt || ''
-  if (!remoteJid && !remoteJidAlt) return null
-  if (remoteJid === 'status@broadcast' || remoteJidAlt === 'status@broadcast') return null
 
-  const identity = getBotIdentity(socket?.user)
-  const isSelfChat = isSelfChatFromKey({ remoteJid, remoteJidAlt }, identity)
-  if (key.fromMe && !isSelfChat) return null
+  // Baris paling awal — tolak sebelum log, OTP, atau parser dipanggil.
+  if (isBlockedKey(key)) return null
+
+  const id = key.id
+  if (!id || sentMessageIds.has(id) || processed.has(id)) return null
+  if (!isFresh(message)) return null
+
+  // Berlaku untuk fromMe true maupun false. Di luar whitelist = diamkan.
+  if (!isSelfChatKey({ remoteJid, remoteJidAlt })) return null
 
   const text = extractText(message.message)
   if (!text) return null
@@ -80,14 +92,12 @@ async function readMessage(message, socket) {
   processed.set(id, Date.now())
   cleanupProcessed()
 
-  const senderPhone = resolveSenderPhone(key, identity, isSelfChat)
-
   return {
     id,
-    from: senderPhone,
+    from: getOwnPhone(),
     // JID asli tempat pesan diterima (@lid atau @s.whatsapp.net) dipakai
     // sebagai tujuan balasan agar kunci enkripsi Signal tetap konsisten.
-    replyJid: remoteJid || remoteJidAlt,
+    replyJid: remoteJid,
     text: { body: text },
   }
 }
@@ -98,6 +108,7 @@ export async function connectBaileys() {
 
   try {
     const { state, saveCreds } = await useMultiFileAuthState(path.resolve(authDir))
+    seedSelfIds({ creds: state.creds })
 
     const { version } = await fetchLatestBaileysVersion()
 
@@ -118,6 +129,9 @@ export async function connectBaileys() {
 
     socket.ev.on('connection.update', (update) => {
       const { connection, lastDisconnect } = update
+
+      // sock.user baru terisi setelah sesi terbuka; perbarui whitelist.
+      if (socket.user) seedSelfIds({ user: socket.user, creds: state.creds })
 
       if (update.qr) {
         qrcode.generate(update.qr, { small: true })
@@ -144,7 +158,7 @@ export async function connectBaileys() {
     socket.ev.on('messages.upsert', async (upsert) => {
       if (upsert.type !== 'notify' && upsert.type !== 'append') return
       for (const msg of upsert.messages || []) {
-        const message = await readMessage(msg, socket)
+        const message = await readMessage(msg)
         if (!message) continue
         console.log('[Bot Masuk]', {
           type: upsert.type,

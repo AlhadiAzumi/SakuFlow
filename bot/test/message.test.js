@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { extractText, isFresh } from '../src/baileys.js'
+import { extractText, isBlockedKey, isFresh } from '../src/baileys.js'
 
 test('baca teks dari pesan biasa', () => {
   assert.equal(extractText({ conversation: 'keluar 25rb buat kopi' }), 'keluar 25rb buat kopi')
@@ -39,4 +39,17 @@ test('filter waktu: pesan baru diterima, pesan lama ditolak', () => {
 
 test('pesan tanpa timestamp tetap diterima', () => {
   assert.equal(isFresh({}), true)
+})
+
+test('blokir grup, broadcast, newsletter, participant, dan JID kosong', () => {
+  assert.equal(isBlockedKey({ remoteJid: '' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '120363012345678901@g.us' }), true)
+  assert.equal(isBlockedKey({ remoteJid: 'status@broadcast' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '120363012345678901@newsletter' }), true)
+  assert.equal(isBlockedKey({ remoteJid: '6285167811268@s.whatsapp.net', participant: '628999@s.whatsapp.net' }), true)
+})
+
+test('chat satu lawan satu tidak diblokir', () => {
+  assert.equal(isBlockedKey({ remoteJid: '6285167811268@s.whatsapp.net' }), false)
+  assert.equal(isBlockedKey({ remoteJid: '80501142515803@lid' }), false)
 })
