@@ -48,7 +48,7 @@ export default function AuthScreen({ onBack }) {
   }
 
   return (
-    <div className="auth-page">
+    <div className="auth-page pixel-app">
       {onBack && (
         <button type="button" onClick={onBack} className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[12px] font-bold text-slate-600 shadow-sm backdrop-blur transition hover:text-blue-700">
           <ArrowLeft size={14} /> Kembali ke beranda

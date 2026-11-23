@@ -29,6 +29,9 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --reveal-offset: 18px;
+  --font-pixel: 'Silkscreen', 'Courier New', monospace;
+  --pixel-shadow: 4px 4px 0 rgba(15, 23, 42, 0.13);
+  --pixel-shadow-blue: 5px 5px 0 rgba(37, 99, 235, 0.16);
 }
 
 html { scroll-behavior: smooth; }
@@ -969,6 +972,302 @@ code {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ================================================================
+   SakuFlow — Pixel Ledger Layer
+   Detail 8-bit dipakai sebagai aksen, bukan mengganti identitas glass UI.
+   ================================================================ */
+
+.pixel-landing {
+  background-color: #fff;
+  background-image:
+    radial-gradient(circle at 10% 4%, rgba(56, 189, 248, 0.08) 0, transparent 28%),
+    linear-gradient(rgba(37, 99, 235, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.025) 1px, transparent 1px);
+  background-size: auto, 28px 28px, 28px 28px;
+}
+
+.pixel-app {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.022) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.pixel-text,
+.pixel-eyebrow,
+.pixel-chip,
+.pixel-badge,
+.pixel-ticker {
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pixel-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 7px;
+  color: var(--primary-dark);
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+.pixel-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--primary-light);
+  box-shadow: 7px 0 0 var(--primary), 14px 0 0 var(--primary-dark);
+  margin-right: 14px;
+}
+.pixel-hero .pixel-eyebrow { color: #e0f2fe; }
+
+/* Grid piksel di hero, tetap lembut di atas gradasi biru. */
+.pixel-hero::before {
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity: 0.7;
+}
+.pixel-hero::after {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 68%);
+}
+.pixel-stars {
+  position: absolute;
+  top: 11%;
+  left: 7%;
+  width: 4px;
+  height: 4px;
+  background: #e0f2fe;
+  box-shadow:
+    72px 46px 0 rgba(224, 242, 254, 0.85),
+    180px -26px 0 #7dd3fc,
+    318px 68px 0 rgba(255, 255, 255, 0.9),
+    520px 18px 0 rgba(125, 211, 252, 0.9);
+  animation: pixel-twinkle 2.6s steps(2, end) infinite;
+  pointer-events: none;
+}
+@keyframes pixel-twinkle {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.25; }
+}
+
+/* Kartu dengan sudut "berpotong" kecil + hard shadow. */
+.pixel-card {
+  position: relative;
+  border-radius: 20px !important;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  box-shadow: var(--pixel-shadow-blue);
+  transition: transform 0.16s steps(3, end), box-shadow 0.16s steps(3, end), border-color 0.16s steps(3, end);
+}
+.pixel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--primary), var(--primary)) left 18px top 0 / 10px 3px no-repeat,
+    linear-gradient(var(--primary-light), var(--primary-light)) left 32px top 0 / 4px 3px no-repeat,
+    linear-gradient(var(--primary-dark), var(--primary-dark)) right 18px bottom 0 / 10px 3px no-repeat;
+  opacity: 0.6;
+}
+.pixel-card:hover {
+  transform: translate(-2px, -2px);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 7px 7px 0 rgba(37, 99, 235, 0.2);
+}
+.float-a.pixel-card:hover,
+.float-b.pixel-card:hover,
+.float-c.pixel-card:hover {
+  animation: none;
+  transform: translate(-3px, -3px);
+}
+
+.pixel-badge {
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 0 rgba(37, 99, 235, 0.12);
+  font-size: 9.5px;
+}
+.pixel-badge:hover {
+  box-shadow: 5px 5px 0 rgba(37, 99, 235, 0.18);
+}
+
+/* Chip interaktif: tekan-state terasa seperti tombol game. */
+.pixel-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.pixel-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-dark);
+  font-size: 9px;
+  line-height: 1.2;
+  box-shadow: 3px 3px 0 rgba(37, 99, 235, 0.14);
+  transition: transform 0.12s steps(2, end), box-shadow 0.12s steps(2, end), background 0.12s steps(2, end);
+}
+.pixel-chip:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 rgba(37, 99, 235, 0.2); }
+.pixel-chip:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(37, 99, 235, 0.2); }
+.pixel-chip.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  box-shadow: 4px 4px 0 rgba(56, 189, 248, 0.55);
+}
+
+.pixel-chat {
+  position: relative;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.pixel-chat--in {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 10px 10px 3px 10px;
+  box-shadow: 3px 3px 0 rgba(15, 23, 42, 0.18);
+}
+.pixel-chat--out {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px 10px 10px 3px;
+  box-shadow: 3px 3px 0 rgba(37, 99, 235, 0.1);
+}
+.pixel-chat strong { display: block; font-size: 11.5px; }
+.pixel-chat span { display: block; color: var(--muted); font-size: 10.5px; }
+.pixel-caret {
+  display: inline-block !important;
+  width: 7px;
+  height: 12px;
+  margin-left: 3px;
+  background: var(--primary);
+  vertical-align: -2px;
+  animation: pixel-blink 1s steps(2, end) infinite;
+}
+@keyframes pixel-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* CTA dengan pinggiran kotak, tetap memakai pill gelap SakuFlow. */
+.dark-pill,
+.button--primary,
+.pixel-hero-cta {
+  border-radius: 14px !important;
+  box-shadow: var(--pixel-shadow);
+  transition: transform 0.16s steps(3, end), box-shadow 0.16s steps(3, end), background 0.2s ease;
+}
+.dark-pill:hover,
+.button--primary:hover:not(:disabled),
+.pixel-hero-cta:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(15, 23, 42, 0.24);
+}
+.dark-pill:active,
+.button--primary:active:not(:disabled),
+.pixel-hero-cta:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 rgba(15, 23, 42, 0.24);
+}
+.pixel-hero-cta { box-shadow: 4px 4px 0 rgba(15, 23, 42, 0.3); }
+.pixel-hero-cta:hover { box-shadow: 6px 6px 0 rgba(15, 23, 42, 0.38); }
+.dark-pill > span,
+.button--primary .button__icon { border-radius: 6px; }
+
+/* Ticker piksel di landing. */
+.pixel-ticker {
+  overflow: hidden;
+  background: var(--ink);
+  color: #e0f2fe;
+  border-top: 3px solid var(--primary);
+  border-bottom: 3px solid var(--primary);
+  font-size: 9.5px;
+}
+.pixel-ticker__track { display: flex; width: max-content; animation: pixel-marquee 22s linear infinite; }
+.pixel-ticker__group { display: flex; gap: 32px; padding: 9px 16px; white-space: nowrap; }
+.pixel-ticker__group span::before { content: '■'; color: var(--primary-light); margin-right: 12px; }
+@keyframes pixel-marquee { to { transform: translateX(-50%); } }
+
+/* Panel dashboard: sudut piksel halus + progres bersegmen. */
+.pixel-app .panel,
+.pixel-app .summary-card,
+.pixel-app .auth-card,
+.pixel-app .modal,
+.pixel-app .savings-card {
+  position: relative;
+  box-shadow: var(--pixel-shadow-blue), var(--shadow-soft);
+}
+.pixel-app .panel::before,
+.pixel-app .summary-card::before,
+.pixel-app .auth-card::before,
+.pixel-app .modal::before,
+.pixel-app .savings-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--primary), var(--primary)) left 18px top 0 / 9px 3px no-repeat,
+    linear-gradient(var(--primary-light), var(--primary-light)) left 31px top 0 / 4px 3px no-repeat,
+    linear-gradient(var(--primary-dark), var(--primary-dark)) right 18px bottom 0 / 9px 3px no-repeat;
+  opacity: 0.55;
+}
+.pixel-app .live-badge,
+.pixel-app .mode-badge,
+.pixel-app .budget-item__status {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 6px;
+}
+.pixel-app .top-nav button.is-active,
+.pixel-app .segmented button.is-active,
+.pixel-app .bottom-nav button.is-active {
+  box-shadow: 3px 3px 0 rgba(37, 99, 235, 0.16);
+  border-radius: 9px;
+}
+.pixel-app .trend__bar,
+.pixel-app .flow-compact__fill {
+  border-radius: 2px;
+  box-shadow: inset -3px 0 0 rgba(255, 255, 255, 0.3);
+}
+.pixel-app .budget-item__track,
+.pixel-app .breakdown-item__track,
+.pixel-app .savings-card__track,
+.pixel-app .flow-compact__track {
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #e2e8f0 0 9px, #f8fafc 9px 12px);
+}
+.pixel-app .budget-item__fill,
+.pixel-app .breakdown-item__fill,
+.pixel-app .savings-card__fill,
+.pixel-app .flow-compact__fill {
+  border-radius: 1px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 10px, transparent 10px 12px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 10px, transparent 10px 12px);
+}
+.pixel-landing .reveal,
+.pixel-app .reveal { transition-timing-function: steps(6, end); }
+
+@media (max-width: 700px) {
+  .pixel-stars { left: 4%; transform: scale(0.7); transform-origin: top left; }
+  .pixel-chip-row { gap: 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-ticker__track,
+  .pixel-stars,
+  .pixel-caret { animation: none; }
 }
 
 /* ---------- Responsive ---------- */

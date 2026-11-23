@@ -68,6 +68,30 @@ const PERSONAS = [
   },
 ]
 
+const DEMO_COMMANDS = [
+  {
+    label: 'Kopi pagi',
+    input: 'keluar 25rb buat kopi',
+    title: 'Uang keluar tersimpan',
+    amount: 'Rp25.000 • Makan & Minum',
+    note: 'Cek websitenya, datanya langsung muncul.',
+  },
+  {
+    label: 'Gaji masuk',
+    input: 'masuk gaji 3,5 jt',
+    title: 'Uang masuk tercatat',
+    amount: 'Rp3.500.000 • Gaji',
+    note: 'Saldo bulan ini langsung bertambah.',
+  },
+  {
+    label: 'Naik ojol',
+    input: 'keluar 18rb transport',
+    title: 'Uang keluar tersimpan',
+    amount: 'Rp18.000 • Transport',
+    note: 'Kategori otomatis terdeteksi dari pesanmu.',
+  },
+]
+
 function Brand() {
   return (
     <a href="#top" className="flex items-center gap-2.5 no-underline">
@@ -80,7 +104,7 @@ function Brand() {
 }
 
 function DarkPill({ children, onClick, href, className = '' }) {
-  const classes = `group inline-flex items-center gap-2.5 rounded-full bg-slate-900 px-5 py-3 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_16px_32px_rgba(15,23,42,0.28)] ${className}`
+  const classes = `dark-pill group inline-flex items-center gap-2.5 rounded-full bg-slate-900 px-5 py-3 text-[13px] font-bold text-white transition duration-300 ease-out hover:bg-slate-800 ${className}`
   if (href) {
     return (
       <a href={href} className={classes}>
@@ -114,13 +138,14 @@ function SectionHeading({ title, accent, desc, id }) {
 
 export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const [persona, setPersona] = useState(1)
+  const [demo, setDemo] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
 
   return (
-    <div id="top" className="min-h-screen bg-white text-slate-900">
+    <div id="top" className="pixel-landing min-h-screen bg-white text-slate-900">
       {/* ---------- 1. Floating glass navbar ---------- */}
       <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
         <nav className="mx-auto flex max-w-7xl items-center gap-4 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-[0_12px_40px_rgba(37,99,235,0.08)] backdrop-blur-xl sm:px-6">
@@ -169,8 +194,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
 
       {/* ---------- 2. Hero ---------- */}
       <section className="px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pt-14">
-        <div className="hero-shell mx-auto max-w-7xl px-5 pb-28 pt-14 sm:px-10 sm:pt-20">
+        <div className="hero-shell pixel-hero mx-auto max-w-7xl px-5 pb-28 pt-14 sm:px-10 sm:pt-20">
+          <span className="pixel-stars" aria-hidden="true" />
           <Reveal className="relative z-10 mx-auto max-w-3xl text-center">
+            <span className="pixel-eyebrow justify-center text-blue-100">CATAT • CEK • EVALUASI • ULANGI</span>
             <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[64px]">
               Catat Keuangan Harian
               <br className="hidden sm:block" /> Lebih Cepat dengan{' '}
@@ -188,7 +215,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <button
                 type="button"
                 onClick={onEnter}
-                className="group inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white shadow-lg backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/30"
+                className="pixel-hero-cta group inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md hover:bg-white/30"
               >
                 {primaryLabel}
                 <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
@@ -200,7 +227,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           {/* 3 kartu pratinjau UI */}
           <Reveal delay={120} className="relative z-10 mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3 md:gap-5">
             {/* Kiri: simulasi chat WA */}
-            <article className="float-a rounded-3xl border border-white/60 bg-white/85 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+            <article className="float-a pixel-card rounded-3xl border border-white/60 bg-white/85 p-5 backdrop-blur-xl">
               <div className="mb-4 flex items-center gap-2.5">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white">
                   <MessageCircle size={17} />
@@ -212,20 +239,34 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                   </p>
                 </div>
               </div>
+              <div className="pixel-chip-row">
+                {DEMO_COMMANDS.map((item, index) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => setDemo(index)}
+                    className={`pixel-chip ${demo === index ? 'is-active' : ''}`}
+                    aria-pressed={demo === index}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
               <div className="space-y-2.5">
-                <div className="max-w-[88%] rounded-2xl rounded-tr-md bg-blue-600 px-3.5 py-2.5 text-[11.5px] font-medium text-white">
-                  keluar 25rb buat kopi
+                <div className="pixel-chat pixel-chat--in max-w-[92%]">
+                  {DEMO_COMMANDS[demo].input}
+                  <span className="pixel-caret" aria-hidden="true" />
                 </div>
-                <div className="ml-auto max-w-[92%] rounded-2xl rounded-tl-md border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-[11px] leading-relaxed text-slate-600">
-                  <p className="font-bold text-slate-900">Uang keluar tersimpan</p>
-                  <p className="mt-0.5 font-semibold tabular-nums">Rp25.000 • Makan &amp; Minum</p>
-                  <p className="mt-1 text-[10px] text-slate-400">Cek websitenya, datanya langsung muncul.</p>
+                <div className="pixel-chat pixel-chat--out ml-auto max-w-[96%]" aria-live="polite">
+                  <strong>{DEMO_COMMANDS[demo].title}</strong>
+                  <span className="font-semibold tabular-nums text-slate-700">{DEMO_COMMANDS[demo].amount}</span>
+                  <span>{DEMO_COMMANDS[demo].note}</span>
                 </div>
               </div>
             </article>
 
             {/* Tengah: kartu utama */}
-            <article className="float-b relative rounded-3xl border border-white/70 bg-white/95 p-5 shadow-[0_30px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl md:-mt-4 md:scale-[1.03]">
+            <article className="float-b pixel-card relative rounded-3xl border border-white/70 bg-white/95 p-5 backdrop-blur-xl md:-mt-4 md:scale-[1.03]">
               <div className="flex items-center justify-between">
                 <p className="text-[12px] font-bold text-slate-500">Saldo &amp; Arus Kas</p>
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-50 text-blue-600"><LayoutDashboard size={15} /></span>
@@ -254,7 +295,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </article>
 
             {/* Kanan: transaksi terbaru */}
-            <article className="float-c rounded-3xl border border-white/60 bg-white/85 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+            <article className="float-c pixel-card rounded-3xl border border-white/60 bg-white/85 p-5 backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-[13px] font-extrabold">Transaksi terbaru</p>
                 <ChevronRight size={15} className="text-slate-400" />
@@ -286,6 +327,19 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
         </div>
       </section>
 
+      {/* ---------- 2b. Pixel ticker ---------- */}
+      <div className="pixel-ticker" aria-hidden="true">
+        <div className="pixel-ticker__track">
+          {[0, 1].map((group) => (
+            <div key={group} className="pixel-ticker__group">
+              {['Catat lebih cepat', 'Lihat arah uangmu', 'Sinkron real-time', 'Tanpa spreadsheet'].map((text) => (
+                <span key={text}>{text}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ---------- 3. Strip fitur ---------- */}
       <section id="fitur" className="scroll-mt-28 bg-slate-50/70 px-4 py-20 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-4xl text-center">
@@ -299,7 +353,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             {FEATURE_BADGES.map(({ label, icon: Icon }) => (
               <span
                 key={label}
-                className="soft-lift inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-bold text-slate-600 shadow-sm"
+                className="soft-lift pixel-badge inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-bold text-slate-600"
               >
                 <Icon size={14} className="text-blue-600" /> {label}
               </span>
@@ -323,11 +377,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 key={item.tab}
                 type="button"
                 onClick={() => setPersona(index)}
-                className={`rounded-full px-4 py-2.5 text-[12px] font-bold transition ${
-                  persona === index
-                    ? 'bg-slate-900 text-white shadow-lg'
-                    : 'border border-slate-200 bg-white text-slate-500 hover:border-blue-300 hover:text-blue-700'
-                }`}
+                className={`pixel-chip ${persona === index ? 'is-active' : ''}`}
               >
                 {item.tab}
               </button>
@@ -557,7 +607,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <button
               type="button"
               onClick={onEnter}
-              className="group mt-8 inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/30"
+              className="pixel-hero-cta group mt-8 inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md hover:bg-white/30"
             >
               {primaryLabel}
               <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />

@@ -167,7 +167,7 @@ export default function App() {
   const displayName = mode === 'local' ? 'teman' : firstName.charAt(0).toUpperCase() + firstName.slice(1)
 
   return (
-    <div className="app-shell">
+    <div className="app-shell pixel-app">
       <header className="app-header">
         <div className="app-header__inner">
           <button type="button" className="brand" onClick={() => setView('landing')} title="Lihat halaman utama SakuFlow">
@@ -236,6 +236,7 @@ export default function App() {
 
             <div className="page-heading">
               <div>
+                <span className="pixel-eyebrow">MODE CATAT / {mode === 'cloud' ? 'ONLINE' : 'LOKAL'}</span>
                 <h1>Halo, {displayName}</h1>
                 <p>Yuk lihat ke mana uangmu pergi <span className="text-gradient font-extrabold">bulan ini</span>.</p>
               </div>
@@ -320,6 +321,7 @@ export default function App() {
           <div className="page page--notes">
             <div className="page-heading">
               <div>
+                <span className="pixel-eyebrow">BUKU CATATAN / {formatMonthLabel(month)}</span>
                 <h1>Catatan <span className="text-gradient">uang</span></h1>
                 <p>{monthItems.length} transaksi bulan ini. Ketuk catatan untuk mengubahnya.</p>
               </div>
