@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, ArrowUpRight, Globe } from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
 import LogoMark from './LogoMark'
 
@@ -51,7 +51,7 @@ export default function AuthScreen({ onBack }) {
     <div className="auth-page pixel-app">
       {onBack && (
         <button type="button" onClick={onBack} className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[12px] font-bold text-slate-600 shadow-sm backdrop-blur transition hover:text-blue-700">
-          <ArrowLeft size={14} /> Kembali ke beranda
+          <PixelIcon name="arrow-left" size={14} /> Kembali ke beranda
         </button>
       )}
       <div className="auth-card">
@@ -81,13 +81,13 @@ export default function AuthScreen({ onBack }) {
           {notice && <p className="form-notice" role="status">{notice}</p>}
           <button type="submit" className="button button--primary button--full" disabled={loading}>
             {loading ? 'Tunggu…' : mode === 'signin' ? 'Masuk' : 'Buat akun'}
-            <span className="button__icon"><ArrowUpRight size={13} strokeWidth={2.5} /></span>
+            <span className="button__icon"><PixelIcon name="arrow-up-right" size={13} /></span>
           </button>
         </form>
 
         <div className="auth-card__divider"><span>atau</span></div>
         <button type="button" className="button button--outline button--full" onClick={google} disabled={loading}>
-          <Globe size={17} strokeWidth={2.2} /> Lanjut dengan Google
+          <PixelIcon name="globe" size={17} /> Lanjut dengan Google
         </button>
 
         <p className="auth-card__switch">

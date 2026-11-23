@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import CategoryIcon from './CategoryIcon'
+import PixelIcon from './PixelIcon'
 import { getCategories } from '../lib/categories'
 import { formatNumber, parseAmount, todayKey } from '../lib/format'
 
@@ -89,16 +89,16 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
           <div>
             <h2 id="modal-title">{isEdit ? 'Ubah catatan' : 'Uangmu kemana?'}</h2>
           </div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Tutup">×</button>
+          <button type="button" className="icon-button" onClick={onClose} aria-label="Tutup"><PixelIcon name="close" size={14} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
           <div className="segmented">
             <button type="button" className={form.type === 'expense' ? 'is-active is-active--out' : ''} onClick={() => setType('expense')}>
-              <ArrowUpRight size={15} /> Uang keluar
+              <PixelIcon name="arrow-up-right" size={15} /> Uang keluar
             </button>
             <button type="button" className={form.type === 'income' ? 'is-active is-active--in' : ''} onClick={() => setType('income')}>
-              <ArrowDownLeft size={15} /> Uang masuk
+              <PixelIcon name="arrow-down-left" size={15} /> Uang masuk
             </button>
           </div>
 

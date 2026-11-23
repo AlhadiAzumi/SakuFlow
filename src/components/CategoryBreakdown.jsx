@@ -1,4 +1,4 @@
-import { TrendingUp } from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import CategoryIcon from './CategoryIcon'
 import { formatRupiah } from '../lib/format'
 
@@ -6,7 +6,7 @@ export default function CategoryBreakdown({ categories }) {
   if (!categories.length) {
     return (
       <div className="panel-empty">
-        <span><TrendingUp size={30} /></span>
+        <span><PixelIcon name="trending-up" size={30} /></span>
         <p>Belum ada pengeluaran bulan ini.</p>
       </div>
     )

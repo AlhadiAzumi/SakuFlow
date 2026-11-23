@@ -1,28 +1,5 @@
 import { useState } from 'react'
-import {
-  ArrowDownLeft,
-  ArrowRight,
-  ArrowUpRight,
-  ArrowUpRightFromSquare,
-  BadgeCheck,
-  Bus,
-  BriefcaseBusiness,
-  Check,
-  ChevronRight,
-  CircleCheck,
-  Cloud,
-  Coffee,
-  CreditCard,
-  LayoutDashboard,
-  MessageCircle,
-  PiggyBank,
-  ReceiptText,
-  ShieldCheck,
-  Sparkles,
-  Utensils,
-  Waypoints,
-  Zap,
-} from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import LogoMark from './LogoMark'
 import Reveal from './Reveal'
 
@@ -34,11 +11,11 @@ const NAV = [
 ]
 
 const FEATURE_BADGES = [
-  { label: 'Bot WhatsApp Otomatis', icon: MessageCircle },
-  { label: 'Diagram Alur Sankey', icon: Waypoints },
-  { label: 'Sinkronisasi Cloud Supabase', icon: Cloud },
-  { label: 'Mode Lokal & Online', icon: ShieldCheck },
-  { label: 'Ringkasan Real-Time', icon: Zap },
+  { label: 'Bot WhatsApp Otomatis', icon: 'whatsapp' },
+  { label: 'Diagram Alur Sankey', icon: 'waypoints' },
+  { label: 'Sinkronisasi Cloud Supabase', icon: 'cloud' },
+  { label: 'Mode Lokal & Online', icon: 'shield' },
+  { label: 'Ringkasan Real-Time', icon: 'zap' },
 ]
 
 const PERSONAS = [
@@ -110,7 +87,7 @@ function DarkPill({ children, onClick, href, className = '' }) {
       <a href={href} className={classes}>
         {children}
         <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
-          <ArrowUpRight size={13} />
+          <PixelIcon name="arrow-up-right" size={13} />
         </span>
       </a>
     )
@@ -119,7 +96,7 @@ function DarkPill({ children, onClick, href, className = '' }) {
     <button type="button" onClick={onClick} className={classes}>
       {children}
       <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
-        <ArrowUpRight size={13} />
+        <PixelIcon name="arrow-up-right" size={13} />
       </span>
     </button>
   )
@@ -169,7 +146,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               onClick={() => setMenuOpen((v) => !v)}
               className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 lg:hidden"
             >
-              <span className="text-lg leading-none">{menuOpen ? '×' : '≡'}</span>
+              <PixelIcon name={menuOpen ? 'close' : 'menu'} size={18} />
             </button>
           </div>
         </nav>
@@ -202,7 +179,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Catat Keuangan Harian
               <br className="hidden sm:block" /> Lebih Cepat dengan{' '}
               <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <Sparkles size={24} className="text-sky-200 drop-shadow-[0_0_10px_rgba(125,211,252,0.9)] sm:text-4xl" />
+                <PixelIcon name="sparkles" size={24} className="text-sky-200 drop-shadow-[0_0_10px_rgba(125,211,252,0.9)] sm:text-4xl" />
                 <span>SakuFlow</span>
               </span>
             </h1>
@@ -218,7 +195,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 className="pixel-hero-cta group inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md hover:bg-white/30"
               >
                 {primaryLabel}
-                <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
+                <PixelIcon name="arrow-right" size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
               </button>
               <DarkPill href="#cara-kerja">Lihat Cara Kerja</DarkPill>
             </div>
@@ -230,7 +207,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <article className="float-a pixel-card rounded-3xl border border-white/60 bg-white/85 p-5 backdrop-blur-xl">
               <div className="mb-4 flex items-center gap-2.5">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white">
-                  <MessageCircle size={17} />
+                  <PixelIcon name="whatsapp" size={17} />
                 </span>
                 <div>
                   <p className="text-[13px] font-extrabold leading-tight">Bot WhatsApp</p>
@@ -269,7 +246,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <article className="float-b pixel-card relative rounded-3xl border border-white/70 bg-white/95 p-5 backdrop-blur-xl md:-mt-4 md:scale-[1.03]">
               <div className="flex items-center justify-between">
                 <p className="text-[12px] font-bold text-slate-500">Saldo &amp; Arus Kas</p>
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-50 text-blue-600"><LayoutDashboard size={15} /></span>
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-50 text-blue-600"><PixelIcon name="layout-dashboard" size={15} /></span>
               </div>
               <p className="mt-3 text-[11px] font-semibold text-slate-400">Total Saldo</p>
               <p className="preview-value text-[26px] font-extrabold tracking-tight text-slate-900">Rp8.450.000</p>
@@ -298,29 +275,26 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <article className="float-c pixel-card rounded-3xl border border-white/60 bg-white/85 p-5 backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-[13px] font-extrabold">Transaksi terbaru</p>
-                <ChevronRight size={15} className="text-slate-400" />
+                <PixelIcon name="chevron-right" size={15} className="text-slate-400" />
               </div>
               <div className="space-y-3">
                 {[
-                  { icon: Utensils, label: 'Makan & Minum', sub: 'Kopi pagi', amount: '-Rp25.000', tone: 'text-slate-900' },
-                  { icon: Bus, label: 'Transport', sub: 'Bensin', amount: '-Rp50.000', tone: 'text-slate-900' },
-                  { icon: BriefcaseBusiness, label: 'Gaji', sub: 'Pemasukan', amount: '+Rp3.500.000', tone: 'text-blue-600' },
-                ].map((tx) => {
-                  const TxIcon = tx.icon
-                  return (
+                  { icon: 'food', label: 'Makan & Minum', sub: 'Kopi pagi', amount: '-Rp25.000', tone: 'text-slate-900' },
+                  { icon: 'bus', label: 'Transport', sub: 'Bensin', amount: '-Rp50.000', tone: 'text-slate-900' },
+                  { icon: 'briefcase', label: 'Gaji', sub: 'Pemasukan', amount: '+Rp3.500.000', tone: 'text-blue-600' },
+                ].map((tx) => (
                   <div key={tx.label} className="flex items-center gap-2.5">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><TxIcon size={15} /></span>
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><PixelIcon name={tx.icon} size={15} /></span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[11.5px] font-bold">{tx.label}</p>
                       <p className="text-[10px] text-slate-400">{tx.sub}</p>
                     </div>
                     <p className={`preview-value shrink-0 text-[11px] font-extrabold ${tx.tone}`}>{tx.amount}</p>
                   </div>
-                  )
-                })}
+                ))}
               </div>
               <div className="mt-4 flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-[10px] font-bold text-blue-700">
-                <CircleCheck size={13} /> Tersinkron otomatis
+                <PixelIcon name="circle-check" size={13} /> Tersinkron otomatis
               </div>
             </article>
           </Reveal>
@@ -350,12 +324,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             Semua yang kamu butuhkan untuk tahu ke mana uang pergi, dalam satu tempat yang ringan.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-            {FEATURE_BADGES.map(({ label, icon: Icon }) => (
+            {FEATURE_BADGES.map(({ label, icon }) => (
               <span
                 key={label}
                 className="soft-lift pixel-badge inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-bold text-slate-600"
               >
-                <Icon size={14} className="text-blue-600" /> {label}
+                <PixelIcon name={icon} size={14} className="text-blue-600" /> {label}
               </span>
             ))}
           </div>
@@ -411,7 +385,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                         {item.points.map((point) => (
                           <li key={point} className="flex items-center gap-2 text-[12px] font-semibold">
                             <span className={`grid h-5 w-5 place-items-center rounded-full ${active ? 'bg-white/20' : 'bg-blue-50 text-blue-600'}`}>
-                              <Check size={12} />
+                              <PixelIcon name="check" size={12} />
                             </span>
                             {point}
                           </li>
@@ -447,7 +421,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <div className="grid gap-8 md:grid-cols-2 md:gap-10">
               <div>
                 <div className="mb-4 flex items-center gap-2.5">
-                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white"><MessageCircle size={17} /></span>
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white"><PixelIcon name="whatsapp" size={17} /></span>
                   <div>
                     <p className="text-[13px] font-extrabold">Pesan masuk</p>
                     <p className="text-[10px] font-semibold text-slate-400">Dari nomor yang sudah terhubung</p>
@@ -457,10 +431,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                   keluar 25rb buat kopi
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-[11px] font-bold text-blue-600">
-                  <Sparkles size={14} /> Pesan dibaca otomatis dalam hitungan detik
+                  <PixelIcon name="sparkles" size={14} /> Pesan dibaca otomatis dalam hitungan detik
                 </div>
                 <div className="mt-4 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-[11px] font-semibold text-blue-700">
-                  <BadgeCheck size={15} /> Tidak perlu buka aplikasi untuk mencatat
+                  <PixelIcon name="badge-check" size={15} /> Tidak perlu buka aplikasi untuk mencatat
                 </div>
               </div>
 
@@ -468,17 +442,17 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <p className="text-[12px] font-extrabold text-slate-900">Hasil pembacaan pesan</p>
                 <div className="mt-4 space-y-3">
                   {[
-                    { icon: Coffee, label: 'Kategori terdeteksi', value: 'Makan & Minum' },
-                    { icon: CreditCard, label: 'Nominal', value: 'Rp25.000' },
-                    { icon: ArrowUpRight, label: 'Jenis', value: 'Pengeluaran' },
-                  ].map(({ icon: Icon, label, value }) => (
+                    { icon: 'coffee', label: 'Kategori terdeteksi', value: 'Makan & Minum' },
+                    { icon: 'credit-card', label: 'Nominal', value: 'Rp25.000' },
+                    { icon: 'arrow-up-right', label: 'Jenis', value: 'Pengeluaran' },
+                  ].map(({ icon, label, value }) => (
                     <div key={label} className="flex items-center gap-3 rounded-xl border border-white bg-white px-3.5 py-3 shadow-sm">
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-50 text-blue-600"><Icon size={15} /></span>
+                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-50 text-blue-600"><PixelIcon name={icon} size={15} /></span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-semibold text-slate-400">{label}</p>
                         <p className="preview-value truncate text-[12.5px] font-extrabold text-slate-900">{value}</p>
                       </div>
-                      <CircleCheck size={16} className="text-blue-600" />
+                      <PixelIcon name="circle-check" size={16} className="text-blue-600" />
                     </div>
                   ))}
                 </div>
@@ -524,16 +498,16 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </div>
 
             {[
-              { icon: ArrowDownLeft, label: 'Pemasukan', value: 'Rp12,3 jt', pos: 'left-0 top-[8%] sm:top-[12%]' },
-              { icon: ReceiptText, label: 'Kebutuhan Pokok', value: 'Rp1,8 jt', pos: 'left-0 bottom-[8%] sm:bottom-[12%]' },
-              { icon: Coffee, label: 'Jajan & Kopi', value: 'Rp650 rb', pos: 'right-0 top-[8%] sm:top-[12%]' },
-              { icon: PiggyBank, label: 'Tabungan', value: 'Rp2 jt', pos: 'right-0 bottom-[8%] sm:bottom-[12%]' },
-            ].map(({ icon: Icon, label, value, pos }) => (
+              { icon: 'arrow-down-left', label: 'Pemasukan', value: 'Rp12,3 jt', pos: 'left-0 top-[8%] sm:top-[12%]' },
+              { icon: 'receipt', label: 'Kebutuhan Pokok', value: 'Rp1,8 jt', pos: 'left-0 bottom-[8%] sm:bottom-[12%]' },
+              { icon: 'coffee', label: 'Jajan & Kopi', value: 'Rp650 rb', pos: 'right-0 top-[8%] sm:top-[12%]' },
+              { icon: 'piggy', label: 'Tabungan', value: 'Rp2 jt', pos: 'right-0 bottom-[8%] sm:bottom-[12%]' },
+            ].map(({ icon, label, value, pos }) => (
               <div
                 key={label}
                 className={`soft-lift absolute z-10 flex w-[150px] items-center gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-[0_12px_30px_rgba(37,99,235,0.1)] backdrop-blur sm:w-[175px] ${pos}`}
               >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600"><Icon size={15} /></span>
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600"><PixelIcon name={icon} size={15} /></span>
                 <span className="min-w-0">
                   <span className="block truncate text-[10.5px] font-extrabold text-slate-900">{label}</span>
                   <span className="preview-value block text-[10px] font-bold text-slate-400">{value}</span>
@@ -557,7 +531,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <div className="mt-7 flex flex-wrap gap-2.5">
               {['Auto-kategorisasi', 'Struk instan', 'Sinkron realtime', 'Tanpa ribet'].map((chip) => (
                 <span key={chip} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[11.5px] font-bold text-slate-600">
-                  <Check size={13} className="text-blue-600" /> {chip}
+                  <PixelIcon name="check" size={13} className="text-blue-600" /> {chip}
                 </span>
               ))}
             </div>
@@ -565,7 +539,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
 
           <div className="soft-lift rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(37,99,235,0.09)] sm:p-8">
             <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600"><Cloud size={20} /></span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600"><PixelIcon name="cloud" size={20} /></span>
               <div>
                 <p className="text-[14px] font-extrabold">Sinkronisasi saldo instan</p>
                 <p className="mt-1 text-[12px] text-slate-500">Data dari WhatsApp langsung muncul di dashboard tanpa refresh.</p>
@@ -580,7 +554,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               ].map((step, i) => (
                 <div key={step.label} className="flex items-center gap-3">
                   <span className={`grid h-7 w-7 place-items-center rounded-full ${step.done ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    {step.done ? <Check size={14} /> : <span className="text-[10px]">{i + 1}</span>}
+                    {step.done ? <PixelIcon name="check" size={14} /> : <span className="text-[10px]">{i + 1}</span>}
                   </span>
                   <span className="text-[12px] font-bold text-slate-700">{step.label}</span>
                   <span className="ml-auto text-[10px] font-semibold text-slate-400">baru saja</span>
@@ -589,7 +563,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </div>
             <div className="mt-6 rounded-2xl bg-gradient-to-r from-blue-50 to-sky-50 p-4">
               <p className="flex items-center gap-2 text-[11.5px] font-bold text-blue-800">
-                <ShieldCheck size={15} /> Data hanya bisa diakses akunmu sendiri
+                <PixelIcon name="shield" size={15} /> Data hanya bisa diakses akunmu sendiri
               </p>
               <p className="mt-1 text-[10.5px] text-blue-600/80">Dilindungi Supabase Row Level Security.</p>
             </div>
@@ -610,7 +584,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               className="pixel-hero-cta group mt-8 inline-flex items-center gap-2.5 rounded-full border border-white/40 bg-white/20 px-6 py-3.5 text-[13px] font-bold text-white backdrop-blur-md hover:bg-white/30"
             >
               {primaryLabel}
-              <ArrowRight size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
+              <PixelIcon name="arrow-right" size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
             </button>
           </div>
         </Reveal>
@@ -629,7 +603,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:underline"
             >
-              GitHub <ArrowUpRightFromSquare size={12} />
+              GitHub <PixelIcon name="external" size={12} />
             </a>
           </div>
           {[

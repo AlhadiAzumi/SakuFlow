@@ -1,17 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  ArrowRight,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  House,
-  Plus,
-  ReceiptText,
-  Settings2,
-  Sparkles,
-  TriangleAlert,
-} from 'lucide-react'
 import AddTransactionModal from './components/AddTransactionModal'
 import AuthScreen from './components/AuthScreen'
 import BudgetPanel from './components/BudgetPanel'
@@ -20,6 +7,7 @@ import InsightCard from './components/InsightCard'
 import LandingPage from './components/LandingPage'
 import LogoMark from './components/LogoMark'
 import MoneyFlow from './components/MoneyFlow'
+import PixelIcon from './components/PixelIcon'
 import Reveal from './components/Reveal'
 import SavingsCard from './components/SavingsCard'
 import Settings from './components/Settings'
@@ -39,9 +27,9 @@ import {
 import { currentMonthKey, formatMonthLabel, formatRupiah, formatTimeAgo, shiftMonth } from './lib/format'
 
 const TABS = [
-  { id: 'home', label: 'Beranda', icon: House },
-  { id: 'notes', label: 'Catatan', icon: ReceiptText },
-  { id: 'settings', label: 'Setelan', icon: Settings2 },
+  { id: 'home', label: 'Beranda', icon: 'house' },
+  { id: 'notes', label: 'Catatan', icon: 'receipt' },
+  { id: 'settings', label: 'Setelan', icon: 'settings' },
 ]
 
 function LoadingScreen() {
@@ -58,7 +46,7 @@ function Toast({ toast }) {
   if (!toast) return null
   return (
     <div className={`toast toast--${toast.tone}`} role="status" key={toast.id}>
-      {toast.tone === 'error' ? <CircleAlert size={16} /> : <Check size={16} />}
+      {toast.tone === 'error' ? <PixelIcon name="alert" size={16} /> : <PixelIcon name="check" size={16} />}
       {toast.message}
     </div>
   )
@@ -179,20 +167,17 @@ export default function App() {
           </button>
 
           <nav className="top-nav" aria-label="Navigasi utama">
-            {TABS.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  className={tab === item.id ? 'is-active' : ''}
-                  onClick={() => setTab(item.id)}
-                >
-                  <Icon size={15} strokeWidth={2.2} />
-                  {item.label}
-                </button>
-              )
-            })}
+            {TABS.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className={tab === item.id ? 'is-active' : ''}
+                onClick={() => setTab(item.id)}
+              >
+                <PixelIcon name={item.icon} size={15} />
+                {item.label}
+              </button>
+            ))}
           </nav>
 
           <div className="header-actions">
@@ -200,17 +185,17 @@ export default function App() {
               <span className="live-badge" title="Data tersinkron langsung"><i /> Live</span>
             )}
             <div className="month-switcher">
-              <button type="button" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bulan sebelumnya"><ChevronLeft size={17} /></button>
+              <button type="button" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bulan sebelumnya"><PixelIcon name="chevron-left" size={17} /></button>
               <span>{formatMonthLabel(month)}</span>
               <button
                 type="button"
                 onClick={() => setMonth(shiftMonth(month, 1))}
                 disabled={month >= currentMonthKey()}
                 aria-label="Bulan berikutnya"
-              ><ChevronRight size={17} /></button>
+              ><PixelIcon name="chevron-right" size={17} /></button>
             </div>
             <div className="user-chip" title={mode === 'cloud' ? user?.email : 'Mode lokal'}>
-              {mode === 'cloud' ? displayName.charAt(0).toUpperCase() : '⌂'}
+              {mode === 'cloud' ? displayName.charAt(0).toUpperCase() : <PixelIcon name="house" size={14} />}
             </div>
           </div>
         </div>
@@ -241,14 +226,14 @@ export default function App() {
                 <p>Yuk lihat ke mana uangmu pergi <span className="text-gradient font-extrabold">bulan ini</span>.</p>
               </div>
               <button type="button" className="button button--primary button--add-desktop" onClick={openAdd}>
-                <span className="button__icon"><Plus size={13} strokeWidth={2.5} /></span>
+                <span className="button__icon"><PixelIcon name="plus" size={13} /></span>
                 Catat uang
               </button>
             </div>
 
             {transactions.length === 0 && (
               <div className="welcome-banner">
-                <span className="welcome-banner__icon"><Sparkles size={26} /></span>
+                <span className="welcome-banner__icon"><PixelIcon name="sparkles" size={26} /></span>
                 <div>
                   <strong>Langkah pertama dimulai dari satu catatan.</strong>
                   <p>Tambahkan uang masuk atau pengeluaran pertamamu untuk melihat peta uangmu.</p>
@@ -261,7 +246,7 @@ export default function App() {
 
             {overBudget.length > 0 && (
               <div className="alert-banner alert-banner--danger" role="status">
-                <span className="alert-banner__icon"><TriangleAlert size={20} /></span>
+                <span className="alert-banner__icon"><PixelIcon name="alert" size={20} /></span>
                 <p>
                   <strong>{overBudget.length} kategori sudah melewati budget:</strong>{' '}
                   {overBudget.map((item) => item.label).join(', ')}. Cek pengeluaranmu, ya.
@@ -270,7 +255,7 @@ export default function App() {
             )}
             {overBudget.length === 0 && nearBudget.length > 0 && (
               <div className="alert-banner alert-banner--warning" role="status">
-                <span className="alert-banner__icon"><TriangleAlert size={20} /></span>
+                <span className="alert-banner__icon"><PixelIcon name="alert" size={20} /></span>
                 <p>
                   <strong>Hati-hati, budget hampir habis:</strong>{' '}
                   {nearBudget.map((item) => `${item.label} (${Math.round(item.pct)}%)`).join(', ')}.
@@ -311,7 +296,7 @@ export default function App() {
                   <div>
                     <h2 className="panel__title">Catatan terakhir</h2>
                   </div>
-                  <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua <ArrowRight size={14} /></button>
+                  <button type="button" className="link-button" onClick={() => setTab('notes')}>Lihat semua <PixelIcon name="arrow-right" size={14} /></button>
                 </div>
                 <TransactionList items={[...monthItems].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 5)} onEdit={openEdit} onDelete={handleDelete} compact />
               </section>
@@ -326,7 +311,7 @@ export default function App() {
                 <p>{monthItems.length} transaksi bulan ini. Ketuk catatan untuk mengubahnya.</p>
               </div>
               <button type="button" className="button button--primary button--add-desktop" onClick={openAdd}>
-                <span className="button__icon"><Plus size={13} strokeWidth={2.5} /></span>
+                <span className="button__icon"><PixelIcon name="plus" size={13} /></span>
                 Catat uang
               </button>
             </div>
@@ -340,7 +325,7 @@ export default function App() {
       </main>
 
       {tab !== 'settings' && (
-        <button type="button" className="fab" onClick={openAdd} aria-label="Tambah catatan"><Plus size={24} strokeWidth={2.4} /></button>
+        <button type="button" className="fab" onClick={openAdd} aria-label="Tambah catatan"><PixelIcon name="plus" size={24} /></button>
       )}
 
       <nav className="bottom-nav" aria-label="Navigasi bawah">
@@ -351,7 +336,7 @@ export default function App() {
             className={tab === item.id ? 'is-active' : ''}
             onClick={() => setTab(item.id)}
           >
-            <span className="bottom-nav__icon"><item.icon size={19} strokeWidth={2.2} /></span>
+            <span className="bottom-nav__icon"><PixelIcon name={item.icon} size={19} /></span>
             <span>{item.label}</span>
           </button>
         ))}

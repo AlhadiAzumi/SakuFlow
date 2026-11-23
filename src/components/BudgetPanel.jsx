@@ -1,4 +1,4 @@
-import { ArrowRight, Target } from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import CategoryIcon from './CategoryIcon'
 import { formatRupiah, formatRupiahCompact } from '../lib/format'
 
@@ -8,12 +8,12 @@ export default function BudgetPanel({ budgets, onOpenSettings }) {
   if (!budgets.length) {
     return (
       <section className="panel budget-intro">
-        <div className="budget-intro__icon"><Target size={26} /></div>
+        <div className="budget-intro__icon"><PixelIcon name="target" size={26} /></div>
         <div>
           <strong>Belum ada budget bulanan</strong>
           <p>Pasang batas per kategori supaya kamu dapat peringatan sebelum uang terpakai habis.</p>
         </div>
-        <button type="button" className="link-button" onClick={onOpenSettings}>Atur budget <ArrowRight size={14} /></button>
+        <button type="button" className="link-button" onClick={onOpenSettings}>Atur budget <PixelIcon name="arrow-right" size={14} /></button>
       </section>
     )
   }
@@ -24,7 +24,7 @@ export default function BudgetPanel({ budgets, onOpenSettings }) {
         <div>
           <h2 className="panel__title">Pantau budgetmu</h2>
         </div>
-        <button type="button" className="link-button" onClick={onOpenSettings}>Atur budget <ArrowRight size={14} /></button>
+        <button type="button" className="link-button" onClick={onOpenSettings}>Atur budget <PixelIcon name="arrow-right" size={14} /></button>
       </div>
       <div className="budget-list">
         {budgets.map((item) => (

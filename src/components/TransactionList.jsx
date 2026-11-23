@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { MessageCircle, ReceiptText, Search } from 'lucide-react'
 import CategoryIcon from './CategoryIcon'
+import PixelIcon from './PixelIcon'
 import { getCategory } from '../lib/categories'
 import { formatDayHeading, formatRupiah } from '../lib/format'
 
@@ -40,7 +40,7 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
       {!compact && (
         <div className="transaction-list__tools">
           <label className="search-field">
-            <span aria-hidden="true"><Search size={16} /></span>
+            <span aria-hidden="true"><PixelIcon name="search" size={16} /></span>
             <input
               type="search"
               value={query}
@@ -70,7 +70,7 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
 
       {!grouped.length ? (
         <div className="panel-empty">
-          <span><ReceiptText size={30} /></span>
+          <span><PixelIcon name="receipt" size={30} /></span>
           <p>{items.length ? 'Tidak ada catatan yang cocok.' : 'Belum ada catatan bulan ini.'}</p>
         </div>
       ) : (
@@ -97,8 +97,8 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
                       <strong>{category.label}</strong>
                       <span>
                         {tx.source === 'whatsapp' && (
-                          <span className="transaction-row__source" title="Dicatat lewat WhatsApp"><MessageCircle size={12} /> </span>
-                        )}
+                          <PixelIcon name="whatsapp" size={12} title="WhatsApp" className="transaction-row__source" />
+                        )}{' '}
                         {tx.note || (tx.type === 'income' ? 'Uang masuk' : 'Pengeluaran')}
                       </span>
                     </button>
@@ -112,7 +112,7 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
                       aria-label={`Hapus catatan ${category.label}`}
                       title="Hapus"
                     >
-                      ×
+                      <PixelIcon name="close" size={12} />
                     </button>
                   </article>
                 )

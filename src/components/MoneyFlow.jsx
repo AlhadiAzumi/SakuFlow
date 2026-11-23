@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Compass } from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import CategoryIcon from './CategoryIcon'
 import { formatRupiah, formatRupiahCompact } from '../lib/format'
 
@@ -73,7 +73,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
   if (!items.length || total <= 0) {
     return (
       <div className="flow-empty">
-        <div className="flow-empty__icon"><Compass size={34} /></div>
+        <div className="flow-empty__icon"><PixelIcon name="compass" size={34} /></div>
         <h3>Belum ada alur uang</h3>
         <p>Catat pemasukan atau pengeluaran pertamamu, dan di sini akan muncul peta ke mana uangmu pergi.</p>
       </div>

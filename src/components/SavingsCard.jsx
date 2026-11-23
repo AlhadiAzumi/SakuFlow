@@ -1,16 +1,16 @@
-import { ArrowRight, PiggyBank, Trophy } from 'lucide-react'
+import PixelIcon from './PixelIcon'
 import { formatRupiah } from '../lib/format'
 
 export default function SavingsCard({ progress, onOpenSettings }) {
   if (progress.target <= 0) {
     return (
       <section className="savings-card savings-card--empty">
-        <span className="savings-card__icon"><PiggyBank size={26} /></span>
+        <span className="savings-card__icon"><PixelIcon name="piggy" size={26} /></span>
         <div>
           <strong>Target tabungan belum dipasang</strong>
           <p>Tentukan target bulanan, dan sisa uangmu akan terlihat sebagai progres tabungan.</p>
         </div>
-        <button type="button" className="link-button" onClick={onOpenSettings}>Pasang target <ArrowRight size={14} /></button>
+        <button type="button" className="link-button" onClick={onOpenSettings}>Pasang target <PixelIcon name="arrow-right" size={14} /></button>
       </section>
     )
   }
@@ -22,7 +22,7 @@ export default function SavingsCard({ progress, onOpenSettings }) {
           <h2 className="panel__title">Sisa uangmu jadi tabungan</h2>
         </div>
         <span className="savings-card__emoji">
-          {progress.reached ? <Trophy size={28} /> : <PiggyBank size={28} />}
+          {progress.reached ? <PixelIcon name="trophy" size={28} /> : <PixelIcon name="piggy" size={28} />}
         </span>
       </div>
       <div className="savings-card__figures">
