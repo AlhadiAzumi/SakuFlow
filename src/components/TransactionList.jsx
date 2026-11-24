@@ -30,7 +30,7 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
 
   const requestDelete = (tx) => {
     const category = getCategory(tx.type, tx.category)
-    if (window.confirm(`Hapus catatan "${category.label} — ${formatRupiah(tx.amount)}"?`)) {
+    if (window.confirm(`Hapus catatan "${category.label}" sebesar ${formatRupiah(tx.amount)}?`)) {
       onDelete(tx.id)
     }
   }

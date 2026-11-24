@@ -75,7 +75,7 @@ app.get('/webhook', (req, res) => {
   return res.sendStatus(403)
 })
 
-// Satu-satunya route POST /webhook — tanpa filter signature/phone number id.
+// Satu-satunya route POST /webhook, tanpa filter signature/phone number id.
 app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   try {
     // Step 0: normalisasi body mentah dari Vercel (Buffer/string) jadi objek.
@@ -205,7 +205,7 @@ app.delete('/api/link', requireUser, async (req, res) => {
   }
 })
 
-// Di Vercel, function diekspor dan dipanggil oleh runtime — jangan listen.
+// Di Vercel, function diekspor dan dipanggil oleh runtime. Jangan listen.
 if (!process.env.VERCEL) {
   const port = Number(process.env.PORT || config.port || 3001)
   app.listen(port, () => {

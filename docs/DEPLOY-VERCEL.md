@@ -24,7 +24,7 @@ Supabase (service_role) → Realtime → website Sakunode
 5. Di **API Setup → To**, tambahkan & verifikasi nomor HP penerima.
 6. **WhatsApp → Configuration → Webhook**:
    - Callback URL: `https://<project>.vercel.app/webhook`
-   - Verify token: bebas, misal `catatan-uang-secret` — samakan dengan `WHATSAPP_VERIFY_TOKEN`
+   - Verify token: bebas, misal `catatan-uang-secret`. Samakan dengan `WHATSAPP_VERIFY_TOKEN`
    - Verify & Save → subscribe field **`messages`**.
 
 > Beda dengan deploy lama di root repo yang memakai `/api/webhook`. Kalau root directory Vercel-mu `bot/`, URL-nya `/webhook`.
@@ -73,7 +73,7 @@ Contoh respons sehat:
 { "ok": true, "mode": "live", "botMode": "meta-cloud" }
 ```
 
-Lalu uji verifikasi webhook (ganti `TOKEN_KAMU` dengan verify token aslimu — jangan kirim ke sini):
+Lalu uji verifikasi webhook (ganti `TOKEN_KAMU` dengan verify token aslimu. Jangan kirim ke sini):
 
 ```bash
 curl "https://<project>.vercel.app/webhook?hub.mode=subscribe&hub.challenge=TEST123&hub.verify_token=TOKEN_KAMU"
@@ -101,7 +101,7 @@ Harus balas `TEST123`. Terakhir, kirim `masuk uang 10 ribu` dari nomor yang terd
 | Tidak ada balasan | Field `messages` belum di-subscribe, atau nomor belum di *To* |
 | OTP tidak sampai | Cek `WHATSAPP_TOKEN` + `PHONE_NUMBER_ID`, dan nomor harus terdaftar |
 | Token mati mendadak | Temporary token hanya 24 jam |
-| *Test Messaging Account Disabled* | Verifikasi bisnis Meta belum approve — di sisi Meta |
+| *Test Messaging Account Disabled* | Verifikasi bisnis Meta belum approve di sisi Meta |
 | Error CORS di website | `WEB_ORIGIN` belum sama dengan domain website |
 | Deploy gagal build | Pastikan Root Directory = `bot/` agar script `build` terbaca |
 

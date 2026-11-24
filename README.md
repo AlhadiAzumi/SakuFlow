@@ -1,4 +1,4 @@
-# Sakunode — Catatan Uang Harian
+# Sakunode | Catatan Uang Harian
 
 Aplikasi pencatat keuangan berbasis web (PWA) yang membantu pengguna melihat **ke mana uang mereka pergi**. Fokus utamanya bukan sekadar tabel saldo, tapi visualisasi alur uang dan insight mingguan yang mudah dipahami.
 
@@ -49,7 +49,7 @@ Untuk mengaktifkan **mode cloud + akun**:
    VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
    ```
 
-4. Buat tabel & aturan akses. **Cara tercepat (dan disarankan):** buka `supabase/setup.sql`, salin seluruh isinya, paste di **Supabase → SQL Editor**, lalu klik **Run**. File itu adalah versi lengkap — termasuk `GRANT` hak akses dan aktivasi Realtime. SQL ringkas di bawah hanya untuk gambaran:
+4. Buat tabel & aturan akses. **Cara tercepat (dan disarankan):** buka `supabase/setup.sql`, salin seluruh isinya, paste di **Supabase → SQL Editor**, lalu klik **Run**. File itu adalah versi lengkap, termasuk `GRANT` hak akses dan aktivasi Realtime. SQL ringkas di bawah hanya untuk gambaran:
 
 ```sql
 create table if not exists public.transactions (
@@ -191,7 +191,7 @@ Singkatnya:
 5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `ringkasan`, dll.
 6. Tiap `message.id` hanya diproses sekali. Webhook dilindungi HMAC-SHA256.
 
-Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true` — balasan bot muncul di terminal.
+Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true`. Balasan bot muncul di terminal.
 
 ## Ide lanjutan
 

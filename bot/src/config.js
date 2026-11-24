@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv'
 
-// Selama ini .env tidak pernah dibaca — ini yang bikin mode selalu dry-run.
+// Selama ini .env tidak pernah dibaca. Ini yang bikin mode selalu dry-run.
 // Path di-resolve relatif ke file ini, jadi tetap bot/.env walau dijalankan dari folder lain.
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) })
 

@@ -49,7 +49,7 @@
 
     <h3>1. Data yang kami kumpulkan</h3>
     <ul>
-      <li><strong>Akun:</strong> alamat email dan data autentikasi. Kami tidak menyimpan kata sandi — autentikasi dikelola oleh Supabase Auth.</li>
+      <li><strong>Akun:</strong> alamat email dan data autentikasi. Kami tidak menyimpan kata sandi. Autentikasi dikelola oleh Supabase Auth.</li>
       <li><strong>Data keuangan:</strong> jenis transaksi, nominal, kategori, tanggal, catatan opsional, batas budget per kategori, dan target tabungan.</li>
       <li><strong>WhatsApp:</strong> nomor telepon, kode OTP, isi pesan yang kamu kirim ke bot, dan ID pesan WhatsApp (hanya untuk mencegah pemrosesan ganda).</li>
       <li><strong>Perangkat:</strong> pada mode lokal, data tersimpan di <code>localStorage</code> browser kamu. Kami tidak memakai iklan, pelacak, atau analitik pihak ketiga.</li>
@@ -65,7 +65,7 @@
     <p>Data disimpan sampai kamu menghapusnya. Kamu bisa mengunduh data (JSON) dan menghapus data lokal lewat menu <strong>Setelan</strong>. Untuk menghapus data cloud, hubungi kami. Kode OTP dihapus setelah verifikasi.</p>
 
     <h3>5. Keamanan</h3>
-    <p>Akses dibatasi dengan <strong>Row Level Security (RLS)</strong> — hanya pemilik akun yang bisa membaca datanya. Webhook WhatsApp diverifikasi dengan tanda tangan <strong>HMAC-SHA256</strong>.</p>
+    <p>Akses dibatasi dengan <strong>Row Level Security (RLS)</strong>. Hanya pemilik akun yang bisa membaca datanya. Webhook WhatsApp diverifikasi dengan tanda tangan <strong>HMAC-SHA256</strong>.</p>
 
     <h3>6. Hak kamu</h3>
     <p>Kamu berhak mengakses, mengubah, mengunduh, atau meminta penghapusan data pribadi kamu.</p>

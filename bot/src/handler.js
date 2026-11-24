@@ -190,7 +190,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
     })
     const category = getCategory(parsed.type, parsed.category)
     // Transaksi sudah tersimpan. Kalau rekap gagal, jangan sampai user
-    // dikabari "gagal menyimpan" — kirim konfirmasi dengan rekap kosong.
+    // dikabari "gagal menyimpan". Kirim konfirmasi dengan rekap kosong.
     let totals = { income: 0, expense: 0, count: 0 }
     try {
       totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
@@ -200,7 +200,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
     await reply([
       `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
       `${rupiah(parsed.amount)} • ${category.label}`,
-      `Total bulan ini — masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
+      `Total bulan ini: masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
       'Cek websitenya, datanya langsung muncul.',
     ].join('\n'))
     return { type: 'transaction', ok: true, phone, userId, amount: parsed.amount, category: parsed.category }

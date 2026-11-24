@@ -1,4 +1,4 @@
-# Bot WhatsApp — Catatan Uang Harian (Meta Cloud API)
+# Bot WhatsApp | Catatan Uang Harian (Meta Cloud API)
 
 Bot ini menerima chat seperti **"masuk uang 500 ribu"**, lalu menulis transaksi ke database Supabase yang **sama** dengan website. Karena website memakai Supabase Realtime, catatannya langsung muncul tanpa refresh.
 
@@ -168,7 +168,7 @@ Catatan: bot bersifat **satu arah**. Pesan dan perintah diproses, tetapi bot tid
 
 | Method | Path | Fungsi | Auth |
 | --- | --- | --- | --- |
-| GET | `/health` | Cek status bot | – |
+| GET | `/health` | Cek status bot | tidak ada |
 | GET | `/webhook` | Verifikasi `hub.challenge` Meta | `WHATSAPP_VERIFY_TOKEN` |
 | POST | `/webhook` | Terima pesan WhatsApp | HMAC `X-Hub-Signature-256` |
 | POST | `/api/link/request` | Kirim OTP | Bearer token Supabase |
@@ -200,7 +200,7 @@ curl -X POST http://localhost:3001/webhook ^
 | Verifikasi webhook `403` | `hub.verify_token` beda dengan `WHATSAPP_VERIFY_TOKEN` |
 | Webhook `401` | `WHATSAPP_APP_SECRET` salah / header HMAC tidak ada |
 | OTP tidak sampai | Cek `WHATSAPP_TOKEN`, `PHONE_NUMBER_ID`, dan nomor harus terdaftar di **API Setup → To** |
-| *Test Messaging Account* `Disabled` | Verifikasi bisnis Meta belum approve — di sisi Meta, bukan bug aplikasi |
+| *Test Messaging Account* `Disabled` | Verifikasi bisnis Meta belum approve di sisi Meta, bukan bug aplikasi |
 | `Failed to fetch` di website | Bot belum jalan atau origin belum masuk `WEB_ORIGIN` |
 | REST Supabase `403` | Jalankan ulang `supabase/setup.sql` untuk GRANT |
 | `mode` tetap `dry-run` | `BOT_DRY_RUN` bukan `false`, atau kredensial Supabase kosong |

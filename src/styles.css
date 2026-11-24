@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ================================================================
-   Sakunode — Light-Mode Fintech SaaS Design System
+   Sakunode | Light-Mode Fintech SaaS Design System
    ================================================================ */
 
 :root {
@@ -1211,7 +1211,7 @@ code {
 }
 
 /* ================================================================
-   Sakunode — Pixel Ledger Layer
+   Sakunode | Pixel Ledger Layer
    Detail 8-bit dipakai sebagai aksen, bukan mengganti identitas glass UI.
    ================================================================ */
 
@@ -1624,7 +1624,7 @@ code {
 }
 
 /* ================================================================
-   Sakunode — Dashboard Workbench
+   Sakunode | Dashboard Workbench
    Layout sidebar + kartu tegas, tetap memakai palet dan pixel accent.
    ================================================================ */
 

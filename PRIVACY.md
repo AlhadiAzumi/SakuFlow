@@ -1,4 +1,4 @@
-# Kebijakan Privasi — Sakunode
+# Kebijakan Privasi | Sakunode
 
 **Terakhir diperbarui:** 21 November 2026
 
@@ -10,7 +10,7 @@ Sakunode adalah aplikasi pencatat keuangan berbasis web (PWA) dan bot WhatsApp y
 
 ### 1. Data yang kami kumpulkan
 
-- **Akun**: alamat email dan data autentikasi. Kami tidak menyimpan kata sandi kamu — autentikasi dikelola oleh Supabase Auth.
+- **Akun**: alamat email dan data autentikasi. Kami tidak menyimpan kata sandi kamu. Autentikasi dikelola oleh Supabase Auth.
 - **Data keuangan**: jenis transaksi (uang masuk/keluar), nominal, kategori, tanggal, catatan opsional, batas budget per kategori, dan target tabungan.
 - **WhatsApp**: nomor telepon, kode verifikasi (OTP), isi pesan yang kamu kirim ke bot, dan ID pesan WhatsApp (hanya untuk mencegah pesan diproses dua kali).
 - **Perangkat**: jika kamu memakai mode lokal, data disimpan di `localStorage` browser kamu sendiri. Kami **tidak** memakai iklan, pelacak, atau analitik pihak ketiga.
@@ -29,7 +29,7 @@ Data disimpan sampai kamu menghapusnya. Kamu bisa mengunduh data dalam bentuk JS
 
 ### 5. Keamanan
 
-Akses data dibatasi dengan **Row Level Security (RLS)** — hanya pemilik akun yang dapat membaca dan mengubah datanya. Webhook WhatsApp diverifikasi dengan tanda tangan **HMAC-SHA256**.
+Akses data dibatasi dengan **Row Level Security (RLS)**. Hanya pemilik akun yang dapat membaca dan mengubah datanya. Webhook WhatsApp diverifikasi dengan tanda tangan **HMAC-SHA256**.
 
 ### 6. Hak kamu
 
@@ -76,7 +76,7 @@ Data is kept until you delete it. You can export your data as JSON and clear loc
 
 ### 5. Security
 
-Access is restricted with **Row Level Security (RLS)** — only the account owner can read or modify their data. The WhatsApp webhook is verified with an **HMAC-SHA256** signature.
+Access is restricted with **Row Level Security (RLS)**. Only the account owner can read or modify their data. The WhatsApp webhook is verified with an **HMAC-SHA256** signature.
 
 ### 6. Your rights
 

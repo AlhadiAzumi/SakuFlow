@@ -193,7 +193,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
-              Catat uang masuk dan keluar cukup lewat chat. Lihat ke mana uangmu pergi lewat diagram alur yang enak dibaca — tanpa ribet, tanpa spreadsheet.
+              Catat uang masuk dan keluar cukup lewat chat. Lihat ke mana uangmu pergi lewat diagram alur yang enak dibaca. Tanpa ribet, tanpa spreadsheet.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -354,7 +354,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <SectionHeading
             title="Kelola Arus Kas dengan Cara yang"
             accent="Paling Mudah"
-            desc="Satu alur kerja yang bisa dipakai siapa saja — tinggal pilih yang paling mirip denganmu."
+            desc="Satu alur kerja yang bisa dipakai siapa saja. Tinggal pilih yang paling mirip denganmu."
           />
 
           <div className="mt-9 flex flex-wrap justify-center gap-2">

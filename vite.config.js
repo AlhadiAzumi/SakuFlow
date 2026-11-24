@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['iconsakunode.svg', 'icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Sakunode — Catatan Uang Harian & Visualisasi Arus Kas',
+        name: 'Sakunode | Catatan Uang Harian & Visualisasi Arus Kas',
         short_name: 'Sakunode',
         description: 'Catat keuangan harian dengan cepat lewat web dan bot WhatsApp, lalu lihat ke mana uangmu pergi.',
         theme_color: '#2563EB',
