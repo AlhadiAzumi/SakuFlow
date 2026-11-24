@@ -50,7 +50,7 @@ function Toast({ toast }) {
 
 export default function App() {
   const {
-    mode, user, authLoading, dataLoading, transactions, lastSyncedTx, settings, toast,
+    mode, user, authLoading, dataLoading, transactions, lastSyncedTx, settings, profile, toast,
     addTransaction, updateTransaction, deleteTransaction, showToast,
   } = useApp()
 
@@ -165,7 +165,8 @@ export default function App() {
   }
 
   const firstName = (user?.email || '').split('@')[0] || 'teman'
-  const displayName = mode === 'local' ? 'teman' : firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const displayName = profile.username
+    || (mode === 'local' ? 'teman' : firstName.charAt(0).toUpperCase() + firstName.slice(1))
 
   return (
     <div className={`app-shell pixel-app dash-shell${sidebarOpen ? ' is-sidebar-open' : ''}`}>
@@ -178,9 +179,11 @@ export default function App() {
         mode={mode}
         displayName={displayName}
         email={user?.email || ''}
+        avatar={profile.avatar}
         lastSyncedTx={lastSyncedTx}
         syncTick={syncTick}
         onOpenAdd={openAdd}
+        onOpenProfile={() => switchTab('settings')}
         onHome={() => { setView('landing'); setSidebarOpen(false) }}
         onClose={() => setSidebarOpen(false)}
       />
@@ -211,9 +214,17 @@ export default function App() {
               {mode === 'cloud' && (
                 <span className="live-badge" title="Data tersinkron langsung"><i /> Live</span>
               )}
-              <div className="user-chip" title={mode === 'cloud' ? user?.email : 'Mode lokal'}>
-                {mode === 'cloud' ? displayName.charAt(0).toUpperCase() : <PixelIcon name="house" size={14} />}
-              </div>
+              <button
+                type="button"
+                className="user-chip"
+                onClick={() => switchTab('settings')}
+                title="Buka profil & setelan"
+                aria-label="Buka profil & setelan"
+              >
+                {profile.avatar
+                  ? <img src={profile.avatar} alt="" />
+                  : mode === 'cloud' ? displayName.charAt(0).toUpperCase() : <PixelIcon name="house" size={14} />}
+              </button>
             </div>
           </div>
         </header>

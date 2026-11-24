@@ -4,8 +4,10 @@ import { isCloudMode, supabase } from '../lib/supabase'
 
 const STORAGE_KEY = 'catatan-uang:transactions:v1'
 const SETTINGS_KEY = 'catatan-uang:settings:v1'
+const PROFILE_KEY = 'catatan-uang:profiles:v1'
 
 const defaultSettings = { budgets: {}, savingsTarget: 0 }
+const defaultProfile = { username: '', avatar: '' }
 
 export const AppContext = createContext(null)
 
@@ -54,12 +56,38 @@ const writeSettings = (settings) => {
   }
 }
 
+const readProfiles = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}')
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+const readProfile = (key) => {
+  const profile = readProfiles()[key]
+  return {
+    username: typeof profile?.username === 'string' ? profile.username : '',
+    avatar: typeof profile?.avatar === 'string' ? profile.avatar : '',
+  }
+}
+
+const writeProfile = (key, profile) => {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...readProfiles(), [key]: profile }))
+  } catch {
+    // Foto profil bisa saja terlalu besar untuk localStorage; state tetap dipakai.
+  }
+}
+
 export function AppProvider({ children }) {
   const [session, setSession] = useState(null)
   const [authLoading, setAuthLoading] = useState(isCloudMode)
   const [transactions, setTransactions] = useState([])
   const [dataLoading, setDataLoading] = useState(true)
   const [settings, setSettings] = useState(defaultSettings)
+  const [profile, setProfile] = useState(defaultProfile)
   const [toast, setToast] = useState(null)
   const [lastSyncedTx, setLastSyncedTx] = useState(null)
 
@@ -116,6 +144,21 @@ export function AppProvider({ children }) {
   }, [showToast])
 
   const userId = session?.user?.id
+
+  // Nama & foto profil tersimpan di metadata akun Supabase. Cache lokal dipakai
+  // untuk mode lokal dan sebagai fallback kalau metadata belum tersedia.
+  const metadataName = session?.user?.user_metadata?.display_name
+  const metadataAvatar = session?.user?.user_metadata?.avatar_url
+  useEffect(() => {
+    const key = userId || 'local'
+    const cached = readProfile(key)
+    setProfile(userId
+      ? {
+          username: typeof metadataName === 'string' && metadataName.trim() ? metadataName : cached.username,
+          avatar: typeof metadataAvatar === 'string' && metadataAvatar ? metadataAvatar : cached.avatar,
+        }
+      : cached)
+  }, [userId, metadataName, metadataAvatar])
 
   useEffect(() => {
     if (!userId) {
@@ -258,6 +301,22 @@ export function AppProvider({ children }) {
     return next
   }, [settings, userId])
 
+  const updateProfile = useCallback(async (patch) => {
+    const username = String(patch?.username ?? '').trim().slice(0, 24)
+    if (!username) throw new Error('Nama profil tidak boleh kosong.')
+    const next = { username, avatar: typeof patch?.avatar === 'string' ? patch.avatar : '' }
+
+    if (isCloudMode && userId) {
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: next.username, avatar_url: next.avatar || null },
+      })
+      if (error) throw error
+    }
+    writeProfile(userId || 'local', next)
+    setProfile(next)
+    return next
+  }, [userId])
+
   const buildRecord = useCallback((payload) => ({
     id: createId(),
     user_id: userId || 'local',
@@ -364,6 +423,7 @@ export function AppProvider({ children }) {
     const payload = {
       exported_at: new Date().toISOString(),
       mode: isCloudMode ? 'cloud' : 'local',
+      profile,
       settings,
       transactions,
     }
@@ -376,7 +436,7 @@ export function AppProvider({ children }) {
     link.click()
     link.remove()
     URL.revokeObjectURL(url)
-  }, [transactions, settings])
+  }, [transactions, settings, profile])
 
   const clearLocalData = useCallback(() => {
     writeLocal([])
@@ -395,6 +455,8 @@ export function AppProvider({ children }) {
     lastSyncedTx,
     settings,
     updateSettings,
+    profile,
+    updateProfile,
     toast,
     showToast,
     addTransaction,
@@ -407,7 +469,7 @@ export function AppProvider({ children }) {
     exportData,
     clearLocalData,
   }), [
-    authLoading, dataLoading, transactions, lastSyncedTx, settings, updateSettings, toast, showToast,
+    authLoading, dataLoading, transactions, lastSyncedTx, settings, updateSettings, profile, updateProfile, toast, showToast,
     addTransaction, updateTransaction, deleteTransaction,
     signIn, signUp, signInWithGoogle, signOut, exportData, clearLocalData,
     session?.user,

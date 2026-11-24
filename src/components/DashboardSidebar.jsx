@@ -12,9 +12,11 @@ export default function DashboardSidebar({
   mode,
   displayName,
   email,
+  avatar,
   lastSyncedTx,
   syncTick,
   onOpenAdd,
+  onOpenProfile,
   onHome,
   onClose,
 }) {
@@ -78,9 +80,17 @@ export default function DashboardSidebar({
 
         <div className="dash-sidebar__account">
           <div className="dash-sidebar__identity">
-            <span className="dash-sidebar__avatar">
-              {mode === 'cloud' ? displayName.charAt(0).toUpperCase() : <PixelIcon name="house" size={15} />}
-            </span>
+            <button
+              type="button"
+              className="dash-sidebar__avatar"
+              onClick={onOpenProfile}
+              title="Ubah foto profil & nama"
+              aria-label="Ubah foto profil & nama"
+            >
+              {avatar
+                ? <img src={avatar} alt="" />
+                : mode === 'cloud' ? displayName.charAt(0).toUpperCase() : <PixelIcon name="house" size={15} />}
+            </button>
             <div>
               <strong>{displayName}</strong>
               <span>{mode === 'cloud' ? email : 'Perangkat ini'}</span>

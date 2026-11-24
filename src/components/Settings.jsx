@@ -1,6 +1,7 @@
 import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
 import BudgetSettings from './BudgetSettings'
+import ProfilePanel from './ProfilePanel'
 import WhatsAppLink from './WhatsAppLink'
 
 export default function Settings() {
@@ -28,6 +29,8 @@ export default function Settings() {
           <p>Atur akun, data, dan bot WhatsApp dalam satu tempat.</p>
         </div>
       </div>
+
+      <ProfilePanel />
 
       <section className="panel">
         <h2 className="panel__title">Akun &amp; data</h2>
