@@ -18,5 +18,6 @@ const ICONS = {
 
 export default function CategoryIcon({ category, size = 16, className, title }) {
   const key = category?.icon || category?.id
-  return <PixelIcon name={ICONS[key] || key || 'other'} size={size} className={className} title={title} />
+  const label = title || category?.label
+  return <PixelIcon name={ICONS[key] || key || 'other'} size={size} className={className} title={label} />
 }

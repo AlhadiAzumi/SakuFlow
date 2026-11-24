@@ -1,6 +1,7 @@
 import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
 import BudgetSettings from './BudgetSettings'
+import IconLegend from './IconLegend'
 import ProfilePanel from './ProfilePanel'
 import WhatsAppLink from './WhatsAppLink'
 
@@ -69,6 +70,8 @@ export default function Settings() {
       </section>
 
       <WhatsAppLink />
+
+      <IconLegend />
 
       <BudgetSettings />
 
