@@ -4,11 +4,11 @@ import CategoryIcon from './CategoryIcon'
 import { formatRupiah, formatRupiahCompact } from '../lib/format'
 
 const W = 900
-const LEFT_X = 28
-const LEFT_W = 172
-const RIGHT_X = 686
-const RIGHT_W = 14
-const GAP = 12
+const LEFT_X = 24
+const LEFT_W = 168
+const RIGHT_X = 690
+const RIGHT_W = 16
+const GAP = 14
 
 function buildItems(income, expenseItems) {
   const items = expenseItems
@@ -91,7 +91,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
   const startY = top + Math.max(0, (usable - usedHeight) / 2)
   const leftHeight = Math.max(48, usedHeight)
   const leftTop = startY + (usedHeight - leftHeight) / 2
-  const mx = (LEFT_X + LEFT_W + RIGHT_X) / 2
+  const midX = (LEFT_X + LEFT_W + RIGHT_X) / 2
 
   let rightCursor = startY
   let leftCursor = leftTop
@@ -109,6 +109,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
     <div className="flow-chart">
       <div className="flow-chart__heading">
         <div>
+          <span className="pixel-eyebrow">PETA ALAH UANG / BULAN INI</span>
           <h2>Ke mana uangmu pergi?</h2>
         </div>
         <div className="flow-chart__total">
@@ -120,66 +121,98 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
         </div>
       </div>
 
+      <p className="flow-chart__legend">
+        <PixelIcon name="waypoints" size={13} />
+        Pita makin lebar = nominal makin besar. Kotak kiri sumber uang, kotak kanan tujuannya.
+      </p>
+
       <div className="flow-chart__desktop">
-        <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-label="Diagram alur uang per kategori" preserveAspectRatio="xMidYMid meet">
+        <svg
+          viewBox={`0 0 ${W} ${height}`}
+          role="img"
+          aria-label="Peta alur uang per kategori berbentuk pita kotak"
+          preserveAspectRatio="xMidYMid meet"
+          shapeRendering="crispEdges"
+        >
           <defs>
-            <linearGradient id="sourceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38BDF8" />
-              <stop offset="100%" stopColor="#1D4ED8" />
-            </linearGradient>
+            <pattern id="flowGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M 16 0 H 0 V 16" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+            </pattern>
           </defs>
+          <rect x="0" y="0" width={W} height={height} fill="url(#flowGrid)" opacity="0.5" />
 
           {nodes.map((node) => {
             const x1 = LEFT_X + LEFT_W
-            const y1 = node.leftTopSegment
-            const y2 = node.rightTop
-            const path = `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${RIGHT_X} ${y2} L ${RIGHT_X} ${y2 + node.h} C ${mx} ${y2 + node.h}, ${mx} ${y1 + node.leftH}, ${x1} ${y1 + node.leftH} Z`
+            const band = Math.max(4, Math.min(10, node.leftH * 0.65))
+            const y1 = node.leftTopSegment + node.leftH / 2 - band / 2
+            const y2 = node.rightTop + node.h / 2 - band / 2
+            const path = `M ${x1} ${y1} H ${midX} V ${y2} H ${RIGHT_X} V ${y2 + band} H ${midX} V ${y1 + band} H ${x1} Z`
             return (
-              <path
-                key={`link-${node.id}`}
-                d={path}
-                fill={node.color}
-                fillOpacity="0.26"
-                className="flow-ribbon"
-              >
-                <title>{`${node.label}: ${formatRupiah(node.amount)}`}</title>
-              </path>
+              <g key={`link-${node.id}`}>
+                <path d={path} fill={node.color} fillOpacity="0.26" className="flow-ribbon">
+                  <title>{`${node.label}: ${formatRupiah(node.amount)}`}</title>
+                </path>
+                {[0.2, 0.45, 0.7].map((ratio) => (
+                  <rect
+                    key={`tick-a-${ratio}-${node.id}`}
+                    x={x1 + (midX - x1) * ratio}
+                    y={y1 + band / 2 - 2}
+                    width="4"
+                    height="4"
+                    fill="#ffffff"
+                    fillOpacity="0.5"
+                  />
+                ))}
+                {[0.35, 0.65].map((ratio) => (
+                  <rect
+                    key={`tick-b-${ratio}-${node.id}`}
+                    x={midX + (RIGHT_X - midX) * ratio}
+                    y={y2 + band / 2 - 2}
+                    width="4"
+                    height="4"
+                    fill="#ffffff"
+                    fillOpacity="0.5"
+                  />
+                ))}
+              </g>
             )
           })}
 
-          <rect
-            x={LEFT_X}
-            y={leftTop}
-            width={LEFT_W}
-            height={leftHeight}
-            rx="16"
-            fill="url(#sourceGradient)"
-          />
+          <rect x={LEFT_X + 6} y={leftTop + 6} width={LEFT_W} height={leftHeight} fill="#0F172A" opacity="0.16" />
+          <rect x={LEFT_X} y={leftTop} width={LEFT_W} height={leftHeight} fill="#2563EB" />
+          <rect x={LEFT_X + 5} y={leftTop + 5} width={LEFT_W - 10} height={leftHeight - 10} fill="none" stroke="#38BDF8" strokeWidth="2" />
           <text x={LEFT_X + LEFT_W / 2} y={leftTop + leftHeight / 2 - 8} textAnchor="middle" className="flow-svg__source-label">
-            {sourceLabel}
+            SUMBER UANG
           </text>
-          <text x={LEFT_X + LEFT_W / 2} y={leftTop + leftHeight / 2 + 20} textAnchor="middle" className="flow-svg__source-value">
+          <text x={LEFT_X + LEFT_W / 2} y={leftTop + leftHeight / 2 + 18} textAnchor="middle" className="flow-svg__source-value">
             {formatRupiahCompact(total)}
           </text>
 
           {nodes.map((node) => (
             <g key={`node-${node.id}`}>
+              <rect x={RIGHT_X + 5} y={node.rightTop + 5} width={RIGHT_W} height={node.h} fill="#0F172A" opacity="0.16" />
+              <rect x={RIGHT_X} y={node.rightTop} width={RIGHT_W} height={node.h} fill={node.color} />
               <rect
-                x={RIGHT_X}
-                y={node.rightTop}
-                width={RIGHT_W}
-                height={node.h}
-                rx="7"
-                fill={node.color}
+                x={RIGHT_X + RIGHT_W + 10}
+                y={node.rightTop + node.h / 2 - 14}
+                width="28"
+                height="28"
+                fill="#ffffff"
+                stroke={node.color}
+                strokeWidth="2"
               />
-              <circle cx={RIGHT_X + RIGHT_W + 20} cy={node.rightTop + node.h / 2} r="13" fill={node.color} fillOpacity="0.14" />
-              <foreignObject x={RIGHT_X + RIGHT_W + 8} y={node.rightTop + node.h / 2 - 12} width="24" height="24">
-                <div className="flow-svg__icon" style={{ color: node.color }}><CategoryIcon category={node} size={14} /></div>
+              <foreignObject
+                x={RIGHT_X + RIGHT_W + 16}
+                y={node.rightTop + node.h / 2 - 8}
+                width="16"
+                height="16"
+              >
+                <div className="flow-svg__icon" style={{ color: node.color }}><CategoryIcon category={node} size={16} /></div>
               </foreignObject>
-              <text x={RIGHT_X + RIGHT_W + 44} y={node.rightTop + node.h / 2 - 2} className="flow-svg__label">
+              <text x={RIGHT_X + RIGHT_W + 46} y={node.rightTop + node.h / 2 - 2} className="flow-svg__label">
                 {node.label}
               </text>
-              <text x={RIGHT_X + RIGHT_W + 44} y={node.rightTop + node.h / 2 + 17} className="flow-svg__value">
+              <text x={RIGHT_X + RIGHT_W + 46} y={node.rightTop + node.h / 2 + 17} className="flow-svg__value">
                 {formatRupiah(node.amount)}
               </text>
             </g>
