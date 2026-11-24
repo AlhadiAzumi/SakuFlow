@@ -394,14 +394,19 @@ export function AppProvider({ children }) {
     if (error) throw error
   }, [])
 
-  const signUp = useCallback(async (email, password) => {
-    if (!isCloudMode) return
-    const { error } = await supabase.auth.signUp({
+  const signUp = useCallback(async (email, password, displayName = '') => {
+    if (!isCloudMode) return { needsConfirmation: false }
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        data: displayName ? { display_name: displayName.trim().slice(0, 24) } : {},
+        emailRedirectTo: window.location.origin,
+      },
     })
     if (error) throw error
+    // Tanpa sesi berarti Supabase masih meminta verifikasi email.
+    return { needsConfirmation: !data?.session }
   }, [])
 
   const signInWithGoogle = useCallback(async () => {
