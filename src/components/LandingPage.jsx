@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BotCommands from './BotCommands'
 import PixelIcon from './PixelIcon'
 import LogoMark from './LogoMark'
 import Reveal from './Reveal'
@@ -7,6 +8,7 @@ const NAV = [
   { label: 'Fitur', href: '#fitur' },
   { label: 'Cara Kerja', href: '#cara-kerja' },
   { label: 'Bot WhatsApp', href: '#bot-whatsapp' },
+  { label: 'Perintah Bot', href: '#perintah-bot' },
   { label: 'Alur Dana', href: '#alur-dana' },
 ]
 
@@ -49,21 +51,21 @@ const DEMO_COMMANDS = [
   {
     label: 'Kopi pagi',
     input: 'keluar 25rb buat kopi',
-    title: 'Uang keluar tersimpan',
+    title: 'Tersimpan di dashboard',
     amount: 'Rp25.000 • Makan & Minum',
-    note: 'Cek websitenya, datanya langsung muncul.',
+    note: 'Bot tidak membalas chat. Cek hasilnya di website.',
   },
   {
     label: 'Gaji masuk',
     input: 'masuk gaji 3,5 jt',
-    title: 'Uang masuk tercatat',
+    title: 'Tersimpan di dashboard',
     amount: 'Rp3.500.000 • Gaji',
-    note: 'Saldo bulan ini langsung bertambah.',
+    note: 'Bot tidak membalas chat. Saldo langsung bertambah.',
   },
   {
     label: 'Naik ojol',
     input: 'keluar 18rb transport',
-    title: 'Uang keluar tersimpan',
+    title: 'Tersimpan di dashboard',
     amount: 'Rp18.000 • Transport',
     note: 'Kategori otomatis terdeteksi dari pesanmu.',
   },
@@ -120,6 +122,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
 
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
+  const footerHref = (link) => {
+    if (link === 'Kebijakan Privasi') return 'https://github.com/AlhadiAzumi/SakuFlow/blob/main/PRIVACY.md'
+    if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/SakuFlow'
+    return NAV.find((item) => item.label === link)?.href || '#top'
+  }
+  const isExternalLink = (link) => link === 'Kebijakan Privasi' || link === 'GitHub'
 
   return (
     <div id="top" className="pixel-landing min-h-screen bg-white text-slate-900">
@@ -212,7 +220,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <div>
                   <p className="text-[13px] font-extrabold leading-tight">Bot WhatsApp</p>
                   <p className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online sekarang
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Membaca pesan
                   </p>
                 </div>
               </div>
@@ -240,6 +248,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                   <span>{DEMO_COMMANDS[demo].note}</span>
                 </div>
               </div>
+              <p className="mt-3 flex items-start gap-1.5 text-[10px] font-semibold leading-relaxed text-slate-500">
+                <PixelIcon name="info" size={12} className="mt-0.5 shrink-0 text-blue-600" />
+                Pratinjau hasil di dashboard, bukan balasan WhatsApp.
+              </p>
             </article>
 
             {/* Tengah: kartu utama */}
@@ -469,6 +481,20 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
         </Reveal>
       </section>
 
+      {/* ---------- 5b. Daftar perintah bot ---------- */}
+      <section id="perintah-bot" className="scroll-mt-28 px-4 py-24 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto max-w-5xl">
+          <SectionHeading
+            title="Perintah Bot WhatsApp"
+            accent="Yang Bisa Kamu Kirim"
+            desc="Tidak perlu hafal format khusus. Ketik seperti bicara normal, lalu lihat hasilnya di dashboard."
+          />
+          <div className="soft-lift mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(37,99,235,0.1)] sm:p-8">
+            <BotCommands />
+          </div>
+        </Reveal>
+      </section>
+
       {/* ---------- 6. Diagram node aliran uang ---------- */}
       <section id="alur-dana" className="scroll-mt-28 px-4 py-24 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-6xl">
@@ -526,10 +552,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Pencatatan Selesai dalam <span className="text-gradient">Hitungan Detik</span>
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-500">
-              Tidak perlu membuka banyak menu. Ketik satu kalimat, SakuFlow menyimpan transaksinya dan langsung mengirim struk konfirmasi.
+              Tidak perlu membuka banyak menu. Ketik satu kalimat, SakuFlow langsung menyimpannya dan menampilkannya di dashboard.
             </p>
             <div className="mt-7 flex flex-wrap gap-2.5">
-              {['Auto-kategorisasi', 'Struk instan', 'Sinkron realtime', 'Tanpa ribet'].map((chip) => (
+              {['Auto-kategorisasi', 'Tersimpan instan', 'Sinkron realtime', 'Tanpa ribet'].map((chip) => (
                 <span key={chip} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[11.5px] font-bold text-slate-600">
                   <PixelIcon name="check" size={13} className="text-blue-600" /> {chip}
                 </span>
@@ -607,7 +633,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </a>
           </div>
           {[
-            { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Alur Dana'] },
+            { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
             { title: 'Perusahaan', links: ['Tentang SakuFlow', 'Kebijakan Privasi', 'GitHub'] },
             { title: 'Bantuan', links: ['Panduan Mulai', 'Kontak', 'Status Layanan'] },
           ].map((col) => (
@@ -617,14 +643,8 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 {col.links.map((link) => (
                   <li key={link}>
                     <a
-                      href={
-                        link === 'Kebijakan Privasi'
-                          ? 'https://github.com/AlhadiAzumi/SakuFlow/blob/main/PRIVACY.md'
-                          : link === 'GitHub'
-                            ? 'https://github.com/AlhadiAzumi/SakuFlow'
-                            : '#top'
-                      }
-                      target={link === 'Fitur' || link === 'Cara Kerja' || link === 'Bot WhatsApp' || link === 'Alur Dana' ? undefined : '_blank'}
+                      href={footerHref(link)}
+                      target={isExternalLink(link) ? '_blank' : undefined}
                       rel="noreferrer"
                       className="text-[11.5px] font-medium text-slate-500 transition hover:text-blue-600"
                     >

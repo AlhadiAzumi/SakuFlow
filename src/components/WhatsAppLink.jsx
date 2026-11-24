@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import BotCommands from './BotCommands'
 import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
 import { supabase } from '../lib/supabase'
@@ -131,6 +132,8 @@ export default function WhatsAppLink() {
       <p className="whatsapp-panel__desc">
         Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di SakuFlow (bot tidak mengirim balasan chat).
       </p>
+
+      <BotCommands compact />
 
       {checking ? (
         <p className="whatsapp-panel__muted">Mengecek status koneksi…</p>
