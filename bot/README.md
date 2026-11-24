@@ -143,7 +143,7 @@ Panduan lengkap Meta Business + webhook ada di [`../docs/DEPLOY-VERCEL.md`](../d
 **Sekali linking:**
 
 1. Website → Setelan → **Kirim kode OTP**.
-2. Bot mengirim 6 digit lewat Cloud API.
+2. Kode 6 digit tampil di website (dan dikirim lewat Cloud API bila izin aktif).
 3. Balas di WA dengan kode tersebut → status jadi **Terhubung**.
 
 **Sehari-hari, tinggal chat:**
@@ -154,8 +154,15 @@ Panduan lengkap Meta Business + webhook ada di [`../docs/DEPLOY-VERCEL.md`](../d
 | `gaji 3,5 juta hari ini` | Pemasukan Rp3.500.000, kategori Gaji |
 | `keluar 25rb buat kopi` | Pengeluaran Rp25.000, kategori Makan & Minum |
 | `beli bensin 50 ribu kemarin` | Pengeluaran Rp50.000, kategori Transportasi |
-| `ringkasan` | Total masuk/keluar/sisa bulan ini |
-| `bantuan` | Daftar contoh perintah |
+| `keluar 18rb transport tanggal 12` | Pengeluaran tanggal 12 bulan ini |
+| `ringkasan` / `rekap` | Total masuk/keluar/sisa bulan ini |
+| `riwayat` | 5 catatan terakhir |
+| `status` | Status koneksi & jumlah catatan |
+| `hapus` / `clear` / `batal` | Hapus 1 catatan terakhir |
+| `hapus semua` / `clear all` | Hapus seluruh catatan (tidak bisa dibatalkan) |
+| `bantuan` / `menu` | Daftar perintah |
+
+Catatan: bot bersifat **satu arah**. Pesan dan perintah diproses, tetapi bot tidak mengirim balasan chat; hasilnya langsung terlihat di website.
 
 ## Endpoint API
 
@@ -201,6 +208,7 @@ curl -X POST http://localhost:3001/webhook ^
 ## Batasan saat ini
 
 - Parser masih berbasis aturan; kalimat sangat bebas belum selalu dipahami.
-- Belum bisa edit/hapus transaksi lewat WA (masih lewat website).
+- Bot tidak membalas chat WA (one-way); konfirmasi dan rekap hanya tampil di website.
+- Edit satu transaksi masih lewat website; penghapusan lewat WA hanya untuk catatan terakhir atau semua catatan.
 - Mode dry-run menyimpan data di memory, hilang saat bot dimatikan.
 - Nomor WA dipakai sebagai identitas; pastikan user melakukan verifikasi OTP.

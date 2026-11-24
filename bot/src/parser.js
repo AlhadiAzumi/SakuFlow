@@ -88,11 +88,12 @@ export function parseMessage(text, now = new Date()) {
   const lower = raw.toLowerCase()
 
   if (!raw) return { intent: 'unknown' }
-  if (/^(bantuan|help|panduan|\?|halo|hi|hai)$/.test(lower)) return { intent: 'help' }
-  if (/^(status|status koneksi|koneksi)$/.test(lower)) return { intent: 'status' }
-  if (/^(riwayat|terakhir|catatan terakhir|transaksi terakhir|history)$/.test(lower)) return { intent: 'history' }
-  if (/^(hapus|hapus catatan|hapus transaksi terakhir|batal|clear)$/.test(lower)) return { intent: 'deleteLast' }
-  if (/\b(ringkasan|rekap|summary|total bulan)\b/.test(lower)) return { intent: 'summary' }
+  if (/^(bantuan|help|panduan|panduan bot|perintah|daftar perintah|\?|halo|hi|hai|menu)$/.test(lower)) return { intent: 'help' }
+  if (/^(status|status koneksi|cek status|koneksi|cek koneksi)$/.test(lower)) return { intent: 'status' }
+  if (/^(riwayat|lihat riwayat|terakhir|5 terakhir|catatan terakhir|transaksi terakhir|history)$/.test(lower)) return { intent: 'history' }
+  if (/^(hapus semua|hapus semua catatan|hapus semua laporan|hapus semua transaksi|hapus semua riwayat|hapus semua data|clear all|clear semua|reset|reset semua)$/.test(lower)) return { intent: 'deleteAll' }
+  if (/^(hapus|hapus catatan|hapus transaksi terakhir|hapus terakhir|hapus 1|hapus satu|batal|batalkan|undo|clear)$/.test(lower)) return { intent: 'deleteLast' }
+  if (/\b(ringkasan|rekap|summary|total bulan ini|rekap bulan ini|ringkasan bulan ini)\b/.test(lower)) return { intent: 'summary' }
 
   const amount = extractAmount(lower)
   if (amount === null) return { intent: 'unknown' }
@@ -109,20 +110,23 @@ export function parseMessage(text, now = new Date()) {
 }
 
 export const HELP_TEXT = [
-  'Halo! Aku bot Catatan Uang Harian.',
+  'Halo! Aku bot SakuFlow.',
+  'Catatan: aku hanya membaca chatmu, tidak membalas pesan. Cek hasilnya di website SakuFlow.',
   '',
-  'Cara pakai, tinggal chat seperti:',
+  'Catat uang, tinggal chat seperti:',
   '• "masuk uang 500 ribu"',
   '• "keluar 25rb buat kopi"',
   '• "beli bensin 50 ribu kemarin"',
   '• "gaji 3,5 juta hari ini"',
+  '• "keluar 18rb transport tanggal 12"',
   '',
-  'Perintah lain:',
-  '• "ringkasan" — lihat total bulan ini',
-  '• "riwayat" — 5 catatan terakhir kamu',
-  '• "status" — cek koneksi WhatsApp & jumlah catatan',
-  '• "hapus" / "clear" — hapus 1 catatan terakhir (alias: "batal", "hapus catatan")',
-  '• "bantuan" — tampilkan pesan ini',
+  'Perintah:',
+  '• "ringkasan" / "rekap" — total uang masuk & keluar bulan ini',
+  '• "riwayat" — 5 catatan terakhir',
+  '• "status" — cek koneksi nomor & jumlah catatan',
+  '• "hapus" / "clear" / "batal" — hapus 1 catatan terakhir',
+  '• "hapus semua" / "clear all" — hapus seluruh catatan (tidak bisa dibatalkan)',
+  '• "bantuan" / "menu" — tampilkan pesan ini',
   '',
-  'Setiap catatan langsung muncul di website kamu.',
+  'Setiap perintah langsung muncul di website kamu.',
 ].join('\n')

@@ -21,13 +21,15 @@ async function buildGuideText(phone) {
   return [
     'Bot SakuFlow aktif.',
     status,
+    'Aku hanya membaca chat, tidak membalas. Hasilnya cek di website SakuFlow.',
     '',
     'Format catatan:',
     '• keluar 25rb kopi',
     '• masuk uang 500 ribu',
     '• ringkasan',
+    '• hapus semua',
     '',
-    'Ketik "bantuan" untuk panduan lengkap.',
+    'Ketik "bantuan" untuk daftar perintah lengkap.',
   ].join('\n')
 }
 
@@ -109,6 +111,25 @@ export async function handleMessage(message, { send = sendText } = {}) {
       ].join('\n'))
     }
     return { type: 'history', ok: true, phone, userId, count: items.length }
+  }
+
+  if (parsed.intent === 'deleteAll') {
+    const userId = await store.getLinkedUser(phone)
+    if (!userId) {
+      await reply('Nomor ini belum terhubung, jadi tidak ada catatan yang bisa dihapus. Hubungkan WhatsApp lewat Setelan dulu, ya.')
+      return { type: 'delete_all', ok: false, phone, reason: 'not_linked' }
+    }
+    const deleted = await store.deleteAllTransactions(userId)
+    if (!deleted) {
+      await reply('Belum ada catatan yang bisa dihapus. Kirim dulu misalnya "keluar 25rb kopi".')
+      return { type: 'delete_all', ok: true, phone, userId, deleted: 0 }
+    }
+    await reply([
+      `${deleted} catatan dihapus semuanya.`,
+      'Data di website juga ikut terhapus. Tindakan ini tidak bisa dibatalkan.',
+      'Ketik "riwayat" untuk memastikan catatan sudah kosong.',
+    ].join('\n'))
+    return { type: 'delete_all', ok: true, phone, userId, deleted }
   }
 
   if (parsed.intent === 'deleteLast') {

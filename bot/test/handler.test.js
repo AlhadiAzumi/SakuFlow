@@ -106,3 +106,23 @@ test('status, riwayat, dan hapus 1 transaksi terakhir bekerja untuk nomor terhub
   const emptyDelete = await collectReply('batal', phone)
   assert.match(emptyDelete, /Belum ada catatan yang bisa dihapus/)
 })
+
+test('clear all / hapus semua menghapus seluruh catatan milik nomor terhubung', async () => {
+  const phone = '6284444444444'
+  await store.requestLink('user-clear-all', phone, '222222')
+  await store.verifyOtp(phone, '222222')
+
+  await collectReply('keluar 10rb kopi', phone)
+  await collectReply('masuk gaji 2 juta', phone)
+  assert.match(await collectReply('status', phone), /Total catatan tersimpan: 2/)
+
+  const cleared = await collectReply('clear all', phone)
+  assert.match(cleared, /2 catatan dihapus semuanya/)
+  assert.match(cleared, /tidak bisa dibatalkan/)
+
+  assert.match(await collectReply('riwayat', phone), /Belum ada catatan tersimpan/)
+  assert.match(await collectReply('hapus semua', phone), /Belum ada catatan yang bisa dihapus/)
+
+  const notLinked = await collectReply('clear all', '6281111111111')
+  assert.match(notLinked, /belum terhubung/)
+})

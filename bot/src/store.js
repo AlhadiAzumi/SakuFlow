@@ -223,6 +223,24 @@ export async function deleteLastTransaction(userId) {
   return last
 }
 
+// Dipakai perintah "hapus semua"/"clear all": menghapus seluruh catatan user.
+export async function deleteAllTransactions(userId) {
+  if (!admin) {
+    const before = dryTransactions.length
+    for (let i = dryTransactions.length - 1; i >= 0; i -= 1) {
+      if (dryTransactions[i].user_id === userId) dryTransactions.splice(i, 1)
+    }
+    return before - dryTransactions.length
+  }
+  const { data, error } = await requireAdmin()
+    .from('transactions')
+    .delete()
+    .eq('user_id', userId)
+    .select('id')
+  if (error) throw error
+  return data?.length || 0
+}
+
 export async function resolveUser(accessToken) {
   if (!admin) return DEMO_USER
   const { data, error } = await requireAdmin().auth.getUser(accessToken)

@@ -45,19 +45,32 @@ test('kategori transport, tagihan, dan hiburan', () => {
 })
 
 test('perintah bantuan dan ringkasan', () => {
-  assert.equal(parseMessage('bantuan', NOW).intent, 'help')
-  assert.equal(parseMessage('ringkasan bulan ini', NOW).intent, 'summary')
-  assert.equal(parseMessage('halo', NOW).intent, 'help')
+  for (const text of ['bantuan', 'help', 'menu', 'daftar perintah', 'halo']) {
+    assert.equal(parseMessage(text, NOW).intent, 'help')
+  }
+  for (const text of ['ringkasan', 'ringkasan bulan ini', 'rekap', 'total bulan ini']) {
+    assert.equal(parseMessage(text, NOW).intent, 'summary')
+  }
 })
 
 test('perintah status, riwayat, dan hapus transaksi terakhir', () => {
-  assert.equal(parseMessage('status', NOW).intent, 'status')
-  assert.equal(parseMessage('riwayat', NOW).intent, 'history')
-  assert.equal(parseMessage('clear', NOW).intent, 'deleteLast')
-  assert.equal(parseMessage('hapus', NOW).intent, 'deleteLast')
-  assert.equal(parseMessage('HAPUS CATATAN', NOW).intent, 'deleteLast')
-  assert.equal(parseMessage('BATAL', NOW).intent, 'deleteLast')
-  assert.equal(parseMessage('hapus semua riwayat', NOW).intent, 'unknown')
+  for (const text of ['status', 'cek status', 'koneksi']) {
+    assert.equal(parseMessage(text, NOW).intent, 'status')
+  }
+  for (const text of ['riwayat', 'lihat riwayat', '5 terakhir', 'history']) {
+    assert.equal(parseMessage(text, NOW).intent, 'history')
+  }
+  for (const text of ['clear', 'hapus', 'HAPUS CATATAN', 'BATAL', 'batalkan', 'undo', 'hapus terakhir']) {
+    assert.equal(parseMessage(text, NOW).intent, 'deleteLast')
+  }
+  assert.equal(parseMessage('hai kemana uangku', NOW).intent, 'unknown')
+})
+
+test('perintah hapus semua memiliki banyak alias', () => {
+  for (const text of ['hapus semua', 'hapus semua catatan', 'hapus semua laporan', 'clear all', 'reset', 'HAPUS SEMUA TRANSAKSI']) {
+    assert.equal(parseMessage(text, NOW).intent, 'deleteAll')
+  }
+  assert.equal(parseMessage('hapus semua riwayat', NOW).intent, 'deleteAll')
 })
 
 test('pesan tanpa nominal tidak dikenali', () => {
