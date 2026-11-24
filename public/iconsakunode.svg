@@ -1,12 +1,12 @@
 <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="sakuflowBg" x1="12" y1="8" x2="88" y2="92" gradientUnits="userSpaceOnUse">
+    <linearGradient id="sakunodeBg" x1="12" y1="8" x2="88" y2="92" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#38BDF8" />
       <stop offset="55%" stop-color="#2B7FFF" />
       <stop offset="100%" stop-color="#2563EB" />
     </linearGradient>
 
-    <mask id="sakuflowWalletMask">
+    <mask id="sakunodeWalletMask">
       
       <rect x="25" y="24" width="50" height="50" rx="10" fill="white" />
       
@@ -25,14 +25,14 @@
   </defs>
 
   
-  <rect width="100" height="100" rx="26" fill="url(#sakuflowBg)" />
+  <rect width="100" height="100" rx="26" fill="url(#sakunodeBg)" />
 
   
-  <g mask="url(#sakuflowWalletMask)">
+  <g mask="url(#sakunodeWalletMask)">
     <rect x="25" y="24" width="50" height="50" rx="10" fill="white" />
   </g>
 
   
   <rect x="60.5" y="47.5" width="17.5" height="11" rx="5.5" fill="white" />
-  <circle cx="66" cy="53" r="2.5" fill="url(#sakuflowBg)" />
+  <circle cx="66" cy="53" r="2.5" fill="url(#sakunodeBg)" />
 </svg>

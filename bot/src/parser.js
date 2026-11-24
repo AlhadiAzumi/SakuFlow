@@ -110,8 +110,8 @@ export function parseMessage(text, now = new Date()) {
 }
 
 export const HELP_TEXT = [
-  'Halo! Aku bot SakuFlow.',
-  'Catatan: aku hanya membaca chatmu, tidak membalas pesan. Cek hasilnya di website SakuFlow.',
+  'Halo! Aku bot Sakunode.',
+  'Catatan: aku hanya membaca chatmu, tidak membalas pesan. Cek hasilnya di website Sakunode.',
   '',
   'Catat uang, tinggal chat seperti:',
   '• "masuk uang 500 ribu"',

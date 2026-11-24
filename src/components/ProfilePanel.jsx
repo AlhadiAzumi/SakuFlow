@@ -94,7 +94,7 @@ export default function ProfilePanel() {
       <div className="panel__header-row">
         <div>
           <h2 className="panel__title">Profil kamu</h2>
-          <p className="profile-panel__desc">Nama dan foto ini yang tampil di dashboard SakuFlow.</p>
+          <p className="profile-panel__desc">Nama dan foto ini yang tampil di dashboard Sakunode.</p>
         </div>
         <span className="pixel-eyebrow">IDENTITAS</span>
       </div>

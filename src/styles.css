@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ================================================================
-   SakuFlow — Light-Mode Fintech SaaS Design System
+   Sakunode — Light-Mode Fintech SaaS Design System
    ================================================================ */
 
 :root {
@@ -1211,7 +1211,7 @@ code {
 }
 
 /* ================================================================
-   SakuFlow — Pixel Ledger Layer
+   Sakunode — Pixel Ledger Layer
    Detail 8-bit dipakai sebagai aksen, bukan mengganti identitas glass UI.
    ================================================================ */
 
@@ -1453,7 +1453,7 @@ code {
 }
 @keyframes pixel-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
-/* CTA dengan pinggiran kotak, tetap memakai pill gelap SakuFlow. */
+/* CTA dengan pinggiran kotak, tetap memakai pill gelap Sakunode. */
 .dark-pill,
 .button--primary,
 .pixel-hero-cta {
@@ -1624,7 +1624,7 @@ code {
 }
 
 /* ================================================================
-   SakuFlow — Dashboard Workbench
+   Sakunode — Dashboard Workbench
    Layout sidebar + kartu tegas, tetap memakai palet dan pixel accent.
    ================================================================ */
 

@@ -26,7 +26,7 @@ export default function Settings() {
     <div className="settings-page">
       <div className="page-heading settings-heading">
         <div>
-          <h1>Setelan <span className="text-gradient">SakuFlow</span></h1>
+          <h1>Setelan <span className="text-gradient">Sakunode</span></h1>
           <p>Atur akun, data, dan bot WhatsApp dalam satu tempat.</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function Settings() {
       <BudgetSettings />
 
       <section className="panel">
-        <h2 className="panel__title">Cara pakai SakuFlow</h2>
+        <h2 className="panel__title">Cara pakai Sakunode</h2>
         <ol className="howto">
           <li><span>1</span><div><strong>Catat sekali ketuk</strong><p>Pilih masuk/keluar, nominal, lalu kategori. Selesai dalam 10 detik.</p></div></li>
           <li><span>2</span><div><strong>Lihat peta uangmu</strong><p>Di beranda, ribbon warna-warni menunjukkan ke mana uangmu mengalir.</p></div></li>

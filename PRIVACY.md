@@ -1,8 +1,8 @@
-# Kebijakan Privasi — SakuFlow
+# Kebijakan Privasi — Sakunode
 
 **Terakhir diperbarui:** 21 November 2026
 
-SakuFlow adalah aplikasi pencatat keuangan berbasis web (PWA) dan bot WhatsApp yang membantu pengguna melihat ke mana uang mereka pergi. Kami menghormati privasi kamu. Dokumen ini menjelaskan data apa yang kami kumpulkan, bagaimana kami menggunakannya, dan hak-hak kamu atas data tersebut.
+Sakunode adalah aplikasi pencatat keuangan berbasis web (PWA) dan bot WhatsApp yang membantu pengguna melihat ke mana uang mereka pergi. Kami menghormati privasi kamu. Dokumen ini menjelaskan data apa yang kami kumpulkan, bagaimana kami menggunakannya, dan hak-hak kamu atas data tersebut.
 
 ---
 
@@ -53,7 +53,7 @@ Perubahan akan diumumkan dengan memperbarui tanggal di bagian atas dokumen ini.
 
 **Last updated:** 21 November 2026
 
-SakuFlow is a web/PWA money-tracking app with a WhatsApp bot that helps users see where their money goes. We respect your privacy. This policy explains what data we collect, how we use it, and your rights.
+Sakunode is a web/PWA money-tracking app with a WhatsApp bot that helps users see where their money goes. We respect your privacy. This policy explains what data we collect, how we use it, and your rights.
 
 ### 1. Data we collect
 

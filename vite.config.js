@@ -9,10 +9,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['iconsakuflow.svg', 'icon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['iconsakunode.svg', 'icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'SakuFlow — Catatan Uang Harian',
-        short_name: 'SakuFlow',
+        name: 'Sakunode — Catatan Uang Harian & Visualisasi Arus Kas',
+        short_name: 'Sakunode',
         description: 'Catat keuangan harian dengan cepat lewat web dan bot WhatsApp, lalu lihat ke mana uangmu pergi.',
         theme_color: '#2563EB',
         background_color: '#F8FAFC',
@@ -21,7 +21,7 @@ export default defineConfig({
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-          { src: 'iconsakuflow.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'iconsakunode.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
       workbox: {

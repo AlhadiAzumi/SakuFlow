@@ -174,7 +174,7 @@ app.post('/api/link/request', requireUser, async (req, res) => {
     try {
       const result = await sendWhatsAppMessage(
         phone,
-        `Kode verifikasi SakuFlow: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`,
+        `Kode verifikasi Sakunode: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`,
       )
       delivered = !result?.dry
     } catch (error) {

@@ -87,7 +87,7 @@ export default function AuthScreen({ onBack }) {
         if (result?.needsConfirmation) {
           setSentEmail(email)
         } else {
-          setNotice('Akun berhasil dibuat. Selamat datang di SakuFlow!')
+          setNotice('Akun berhasil dibuat. Selamat datang di Sakunode!')
         }
       } else {
         await signIn(email, password)
@@ -123,7 +123,7 @@ export default function AuthScreen({ onBack }) {
         <div className="auth-card__brand">
           <span className="brand-mark"><LogoMark className="h-full w-full rounded-[10px]" /></span>
           <div>
-            <strong>SakuFlow</strong>
+            <strong>Sakunode</strong>
             <small>Catat cepat, arah uang jelas</small>
           </div>
         </div>

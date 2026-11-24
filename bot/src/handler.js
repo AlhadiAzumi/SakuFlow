@@ -15,13 +15,13 @@ async function buildGuideText(phone) {
   }
 
   const status = linked
-    ? 'Status nomor: sudah terhubung dengan akun SakuFlow.'
-    : 'Status nomor: belum terhubung. Buka website SakuFlow → Setelan → Hubungkan WhatsApp, lalu balas kode OTP 6 digit dari menu tersebut di sini.'
+    ? 'Status nomor: sudah terhubung dengan akun Sakunode.'
+    : 'Status nomor: belum terhubung. Buka website Sakunode → Setelan → Hubungkan WhatsApp, lalu balas kode OTP 6 digit dari menu tersebut di sini.'
 
   return [
-    'Bot SakuFlow aktif.',
+    'Bot Sakunode aktif.',
     status,
-    'Aku hanya membaca chat, tidak membalas. Hasilnya cek di website SakuFlow.',
+    'Aku hanya membaca chat, tidak membalas. Hasilnya cek di website Sakunode.',
     '',
     'Format catatan:',
     '• keluar 25rb kopi',
@@ -82,7 +82,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
       console.error('[Bot] Gagal menghitung transaksi untuk status:', error)
     }
     await reply([
-      'Status: nomor WhatsApp kamu sudah terhubung dengan akun SakuFlow.',
+      'Status: nomor WhatsApp kamu sudah terhubung dengan akun Sakunode.',
       `Total catatan tersimpan: ${count}.`,
       'Ketik "ringkasan" untuk rekap bulan ini atau "riwayat" untuk 5 catatan terakhir.',
     ].join('\n'))

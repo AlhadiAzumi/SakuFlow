@@ -130,7 +130,7 @@ export default function WhatsAppLink() {
     <section className="panel whatsapp-panel">
       <h2 className="panel__title">Catat cukup dengan chat</h2>
       <p className="whatsapp-panel__desc">
-        Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di SakuFlow (bot tidak mengirim balasan chat).
+        Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di Sakunode (bot tidak mengirim balasan chat).
       </p>
 
       <BotCommands compact />
@@ -182,7 +182,7 @@ export default function WhatsAppLink() {
           )}
         </>
       )}
-      <p className="whatsapp-panel__hint">Balas bot dengan 6 digit kode OTP dari menu Setelan SakuFlow.</p>
+      <p className="whatsapp-panel__hint">Balas bot dengan 6 digit kode OTP dari menu Setelan Sakunode.</p>
     </section>
   )
 }

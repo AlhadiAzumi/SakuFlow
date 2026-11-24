@@ -202,10 +202,10 @@ export default function App() {
               <span>{sidebarOpen ? 'Tutup' : 'Menu'}</span>
             </button>
 
-            <button type="button" className="brand" onClick={() => setView('landing')} title="Lihat halaman utama SakuFlow">
+            <button type="button" className="brand" onClick={() => setView('landing')} title="Lihat halaman utama Sakunode">
               <span className="brand-mark"><LogoMark className="h-full w-full rounded-[10px]" /></span>
               <span className="brand__text">
-                <strong>SakuFlow</strong>
+                <strong>Sakunode</strong>
                 <small>Catatan uang harian</small>
               </span>
             </button>

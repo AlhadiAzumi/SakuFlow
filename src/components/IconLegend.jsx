@@ -45,7 +45,7 @@ export default function IconLegend() {
     <section className="panel icon-legend">
       <div className="panel__header-row">
         <div>
-          <h2 className="panel__title">Arti ikon di SakuFlow</h2>
+          <h2 className="panel__title">Arti ikon di Sakunode</h2>
           <p className="icon-legend__desc">
             Ikon dipakai supaya catatan lebih cepat dikenali. Arahkan kursor ke ikon di dashboard untuk melihat namanya.
           </p>

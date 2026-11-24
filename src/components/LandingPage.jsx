@@ -76,7 +76,7 @@ function Brand() {
     <a href="#top" className="flex items-center gap-2.5 no-underline">
       <LogoMark className="h-9 w-9 rounded-xl shadow-[0_8px_18px_rgba(37,99,235,0.28)]" />
       <span className="text-[15px] font-extrabold tracking-tight text-slate-900">
-        SakuFlow
+        Sakunode
       </span>
     </a>
   )
@@ -171,7 +171,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               </a>
             ))}
             <button type="button" onClick={onEnter} className="mt-2 w-full rounded-full bg-slate-900 px-4 py-3 text-sm font-bold text-white">
-              {isLoggedIn ? 'Buka Dashboard' : 'Masuk ke SakuFlow'}
+              {isLoggedIn ? 'Buka Dashboard' : 'Masuk ke Sakunode'}
             </button>
           </div>
         )}
@@ -188,7 +188,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <br className="hidden sm:block" /> Lebih Cepat dengan{' '}
               <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                 <PixelIcon name="sparkles" size={24} className="text-sky-200 drop-shadow-[0_0_10px_rgba(125,211,252,0.9)] sm:text-4xl" />
-                <span>SakuFlow</span>
+                <span>Sakunode</span>
               </span>
             </h1>
 
@@ -426,7 +426,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <SectionHeading
             title="Catat Transaksi Cukup Lewat"
             accent="Chat WhatsApp"
-            desc="Ketik seperti bicara normal. SakuFlow yang mengenali nominal, jenis, dan kategorinya."
+            desc="Ketik seperti bicara normal. Sakunode yang mengenali nominal, jenis, dan kategorinya."
           />
 
           <div className="soft-lift mx-auto mt-12 max-w-4xl rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_24px_60px_rgba(37,99,235,0.1)] sm:p-9">
@@ -473,7 +473,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                   onClick={onEnter}
                   className="mt-5 w-full rounded-full bg-blue-600 px-5 py-3.5 text-[13px] font-bold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-blue-700"
                 >
-                  Simpan ke SakuFlow
+                  Simpan ke Sakunode
                 </button>
               </div>
             </div>
@@ -552,7 +552,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Pencatatan Selesai dalam <span className="text-gradient">Hitungan Detik</span>
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-500">
-              Tidak perlu membuka banyak menu. Ketik satu kalimat, SakuFlow langsung menyimpannya dan menampilkannya di dashboard.
+              Tidak perlu membuka banyak menu. Ketik satu kalimat, Sakunode langsung menyimpannya dan menampilkannya di dashboard.
             </p>
             <div className="mt-7 flex flex-wrap gap-2.5">
               {['Auto-kategorisasi', 'Tersimpan instan', 'Sinkron realtime', 'Tanpa ribet'].map((chip) => (
@@ -634,7 +634,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           </div>
           {[
             { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
-            { title: 'Perusahaan', links: ['Tentang SakuFlow', 'Kebijakan Privasi', 'GitHub'] },
+            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'GitHub'] },
             { title: 'Bantuan', links: ['Panduan Mulai', 'Kontak', 'Status Layanan'] },
           ].map((col) => (
             <div key={col.title}>
@@ -657,7 +657,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           ))}
         </Reveal>
         <div className="mx-auto mt-10 max-w-7xl text-center text-[11px] text-slate-400">
-          © {new Date().getFullYear()} SakuFlow. Dibuat untuk membantu arus kas yang lebih tenang.
+          © {new Date().getFullYear()} Sakunode. Dibuat untuk membantu arus kas yang lebih tenang.
         </div>
       </footer>
     </div>

@@ -19,7 +19,7 @@ export default function BotCommands({ compact = false }) {
       <p className="bot-commands__note">
         <PixelIcon name="info" size={16} />
         <span>
-          <strong>Bot SakuFlow itu satu arah.</strong> Bot membaca pesan dan perintahmu, tetapi{' '}
+          <strong>Bot Sakunode itu satu arah.</strong> Bot membaca pesan dan perintahmu, tetapi{' '}
           <strong>tidak membalas chat WhatsApp</strong>. Semua hasil langsung muncul di dashboard website.
         </span>
       </p>

@@ -27,7 +27,7 @@ async function collectReply(text, from = '6281234567890') {
 test('sapaan dan teks uji dibalas panduan singkat', async () => {
   for (const text of ['halo', 'menu', 'hai', 'ck']) {
     const reply = await collectReply(text)
-    assert.match(reply, /Bot SakuFlow aktif/)
+    assert.match(reply, /Bot Sakunode aktif/)
     assert.match(reply, /Status nomor: belum terhubung/)
     assert.match(reply, /kode OTP 6 digit/)
     assert.match(reply, /keluar 25rb kopi/)
@@ -37,7 +37,7 @@ test('sapaan dan teks uji dibalas panduan singkat', async () => {
 
 test('pesan yang tidak dikenal tetap dibalas panduan', async () => {
   const reply = await collectReply('blablabla')
-  assert.match(reply, /Bot SakuFlow aktif/)
+  assert.match(reply, /Bot Sakunode aktif/)
   assert.match(reply, /Status nomor: belum terhubung/)
   assert.match(reply, /Format catatan/)
 })

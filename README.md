@@ -1,4 +1,4 @@
-# SakuFlow — Catatan Uang Harian
+# Sakunode — Catatan Uang Harian
 
 Aplikasi pencatat keuangan berbasis web (PWA) yang membantu pengguna melihat **ke mana uang mereka pergi**. Fokus utamanya bukan sekadar tabel saldo, tapi visualisasi alur uang dan insight mingguan yang mudah dipahami.
 
@@ -137,7 +137,7 @@ create policy "Users can read own WhatsApp link"
 5. Aktifkan **Realtime** untuk tabel `transactions` di **Database → Publications → supabase_realtime** (centang tabel tersebut). Ini membuat perubahan dari web/bot langsung muncul tanpa refresh.
 6. Aktifkan provider login di **Authentication → Providers**. Email aktif secara default. Untuk **Google**, lakukan ini dulu (kalau belum, tombol Google di website otomatis tertampil sebagai “Google belum tersedia”):
 
-   1. Google Cloud Console → **APIs & Services → OAuth consent screen**, isi nama aplikasi `SakuFlow`, lalu simpan.
+   1. Google Cloud Console → **APIs & Services → OAuth consent screen**, isi nama aplikasi `Sakunode`, lalu simpan.
    2. **Credentials → Create Credentials → OAuth client ID → Web application**. Pada *Authorized redirect URIs*, tambahkan `https://<project-ref>.supabase.co/auth/v1/callback` (project-ref ada di Project URL Supabase).
    3. Salin **Client ID** dan **Client Secret** ke Supabase → **Authentication → Providers → Google**, lalu aktifkan provider.
    4. Supabase → **Authentication → URL Configuration**: isi *Site URL* dengan `https://sakuflow-mu.vercel.app`, dan *Additional Redirect URLs* dengan `http://localhost:5173/**` serta `https://sakuflow-mu.vercel.app/**`.

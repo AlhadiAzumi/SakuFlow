@@ -30,7 +30,7 @@ export default function DashboardSidebar({
         <button type="button" className="dash-sidebar__brand" onClick={onHome}>
           <span className="dash-sidebar__brand-mark"><LogoMark className="h-full w-full rounded-[8px]" /></span>
           <span>
-            <strong>SakuFlow</strong>
+            <strong>Sakunode</strong>
             <small>CATATAN UANG HARIAN</small>
           </span>
         </button>

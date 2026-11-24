@@ -7,7 +7,7 @@ Meta WhatsApp Cloud API
    ↓ webhook POST /webhook
 Vercel Serverless (bot/api/index.js → Express app)
    ↓
-Supabase (service_role) → Realtime → website SakuFlow
+Supabase (service_role) → Realtime → website Sakunode
 ```
 
 ## 1. Siapkan Meta Business
