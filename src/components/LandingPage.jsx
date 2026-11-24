@@ -349,7 +349,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       </section>
 
       {/* ---------- 4. Studi kasus interaktif ---------- */}
-      <section className="px-4 py-24 sm:px-6 lg:px-8">
+      <section id="cara-kerja" className="scroll-mt-28 px-4 py-24 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-7xl">
           <SectionHeading
             title="Kelola Arus Kas dengan Cara yang"
