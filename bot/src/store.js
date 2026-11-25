@@ -195,11 +195,17 @@ export async function countTransactions(userId) {
 // Dipakai perintah "riwayat".
 export async function listRecentTransactions(userId, limit = 5) {
   if (!admin) {
+    // created_at punya resolusi milidetik, jadi dua transaksi yang masuk
+    // bersamaan bisa punya nilai sama. Urutan penyisipan jadi penentu terakhir
+    // supaya "riwayat" dan "hapus transaksi terakhir" selalu konsisten.
     return dryTransactions
-      .filter((item) => item.user_id === userId)
-      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))
-        || String(b.created_at || '').localeCompare(String(a.created_at || '')))
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.user_id === userId)
+      .sort((a, b) => String(b.item.date || '').localeCompare(String(a.item.date || ''))
+        || String(b.item.created_at || '').localeCompare(String(a.item.created_at || ''))
+        || b.index - a.index)
       .slice(0, limit)
+      .map(({ item }) => item)
   }
   const { data, error } = await requireAdmin()
     .from('transactions')

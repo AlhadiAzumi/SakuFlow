@@ -64,21 +64,8 @@ const C = {
 };
 const FONT = "'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif";
 
-function Logo({ size, id }: { size: number; id: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-label="Sakunode">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#3B82F6" />
-          <stop offset="1" stopColor="#1D4ED8" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="16" fill={`url(#${id})`} />
-      <path d="M17 25h26a4 4 0 0 1 4 4v13a4 4 0 0 1-4 4H21a4 4 0 0 1-4-4V25Z" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinejoin="round" />
-      <path d="M17 25l21-8" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
-      <circle cx="40.5" cy="35.5" r="2.8" fill="#fff" />
-    </svg>
-  );
+function Logo({ size }: { size: number; id?: string }) {
+  return <img src="/iconsakunode.svg" width={size} height={size} alt="Sakunode" style={{ display: 'block', objectFit: 'contain' }} />;
 }
 
 const fill: CSSProperties = { position: 'absolute', inset: 0 };
