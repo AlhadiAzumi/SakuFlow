@@ -12,6 +12,7 @@ const admin = config.dryRun || !config.supabaseUrl || !config.serviceRoleKey
 const dryLinks = new Map()
 const dryTransactions = []
 const dryOtps = new Map()
+let drySequence = 0
 
 const requireAdmin = () => {
   if (!admin) throw new Error('Supabase admin belum dikonfigurasi. Set SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY atau nyalakan BOT_DRY_RUN.')
@@ -134,7 +135,9 @@ export async function removeLink(userId) {
 
 export async function insertTransaction(record) {
   if (!admin) {
-    const saved = { id: `dry-${Date.now()}`, ...record }
+    // ID harus unik walaupun dua transaksi masuk di milidetik yang sama.
+    drySequence += 1
+    const saved = { id: `dry-${Date.now()}-${drySequence}`, ...record }
     dryTransactions.push(saved)
     return saved
   }

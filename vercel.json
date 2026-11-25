@@ -10,6 +10,11 @@
     { "source": "/terms", "destination": "/terms/index.html" },
     { "source": "/terms/", "destination": "/terms/index.html" },
     { "source": "/promo", "destination": "/index.html" },
-    { "source": "/promo/", "destination": "/index.html" }
+    { "source": "/promo/", "destination": "/index.html" },
+    { "source": "/masuk", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/catatan", "destination": "/index.html" },
+    { "source": "/setelan", "destination": "/index.html" },
+    { "source": "/setelan/:page", "destination": "/index.html" }
   ]
 }

@@ -7,11 +7,11 @@ import Reveal from './Reveal'
 import SyncToast from './SyncToast'
 
 const NAV = [
-  { label: 'Fitur', href: '#fitur' },
-  { label: 'Cara Kerja', href: '#cara-kerja' },
-  { label: 'Bot WhatsApp', href: '#bot-whatsapp' },
-  { label: 'Perintah Bot', href: '#perintah-bot' },
-  { label: 'Alur Dana', href: '#alur-dana' },
+  { label: 'Fitur', id: 'fitur' },
+  { label: 'Cara Kerja', id: 'cara-kerja' },
+  { label: 'Bot WhatsApp', id: 'bot-whatsapp' },
+  { label: 'Perintah Bot', id: 'perintah-bot' },
+  { label: 'Alur Dana', id: 'alur-dana' },
 ]
 
 const FEATURE_BADGES = [
@@ -73,14 +73,14 @@ const DEMO_COMMANDS = [
   },
 ]
 
-function Brand() {
+function Brand({ onHome }) {
   return (
-    <a href="#top" className="flex items-center gap-2.5 no-underline">
+    <button type="button" onClick={onHome} className="flex items-center gap-2.5 no-underline">
       <LogoMark className="h-9 w-9 rounded-xl shadow-[0_8px_18px_rgba(37,99,235,0.28)]" />
       <span className="text-[15px] font-extrabold tracking-tight text-slate-900">
         Sakunode
       </span>
-    </a>
+    </button>
   )
 }
 
@@ -144,31 +144,44 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       const visible = entries
         .filter((entry) => entry.isIntersecting)
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-      if (visible) setActiveSection(`#${visible.target.id}`)
+      if (visible) setActiveSection(visible.target.id)
     }, { rootMargin: '-25% 0px -62% 0px', threshold: [0, 0.1, 0.5] })
 
     NAV.forEach((item) => {
-      const element = document.getElementById(item.href.slice(1))
+      const element = document.getElementById(item.id)
       if (element) observer.observe(element)
     })
 
     return () => observer.disconnect()
   }, [])
 
+  // Navigasi dalam landing hanya menggulir halaman, tidak mengubah URL.
+  const scrollToSection = (id) => {
+    if (!id || id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const element = document.getElementById(id)
+    if (!element) return
+    const top = element.getBoundingClientRect().top + window.scrollY - 96
+    window.scrollTo({ top, behavior: 'smooth' })
+    setActiveSection(id)
+  }
+
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
-  const footerHref = (link) => {
-    if (link === 'Kebijakan Privasi') return '/privacy'
-    if (link === 'Syarat & Ketentuan') return '/terms'
-    if (link === 'Kontak') return 'mailto:sakunode@gmail.com'
-    if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/Sakunode'
-    return NAV.find((item) => item.label === link)?.href || '#top'
+  const footerLink = (link) => {
+    if (link === 'Kebijakan Privasi') return { href: '/privacy' }
+    if (link === 'Syarat & Ketentuan') return { href: '/terms' }
+    if (link === 'Kontak') return { href: 'mailto:sakunode@gmail.com' }
+    if (link === 'GitHub') return { href: 'https://github.com/AlhadiAzumi/Sakunode', external: true }
+    const section = NAV.find((item) => item.label === link)
+    return section ? { section: section.id } : { href: '/' }
   }
-  const isExternalLink = (link) => link === 'GitHub'
-  const navClass = (href, mobile = false) => [
+  const navClass = (id, mobile = false) => [
     mobile ? 'block' : 'whitespace-nowrap',
     'rounded-lg px-3 py-1.5 text-[13px] transition',
-    activeSection === href
+    activeSection === id
       ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
       : 'font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-700',
   ].join(' ')
@@ -178,18 +191,18 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       {/* ---------- 1. Floating glass navbar ---------- */}
       <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
         <nav className="mx-auto flex max-w-7xl items-center gap-4 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-[0_12px_40px_rgba(37,99,235,0.08)] backdrop-blur-xl sm:px-6">
-          <Brand />
+          <Brand onHome={() => scrollToSection('top')} />
           <div className="ml-6 hidden items-center gap-1 lg:flex">
             {NAV.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                aria-current={activeSection === item.href ? 'true' : undefined}
-                onClick={() => setActiveSection(item.href)}
-                className={navClass(item.href)}
+              <button
+                key={item.id}
+                type="button"
+                aria-current={activeSection === item.id ? 'true' : undefined}
+                onClick={() => scrollToSection(item.id)}
+                className={navClass(item.id)}
               >
                 {item.label}
-              </a>
+              </button>
             ))}
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -215,18 +228,18 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
         {menuOpen && (
           <div className="mx-auto mt-2 max-w-7xl rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur-xl lg:hidden">
             {NAV.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                aria-current={activeSection === item.href ? 'true' : undefined}
+              <button
+                key={item.id}
+                type="button"
+                aria-current={activeSection === item.id ? 'true' : undefined}
                 onClick={() => {
-                  setActiveSection(item.href)
+                  scrollToSection(item.id)
                   setMenuOpen(false)
                 }}
-                className={navClass(item.href, true)}
+                className={navClass(item.id, true)}
               >
                 {item.label}
-              </a>
+              </button>
             ))}
             <div className="mt-2 flex items-center gap-4 border-t border-slate-100 px-3 pt-3 text-[11.5px] font-semibold text-slate-500">
               <a href="/privacy">Kebijakan Privasi</a>
@@ -267,7 +280,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 {primaryLabel}
                 <PixelIcon name="arrow-right" size={15} className="transition duration-300 ease-out group-hover:translate-x-1" />
               </button>
-              <DarkPill href="#cara-kerja">Lihat Cara Kerja</DarkPill>
+              <DarkPill onClick={() => scrollToSection('cara-kerja')}>Lihat Cara Kerja</DarkPill>
             </div>
           </Reveal>
 
@@ -655,7 +668,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       <footer className="bg-white px-4 py-14 sm:px-6 lg:px-8">
         <Reveal className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Brand />
+            <Brand onHome={() => scrollToSection('top')} />
             <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-slate-500">
               Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
             </p>
@@ -676,18 +689,28 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <div key={col.title}>
               <p className="text-[12px] font-extrabold text-slate-900">{col.title}</p>
               <ul className="mt-4 space-y-2.5">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href={footerHref(link)}
-                      target={isExternalLink(link) ? '_blank' : undefined}
-                      rel="noreferrer"
-                      className="text-[11.5px] font-medium text-slate-500 transition hover:text-blue-600"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((link) => {
+                  const target = footerLink(link)
+                  const className = 'text-[11.5px] font-medium text-slate-500 transition hover:text-blue-600'
+                  return (
+                    <li key={link}>
+                      {target.section ? (
+                        <button type="button" onClick={() => scrollToSection(target.section)} className={className}>
+                          {link}
+                        </button>
+                      ) : (
+                        <a
+                          href={target.href}
+                          target={target.external ? '_blank' : undefined}
+                          rel="noreferrer"
+                          className={className}
+                        >
+                          {link}
+                        </a>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           ))}

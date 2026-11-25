@@ -7,12 +7,17 @@ const APP_ROUTES = {
   '/privacy': '/privacy/',
   '/terms': '/terms/',
   '/promo': '/index.html',
-  '/promo/': '/index.html',
+  '/masuk': '/index.html',
+  '/dashboard': '/index.html',
+  '/catatan': '/index.html',
+  '/setelan': '/index.html',
 }
 
 const rewriteAppRoutes = (req, _res, next) => {
-  const [pathname, query] = (req.url || '').split('?')
-  const target = APP_ROUTES[pathname]
+  const [rawPath, query] = (req.url || '').split('?')
+  const pathname = rawPath.replace(/\/+$/, '') || '/'
+  const isSettingsPage = /^\/setelan\/[^/]+$/.test(pathname)
+  const target = APP_ROUTES[pathname] || (isSettingsPage ? '/index.html' : null)
   if (target) req.url = query ? `${target}?${query}` : target
   next()
 }

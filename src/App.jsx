@@ -28,6 +28,7 @@ import {
 } from './lib/analytics'
 import { currentMonthKey, formatMonthLabel } from './lib/format'
 import { DASHBOARD_TABS } from './lib/navigation'
+import { buildPath, isProtectedPath, navigate, normalizePath, routeFromPath } from './lib/router'
 
 const PromoPage = lazy(() => import('../animasi/PromoPage.tsx'))
 
@@ -57,10 +58,14 @@ export default function App() {
     addTransaction, updateTransaction, deleteTransaction, showToast,
   } = useApp()
 
-  const [tab, setTab] = useState('home')
-  const [settingsPage, setSettingsPage] = useState('hub')
-  const [view, setView] = useState('landing')
-  const [showAuth, setShowAuth] = useState(false)
+  const initialRoute = useMemo(
+    () => routeFromPath(typeof window === 'undefined' ? '/' : window.location.pathname),
+    [],
+  )
+  const [tab, setTab] = useState(initialRoute.tab)
+  const [settingsPage, setSettingsPage] = useState(initialRoute.settingsPage)
+  const [view, setView] = useState(initialRoute.view)
+  const [showAuth, setShowAuth] = useState(initialRoute.showAuth)
   const [month, setMonth] = useState(currentMonthKey())
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -102,8 +107,49 @@ export default function App() {
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [sidebarOpen])
 
-  const pathname = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') : ''
-  if (pathname === '/promo') {
+  const pathname = typeof window !== 'undefined' ? normalizePath(window.location.pathname) : '/'
+  const isPromoPath = pathname === '/promo'
+
+  // Tombol back/forward browser ikut mengubah halaman yang aktif.
+  useEffect(() => {
+    const syncFromLocation = () => {
+      const next = routeFromPath(window.location.pathname)
+      setTab(next.tab)
+      setSettingsPage(next.settingsPage)
+      setView(next.view)
+      setShowAuth(next.showAuth)
+    }
+    window.addEventListener('popstate', syncFromLocation)
+    return () => window.removeEventListener('popstate', syncFromLocation)
+  }, [])
+
+  // Setiap perpindahan halaman internal tercermin sebagai pathname bersih.
+  useEffect(() => {
+    if (isPromoPath) return
+    const next = buildPath({ view, showAuth, tab, settingsPage })
+    if (normalizePath(window.location.pathname) !== next) navigate(next)
+  }, [view, showAuth, tab, settingsPage, isPromoPath])
+
+  // Halaman dashboard hanya boleh dibuka oleh pengguna yang sudah masuk.
+  useEffect(() => {
+    if (authLoading || isPromoPath) return
+    const current = normalizePath(window.location.pathname)
+    if (!isLoggedIn && isProtectedPath(current)) {
+      navigate('/', { replace: true })
+      setTab('home')
+      setSettingsPage('hub')
+      setView('landing')
+      setShowAuth(false)
+    } else if (isLoggedIn && current === '/masuk') {
+      navigate('/dashboard', { replace: true })
+      setTab('home')
+      setSettingsPage('hub')
+      setView('dashboard')
+      setShowAuth(false)
+    }
+  }, [authLoading, isLoggedIn, isPromoPath])
+
+  if (isPromoPath) {
     return (
       <Suspense fallback={<div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#090D16', color: '#94A3B8', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14 }}>Menyiapkan animasi…</div>}>
         <PromoPage />
