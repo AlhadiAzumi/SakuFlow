@@ -145,11 +145,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
   const footerHref = (link) => {
-    if (link === 'Kebijakan Privasi') return 'https://github.com/AlhadiAzumi/Sakunode/blob/main/PRIVACY.md'
+    if (link === 'Kebijakan Privasi') return '/privacy'
+    if (link === 'Syarat & Ketentuan') return '/terms'
     if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/Sakunode'
     return NAV.find((item) => item.label === link)?.href || '#top'
   }
-  const isExternalLink = (link) => link === 'Kebijakan Privasi' || link === 'GitHub'
+  const isExternalLink = (link) => link === 'GitHub'
   const navClass = (href, mobile = false) => [
     mobile ? 'block' : 'whitespace-nowrap',
     'rounded-lg px-3 py-1.5 text-[13px] transition',
@@ -636,7 +637,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           </div>
           {[
             { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
-            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'GitHub'] },
+            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'Syarat & Ketentuan', 'GitHub'] },
             { title: 'Bantuan', links: ['Panduan Mulai', 'Kontak', 'Status Layanan'] },
           ].map((col) => (
             <div key={col.title}>

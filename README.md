@@ -163,6 +163,10 @@ Penyiapan di dashboard:
 
 Untuk uji lokal tanpa widget asli, Cloudflare menyediakan dummy key. Ingat untuk memakai key asli sebelum rilis. Mode lokal tanpa Supabase tidak menampilkan widget karena tidak ada permintaan auth ke server.
 
+### Halaman hukum dan SEO
+
+Dua rute publik tersedia tanpa login: `https://sakunode.web.id/privacy` dan `https://sakunode.web.id/terms`. Keduanya berupa file HTML statis di `public/privacy/` dan `public/terms/`, jadi tetap terbaca mesin pencari tanpa menunggu JavaScript. `public/robots.txt` dan `public/sitemap.xml` membantu Google menemukan halaman tersebut.
+
 > Catatan: kunci `anon` dan Site Key Turnstile aman dipakai di sisi klien. Akses data dijaga oleh Row Level Security (RLS), dan Secret Key Turnstile hanya ada di Supabase.
 
 ## Struktur singkat

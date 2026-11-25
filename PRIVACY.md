@@ -1,6 +1,6 @@
 # Kebijakan Privasi | Sakunode
 
-**Terakhir diperbarui:** 21 November 2026
+**Terakhir diperbarui:** 26 November 2026
 
 Sakunode adalah aplikasi pencatat keuangan berbasis web (PWA) dan bot WhatsApp yang membantu pengguna melihat ke mana uang mereka pergi. Kami menghormati privasi kamu. Dokumen ini menjelaskan data apa yang kami kumpulkan, bagaimana kami menggunakannya, dan hak-hak kamu atas data tersebut.
 
@@ -11,6 +11,7 @@ Sakunode adalah aplikasi pencatat keuangan berbasis web (PWA) dan bot WhatsApp y
 ### 1. Data yang kami kumpulkan
 
 - **Akun**: alamat email dan data autentikasi. Kami tidak menyimpan kata sandi kamu. Autentikasi dikelola oleh Supabase Auth.
+- **Login Google**: nama tampilan, email, dan informasi profil dasar dari akun Google kamu. Data email dan profil Google ini hanya dipakai untuk autentikasi akun Sakunode, yaitu membuat atau mengenali akunmu. Kami tidak memakainya untuk iklan, profil pemasaran, atau membagikannya kepada pihak ketiga.
 - **Data keuangan**: jenis transaksi (uang masuk/keluar), nominal, kategori, tanggal, catatan opsional, batas budget per kategori, dan target tabungan.
 - **WhatsApp**: nomor telepon, kode verifikasi (OTP), isi pesan yang kamu kirim ke bot, dan ID pesan WhatsApp (hanya untuk mencegah pesan diproses dua kali).
 - **Perangkat**: jika kamu memakai mode lokal, data disimpan di `localStorage` browser kamu sendiri. Kami **tidak** memakai iklan, pelacak, atau analitik pihak ketiga.
@@ -51,13 +52,14 @@ Perubahan akan diumumkan dengan memperbarui tanggal di bagian atas dokumen ini.
 
 ## English Version
 
-**Last updated:** 21 November 2026
+**Last updated:** 26 November 2026
 
 Sakunode is a web/PWA money-tracking app with a WhatsApp bot that helps users see where their money goes. We respect your privacy. This policy explains what data we collect, how we use it, and your rights.
 
 ### 1. Data we collect
 
 - **Account**: email address and authentication data. We never store your password; authentication is handled by Supabase Auth.
+- **Google sign-in**: display name, email address, and basic profile information from your Google account. This Google email and profile data is used only to authenticate your Sakunode account, meaning to create or recognize your account. We do not use it for advertising, marketing profiles, or share it with third parties.
 - **Financial data**: transaction type (income/expense), amount, category, date, optional note, monthly category budgets, and savings target.
 - **WhatsApp**: phone number, one-time verification code (OTP), the text of messages you send to the bot, and WhatsApp message IDs (only to prevent duplicate processing).
 - **Device**: in local mode, data stays in your own browser's `localStorage`. We do **not** use ads, trackers, or third-party analytics.

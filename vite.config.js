@@ -3,8 +3,31 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const LEGAL_ROUTES = {
+  '/privacy': '/privacy/',
+  '/terms': '/terms/',
+}
+
+const rewriteLegalRoutes = (req, _res, next) => {
+  const [pathname, query] = (req.url || '').split('?')
+  const target = LEGAL_ROUTES[pathname]
+  if (target) req.url = query ? `${target}?${query}` : target
+  next()
+}
+
+const legalRoutesPlugin = () => ({
+  name: 'legal-routes',
+  configureServer(server) {
+    server.middlewares.use(rewriteLegalRoutes)
+  },
+  configurePreviewServer(server) {
+    server.middlewares.use(rewriteLegalRoutes)
+  },
+})
+
 export default defineConfig({
   plugins: [
+    legalRoutesPlugin(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -26,6 +49,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/privacy/, /^\/terms/],
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
       },
     }),
