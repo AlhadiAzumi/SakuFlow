@@ -46,7 +46,7 @@ Perubahan akan diumumkan dengan memperbarui tanggal di bagian atas dokumen ini.
 
 ### Kontak
 
-**Email:** alhadilangsa54321@gmail.com
+**Email:** sakunode@gmail.com
 
 ---
 
@@ -94,4 +94,4 @@ Updates will be reflected by revising the date at the top of this document.
 
 ### Contact
 
-**Email:** alhadilangsa54321@gmail.com
+**Email:** sakunode@gmail.com

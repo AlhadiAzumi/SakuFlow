@@ -5,6 +5,7 @@ import { useApp } from '../context/useApp'
 import { supabase } from '../lib/supabase'
 
 const API_URL = (import.meta.env.VITE_BOT_API_URL || '').replace(/\/$/, '')
+const BOT_WA_URL = String(import.meta.env.VITE_BOT_WA_URL || '').trim()
 
 const getToken = async () => {
   if (!supabase) return null
@@ -170,12 +171,16 @@ export default function WhatsAppLink() {
               <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
               <code className="whatsapp-panel__otp-code">{otp}</code>
               <p>Salin kode ini, lalu kirim ke bot WhatsApp agar nomormu langsung terhubung.</p>
-              <a href="https://wa.me/15551889428" target="_blank" rel="noreferrer">
-                Buka WhatsApp bot
-              </a>
+              {BOT_WA_URL && (
+                <a href={BOT_WA_URL} target="_blank" rel="noreferrer">
+                  Buka WhatsApp bot
+                </a>
+              )}
               {!delivered && (
                 <span className="whatsapp-panel__otp-note">
-                  Pesan otomatis tidak terkirim. Silakan kirim manual lewat tautan tersebut.
+                  {BOT_WA_URL
+                    ? 'Pesan otomatis tidak terkirim. Silakan kirim manual lewat tautan tersebut.'
+                    : 'Pesan otomatis tidak terkirim. Hubungi sakunode@gmail.com untuk bantuan.'}
                 </span>
               )}
             </div>

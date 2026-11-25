@@ -147,6 +147,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const footerHref = (link) => {
     if (link === 'Kebijakan Privasi') return '/privacy'
     if (link === 'Syarat & Ketentuan') return '/terms'
+    if (link === 'Kontak') return 'mailto:sakunode@gmail.com'
     if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/Sakunode'
     return NAV.find((item) => item.label === link)?.href || '#top'
   }

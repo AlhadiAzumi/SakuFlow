@@ -59,7 +59,7 @@ Jangan pakai prefix `VITE_` untuk secret.
 | `WEB_ORIGIN` | `https://sakunode.web.id` (domain lama boleh tetap masuk daftar kalau masih redirect) |
 | `BOT_DRY_RUN` | `false` |
 
-Variabel `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, dan `VITE_BOT_API_URL` tetap diisi di **project website**, bukan di project bot. Tambahkan juga `VITE_TURNSTILE_SITE_KEY` bila ingin menimpa nilai bawaan, dan aktifkan Secret Key Turnstile di Supabase → **Authentication → Attack Protection**.
+Variabel `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, dan `VITE_BOT_API_URL` tetap diisi di **project website**, bukan di project bot. Tambahkan juga `VITE_TURNSTILE_SITE_KEY` bila ingin menimpa nilai bawaan, dan aktifkan Secret Key Turnstile di Supabase → **Authentication → Attack Protection**. `VITE_BOT_WA_URL` opsional, isi dengan tautan `wa.me` nomor bot bila ingin tombol cadangan kirim OTP manual; tanpa itu tidak ada nomor telepon yang ditanam di kode.
 
 ## 4. Cek & uji
 
