@@ -3,31 +3,33 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const LEGAL_ROUTES = {
+const APP_ROUTES = {
   '/privacy': '/privacy/',
   '/terms': '/terms/',
+  '/promo': '/index.html',
+  '/promo/': '/index.html',
 }
 
-const rewriteLegalRoutes = (req, _res, next) => {
+const rewriteAppRoutes = (req, _res, next) => {
   const [pathname, query] = (req.url || '').split('?')
-  const target = LEGAL_ROUTES[pathname]
+  const target = APP_ROUTES[pathname]
   if (target) req.url = query ? `${target}?${query}` : target
   next()
 }
 
-const legalRoutesPlugin = () => ({
-  name: 'legal-routes',
+const appRoutesPlugin = () => ({
+  name: 'app-routes',
   configureServer(server) {
-    server.middlewares.use(rewriteLegalRoutes)
+    server.middlewares.use(rewriteAppRoutes)
   },
   configurePreviewServer(server) {
-    server.middlewares.use(rewriteLegalRoutes)
+    server.middlewares.use(rewriteAppRoutes)
   },
 })
 
 export default defineConfig({
   plugins: [
-    legalRoutesPlugin(),
+    appRoutesPlugin(),
     react(),
     tailwindcss(),
     VitePWA({

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import AddTransactionModal from './components/AddTransactionModal'
 import AuthScreen from './components/AuthScreen'
 import BudgetPanel from './components/BudgetPanel'
@@ -28,6 +28,8 @@ import {
 } from './lib/analytics'
 import { currentMonthKey, formatMonthLabel } from './lib/format'
 import { DASHBOARD_TABS } from './lib/navigation'
+
+const PromoPage = lazy(() => import('../animasi/PromoPage.tsx'))
 
 function LoadingScreen() {
   return (
@@ -99,6 +101,15 @@ export default function App() {
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [sidebarOpen])
+
+  const pathname = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') : ''
+  if (pathname === '/promo') {
+    return (
+      <Suspense fallback={<div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#090D16', color: '#94A3B8', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14 }}>Menyiapkan animasi…</div>}>
+        <PromoPage />
+      </Suspense>
+    )
+  }
 
   if (authLoading) return <LoadingScreen />
 

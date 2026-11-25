@@ -8,10 +8,13 @@ import './styles.css'
 
 registerSW({ immediate: true })
 
+const pathname = window.location.pathname.replace(/\/+$/, '')
+const isPromo = pathname === '/promo'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AppProvider>
-      <ScrollProgress />
+      {!isPromo && <ScrollProgress />}
       <App />
     </AppProvider>
   </React.StrictMode>,
