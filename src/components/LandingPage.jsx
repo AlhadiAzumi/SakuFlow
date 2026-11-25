@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import BotCommands from './BotCommands'
+import FundFlowDiagram from './FundFlowDiagram'
 import PixelIcon from './PixelIcon'
 import LogoMark from './LogoMark'
 import Reveal from './Reveal'
@@ -88,8 +89,10 @@ function DarkPill({ children, onClick, href, className = '' }) {
     return (
       <a href={href} className={classes}>
         {children}
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
-          <PixelIcon name="arrow-up-right" size={13} />
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 transition duration-300 ease-out group-hover:translate-x-0.5">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 12 12 4M6 4h6v6" />
+          </svg>
         </span>
       </a>
     )
@@ -97,18 +100,20 @@ function DarkPill({ children, onClick, href, className = '' }) {
   return (
     <button type="button" onClick={onClick} className={classes}>
       {children}
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-white/15 transition duration-300 ease-out group-hover:rotate-45">
-        <PixelIcon name="arrow-up-right" size={13} />
+      <span className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 transition duration-300 ease-out group-hover:translate-x-0.5">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 12 12 4M6 4h6v6" />
+        </svg>
       </span>
     </button>
   )
 }
 
-function SectionHeading({ title, accent, desc, id }) {
+function SectionHeading({ title, accent, desc, id, accentClassName = '' }) {
   return (
     <div id={id} className="mx-auto max-w-2xl scroll-mt-28 text-center">
       <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-[38px] sm:leading-[1.15]">
-        {title} <span className="text-gradient">{accent}</span>
+        {title} <span className={['text-gradient', accentClassName].filter(Boolean).join(' ')}>{accent}</span>
       </h2>
       {desc && <p className="mt-4 text-sm leading-relaxed text-slate-500 sm:text-[15px]">{desc}</p>}
     </div>
@@ -119,6 +124,23 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const [persona, setPersona] = useState(1)
   const [demo, setDemo] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+      if (visible) setActiveSection(`#${visible.target.id}`)
+    }, { rootMargin: '-25% 0px -62% 0px', threshold: [0, 0.1, 0.5] })
+
+    NAV.forEach((item) => {
+      const element = document.getElementById(item.href.slice(1))
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
@@ -128,6 +150,13 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
     return NAV.find((item) => item.label === link)?.href || '#top'
   }
   const isExternalLink = (link) => link === 'Kebijakan Privasi' || link === 'GitHub'
+  const navClass = (href, mobile = false) => [
+    mobile ? 'block' : 'whitespace-nowrap',
+    'rounded-lg px-3 py-1.5 text-[13px] transition',
+    activeSection === href
+      ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
+      : 'font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-700',
+  ].join(' ')
 
   return (
     <div id="top" className="pixel-landing min-h-screen bg-white text-slate-900">
@@ -140,7 +169,9 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-full px-4 py-2 text-[13px] font-semibold text-slate-500 transition hover:bg-blue-50 hover:text-blue-700"
+                aria-current={activeSection === item.href ? 'true' : undefined}
+                onClick={() => setActiveSection(item.href)}
+                className={navClass(item.href)}
               >
                 {item.label}
               </a>
@@ -164,8 +195,12 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               <a
                 key={item.href}
                 href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+                aria-current={activeSection === item.href ? 'true' : undefined}
+                onClick={() => {
+                  setActiveSection(item.href)
+                  setMenuOpen(false)
+                }}
+                className={navClass(item.href, true)}
               >
                 {item.label}
               </a>
@@ -496,50 +531,17 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
       </section>
 
       {/* ---------- 6. Diagram node aliran uang ---------- */}
-      <section id="alur-dana" className="scroll-mt-28 px-4 py-24 sm:px-6 lg:px-8">
+      <section id="alur-dana" className="scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-6xl">
           <SectionHeading
             title="Pantau Aliran Uangmu"
             accent="Secara Real-Time"
+            accentClassName="sm:inline-block sm:whitespace-nowrap"
             desc="Satu pusat saldo yang terhubung ke semua kategori. Perubahan dari WhatsApp langsung terlihat di sini."
           />
 
-          <div className="relative mx-auto mt-12 h-[430px] max-w-5xl sm:h-[460px]">
-            <svg viewBox="0 0 1000 440" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
-              <path d="M 500 220 C 360 220, 280 100, 155 100" stroke="#bfdbfe" strokeWidth="2" fill="none" />
-              <path d="M 500 220 C 360 220, 280 340, 155 340" stroke="#bfdbfe" strokeWidth="2" fill="none" />
-              <path d="M 500 220 C 640 220, 720 100, 845 100" stroke="#bfdbfe" strokeWidth="2" fill="none" />
-              <path d="M 500 220 C 640 220, 720 340, 845 340" stroke="#bfdbfe" strokeWidth="2" fill="none" />
-              <circle cx="155" cy="100" r="6" fill="#2563eb" />
-              <circle cx="155" cy="340" r="6" fill="#2563eb" />
-              <circle cx="845" cy="100" r="6" fill="#2563eb" />
-              <circle cx="845" cy="340" r="6" fill="#2563eb" />
-            </svg>
-
-            <div className="absolute left-1/2 top-1/2 z-10 w-[230px] -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-blue-100 bg-white p-5 text-center shadow-[0_24px_60px_rgba(37,99,235,0.16)] sm:w-[260px]">
-              <LogoMark className="mx-auto mb-3 h-10 w-10 rounded-xl shadow-lg" />
-              <p className="text-[11px] font-bold text-slate-500">Saldo &amp; Arus Kas</p>
-              <p className="preview-value mt-1 text-2xl font-extrabold tracking-tight text-slate-900">Rp8.450.000</p>
-              <p className="mt-1 text-[10px] font-semibold text-blue-600">+ Rp2.100.000 bulan ini</p>
-            </div>
-
-            {[
-              { icon: 'arrow-down-left', label: 'Pemasukan', value: 'Rp12,3 jt', pos: 'left-0 top-[8%] sm:top-[12%]' },
-              { icon: 'receipt', label: 'Kebutuhan Pokok', value: 'Rp1,8 jt', pos: 'left-0 bottom-[8%] sm:bottom-[12%]' },
-              { icon: 'coffee', label: 'Jajan & Kopi', value: 'Rp650 rb', pos: 'right-0 top-[8%] sm:top-[12%]' },
-              { icon: 'piggy', label: 'Tabungan', value: 'Rp2 jt', pos: 'right-0 bottom-[8%] sm:bottom-[12%]' },
-            ].map(({ icon, label, value, pos }) => (
-              <div
-                key={label}
-                className={`soft-lift absolute z-10 flex w-[150px] items-center gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-[0_12px_30px_rgba(37,99,235,0.1)] backdrop-blur sm:w-[175px] ${pos}`}
-              >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600"><PixelIcon name={icon} size={15} /></span>
-                <span className="min-w-0">
-                  <span className="block truncate text-[10.5px] font-extrabold text-slate-900">{label}</span>
-                  <span className="preview-value block text-[10px] font-bold text-slate-400">{value}</span>
-                </span>
-              </div>
-            ))}
+          <div className="mt-12">
+            <FundFlowDiagram />
           </div>
         </Reveal>
       </section>

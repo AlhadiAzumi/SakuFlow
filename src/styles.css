@@ -2044,3 +2044,43 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .dash-sidebar, .dash-backdrop { transition: none !important; }
 }
+
+/* ---------- Landing: peta alur dana 3 kolom ---------- */
+
+.fund-flow-grid {
+  background-color: #fff;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.fund-flow-dash { animation: fund-flow-dash 2.4s linear infinite; }
+.fund-flow-arrow { animation: fund-flow-arrow 2.4s ease-in-out infinite; }
+
+@keyframes fund-flow-dash {
+  to { stroke-dashoffset: -44; }
+}
+
+@keyframes fund-flow-arrow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.fund-flow-vertical-line {
+  display: block;
+  width: 2px;
+  height: 42px;
+  background: repeating-linear-gradient(180deg, currentColor 0 8px, transparent 8px 12px);
+  animation: fund-flow-vertical 1.6s linear infinite;
+}
+
+@keyframes fund-flow-vertical {
+  to { background-position: 0 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fund-flow-dash,
+  .fund-flow-arrow,
+  .fund-flow-vertical-line { animation: none; }
+}
