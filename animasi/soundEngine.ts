@@ -1,21 +1,36 @@
 export type SfxName = 'pop' | 'whoosh' | 'chime' | 'tick' | 'chord';
 
 let ctx: AudioContext | null = null;
+let dest: MediaStreamAudioDestinationNode | null = null;
 let isMuted = false;
 
 export function initAudio() {
   if (typeof window === 'undefined') return;
   if (!ctx) {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ctx = new AudioCtx();
+    dest = ctx.createMediaStreamDestination();
   }
   if (ctx.state === 'suspended') {
     ctx.resume();
   }
 }
 
+export function getAudioStream(): MediaStream | null {
+  initAudio();
+  return dest ? dest.stream : null;
+}
+
 export function setMuted(muted: boolean) {
   isMuted = muted;
+}
+
+function routeOutput(node: AudioNode) {
+  if (!ctx) return;
+  node.connect(ctx.destination);
+  if (dest) node.connect(dest);
 }
 
 export function playSfx(name: SfxName) {
@@ -33,7 +48,8 @@ export function playSfx(name: SfxName) {
     osc.frequency.exponentialRampToValueAtTime(680, now + 0.08);
     gain.gain.setValueAtTime(0.16, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-    osc.connect(gain).connect(ctx.destination);
+    osc.connect(gain);
+    routeOutput(gain);
     osc.start(now);
     osc.stop(now + 0.095);
   }
@@ -60,7 +76,8 @@ export function playSfx(name: SfxName) {
     gain.gain.linearRampToValueAtTime(0.14, now + duration * 0.4);
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-    noise.connect(filter).connect(gain).connect(ctx.destination);
+    noise.connect(filter).connect(gain);
+    routeOutput(gain);
     noise.start(now);
     noise.stop(now + duration);
   }
@@ -75,7 +92,8 @@ export function playSfx(name: SfxName) {
       osc.frequency.setValueAtTime(freq, start);
       gain.gain.setValueAtTime(0.14, start);
       gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain);
+      routeOutput(gain);
       osc.start(start);
       osc.stop(start + 0.3);
     });
@@ -88,13 +106,13 @@ export function playSfx(name: SfxName) {
     osc.frequency.setValueAtTime(920, now);
     gain.gain.setValueAtTime(0.055, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-    osc.connect(gain).connect(ctx.destination);
+    osc.connect(gain);
+    routeOutput(gain);
     osc.start(now);
     osc.stop(now + 0.035);
   }
 
   if (name === 'chord') {
-    // Cmaj9 warm synth chord (C4, E4, G4, B4, D5)
     [261.63, 329.63, 392.0, 493.88, 587.33].forEach((freq) => {
       if (!ctx) return;
       const osc = ctx.createOscillator();
@@ -104,7 +122,8 @@ export function playSfx(name: SfxName) {
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.07, now + 0.15);
       gain.gain.exponentialRampToValueAtTime(0.0008, now + 2.4);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain);
+      routeOutput(gain);
       osc.start(now);
       osc.stop(now + 2.5);
     });
