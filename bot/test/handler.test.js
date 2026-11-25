@@ -44,8 +44,8 @@ test('pesan yang tidak dikenal tetap dibalas panduan', async () => {
 
 test('panduan menampilkan status nomor yang sudah terhubung', async () => {
   const phone = '6289999999999'
-  await store.requestLink('user-uji', phone, '123456')
-  await store.verifyOtp(phone, '123456')
+  await store.requestLink('user-uji', phone, '482913')
+  await store.verifyOtp(phone, '482913')
 
   const reply = await collectReply('halo', phone)
   assert.match(reply, /Status nomor: sudah terhubung/)
@@ -66,6 +66,29 @@ test('verifikasi OTP mengembalikan hasil database', async () => {
   assert.equal(result.ok, true)
   assert.equal(result.verified, true)
   assert.equal(result.phone, phone)
+})
+
+test('verifikasi menerima /verif dan kode tidak bisa dipakai ulang', async () => {
+  config.dryRun = true
+  const phone = '6286666666666'
+  await store.requestLink('user-verif-prefix', phone, '735214')
+
+  const first = await handleMessage(
+    { id: 'otp-prefix-1', from: phone, text: { body: '/verif 735214' } },
+    { send: async () => ({ dry: true }) },
+  )
+  assert.equal(first.type, 'otp')
+  assert.equal(first.verified, true)
+
+  assert.equal(await store.hasPendingOtp(phone), false)
+  assert.equal(await store.verifyOtp(phone, '735214'), null)
+
+  const second = await handleMessage(
+    { id: 'otp-prefix-2', from: phone, text: { body: '/verif 735214' } },
+    { send: async () => ({ dry: true }) },
+  )
+  assert.notEqual(second.type, 'otp')
+  assert.notEqual(second.verified, true)
 })
 
 test('status, riwayat, dan hapus 1 transaksi terakhir bekerja untuk nomor terhubung', async () => {

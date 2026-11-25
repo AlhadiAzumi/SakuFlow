@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import BotCommands from './BotCommands'
 import FundFlowDiagram from './FundFlowDiagram'
 import PixelIcon from './PixelIcon'
 import LogoMark from './LogoMark'
 import Reveal from './Reveal'
+import SyncToast from './SyncToast'
 
 const NAV = [
   { label: 'Fitur', href: '#fitur' },
@@ -125,6 +126,18 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const [demo, setDemo] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState(null)
+  const [demoSync, setDemoSync] = useState(null)
+  const closeDemoSync = useCallback(() => setDemoSync(null), [])
+
+  const showDemoSync = () => {
+    setDemoSync({
+      id: `demo-${Date.now()}`,
+      amount: 25000,
+      type: 'expense',
+      note: 'kopi',
+      receivedAt: new Date().toISOString(),
+    })
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -497,6 +510,13 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <div className="mt-4 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-[11px] font-semibold text-blue-700">
                   <PixelIcon name="badge-check" size={15} /> Tidak perlu buka aplikasi untuk mencatat
                 </div>
+                <button
+                  type="button"
+                  onClick={showDemoSync}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
+                >
+                  <PixelIcon name="zap" size={13} /> Lihat notifikasi sinkron
+                </button>
               </div>
 
               <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
@@ -676,6 +696,8 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           © {new Date().getFullYear()} Sakunode. Dibuat untuk membantu arus kas yang lebih tenang.
         </div>
       </footer>
+
+      <SyncToast tx={demoSync} onClose={closeDemoSync} />
     </div>
   )
 }

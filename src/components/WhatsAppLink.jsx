@@ -5,7 +5,7 @@ import { useApp } from '../context/useApp'
 import { supabase } from '../lib/supabase'
 
 const API_URL = (import.meta.env.VITE_BOT_API_URL || '').replace(/\/$/, '')
-const BOT_WA_URL = String(import.meta.env.VITE_BOT_WA_URL || '').trim()
+const BOT_WA_URL = String(import.meta.env.VITE_BOT_WA_URL || 'https://wa.me/15551889428').trim()
 
 const getToken = async () => {
   if (!supabase) return null
@@ -21,6 +21,14 @@ export default function WhatsAppLink() {
   const [loading, setLoading] = useState(false)
   const [otp, setOtp] = useState('')
   const [delivered, setDelivered] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (cooldown <= 0) return undefined
+    const timer = setTimeout(() => setCooldown((value) => Math.max(0, value - 1)), 1000)
+    return () => clearTimeout(timer)
+  }, [cooldown])
 
   const callApi = useCallback(async (path, options = {}) => {
     const token = await getToken()
@@ -81,7 +89,7 @@ export default function WhatsAppLink() {
   }, [otp, callApi, mode, showToast])
 
   const requestOtp = async (event) => {
-    event.preventDefault()
+    event?.preventDefault()
     setLoading(true)
     try {
       const result = await callApi('/api/link/request', {
@@ -91,15 +99,32 @@ export default function WhatsAppLink() {
       setStatus({ linked: false, phone: result.phone })
       setOtp(String(result.otp || ''))
       setDelivered(Boolean(result.delivered))
+      setCooldown(30)
+      setCopied(false)
       showToast(result.delivered
-        ? 'Kode OTP dikirim ke WhatsApp. Balas pesan bot dengan kode tersebut.'
-        : 'Kode OTP siap. Kirim manual lewat tautan WhatsApp di bawah, ya.')
+        ? 'Kode OTP acak dikirim ke WhatsApp. Balas pesan bot dengan kode tersebut.'
+        : 'Kode OTP acak siap. Salin atau kirim manual lewat tautan WhatsApp di bawah.')
     } catch (error) {
       showToast(error.message || 'Gagal mengirim kode OTP.', 'error')
     } finally {
       setLoading(false)
     }
   }
+
+  const copyOtp = async () => {
+    if (!otp) return
+    try {
+      await navigator.clipboard.writeText(otp)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      showToast('Gagal menyalin otomatis. Salin angkanya manual, ya.', 'error')
+    }
+  }
+
+  const waHref = otp
+    ? `${BOT_WA_URL}${BOT_WA_URL.includes('?') ? '&' : '?'}text=${encodeURIComponent(`/verif ${otp}`)}`
+    : BOT_WA_URL
 
   const disconnect = async () => {
     setLoading(true)
@@ -161,8 +186,8 @@ export default function WhatsAppLink() {
                 required
               />
             </label>
-            <button type="submit" className="button button--primary" disabled={loading}>
-              {loading ? 'Mengirim…' : 'Kirim kode OTP'}
+            <button type="submit" className="button button--primary" disabled={loading || cooldown > 0}>
+              {loading ? 'Mengirim…' : cooldown > 0 ? `Tunggu ${cooldown} dtk` : 'Kirim kode OTP'}
             </button>
           </form>
 
@@ -170,17 +195,21 @@ export default function WhatsAppLink() {
             <div className="whatsapp-panel__otp" role="status">
               <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
               <code className="whatsapp-panel__otp-code">{otp}</code>
-              <p>Salin kode ini, lalu kirim ke bot WhatsApp agar nomormu langsung terhubung.</p>
-              {BOT_WA_URL && (
-                <a href={BOT_WA_URL} target="_blank" rel="noreferrer">
-                  Buka WhatsApp bot
+              <p>Salin kode ini, lalu kirim ke bot WhatsApp agar nomormu langsung terhubung. Berlaku 5 menit dan hanya bisa dipakai sekali.</p>
+              <div className="whatsapp-panel__otp-actions">
+                <button type="button" className="button button--ghost" onClick={copyOtp}>
+                  {copied ? 'Kode tersalin' : 'Salin kode'}
+                </button>
+                <button type="button" className="button button--ghost" onClick={requestOtp} disabled={loading || cooldown > 0}>
+                  {cooldown > 0 ? `Kode baru ${cooldown} dtk` : 'Minta kode baru'}
+                </button>
+                <a href={waHref} target="_blank" rel="noreferrer">
+                  Kirim kode ke WhatsApp bot
                 </a>
-              )}
+              </div>
               {!delivered && (
                 <span className="whatsapp-panel__otp-note">
-                  {BOT_WA_URL
-                    ? 'Pesan otomatis tidak terkirim. Silakan kirim manual lewat tautan tersebut.'
-                    : 'Pesan otomatis tidak terkirim. Hubungi sakunode@gmail.com untuk bantuan.'}
+                  Pesan otomatis tidak terkirim. Silakan salin kode lalu kirim manual lewat tautan bot di atas.
                 </span>
               )}
             </div>

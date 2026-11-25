@@ -12,6 +12,7 @@ import PixelIcon from './components/PixelIcon'
 import Reveal from './components/Reveal'
 import SavingsCard from './components/SavingsCard'
 import Settings from './components/Settings'
+import SyncToast from './components/SyncToast'
 import SummaryCards from './components/SummaryCards'
 import TransactionList from './components/TransactionList'
 import TrendChart from './components/TrendChart'
@@ -25,8 +26,7 @@ import {
   getTrend,
   summarize,
 } from './lib/analytics'
-import { isSavingsTx } from './lib/categories'
-import { currentMonthKey, formatMonthLabel, formatRupiah, formatTimeAgo } from './lib/format'
+import { currentMonthKey, formatMonthLabel } from './lib/format'
 import { DASHBOARD_TABS } from './lib/navigation'
 
 function LoadingScreen() {
@@ -237,19 +237,6 @@ export default function App() {
             <LoadingScreen />
           ) : tab === 'home' ? (
             <div className="page page--home">
-              {lastSyncedTx && (
-                <div
-                  className="sync-pill"
-                  title={lastSyncedTx.note || 'Transaksi terakhir tersinkron'}
-                  role="status"
-                >
-                  <i />
-                  Sinkron terakhir: {formatTimeAgo(lastSyncedTx.receivedAt, syncTick)} •{' '}
-                  {isSavingsTx(lastSyncedTx) ? 'Tabungan' : lastSyncedTx.type === 'income' ? 'Masuk' : 'Keluar'}{' '}
-                  {formatRupiah(lastSyncedTx.amount)}
-                </div>
-              )}
-
               <div className="page-heading dash-intro">
                 <div>
                   <span className="pixel-eyebrow">MODE CATAT / {mode === 'cloud' ? 'ONLINE' : 'LOKAL'}</span>
@@ -382,6 +369,7 @@ export default function App() {
         onSave={handleSave}
       />
       <Toast toast={toast} />
+      <SyncToast tx={lastSyncedTx} tick={syncTick} />
     </div>
   )
 }

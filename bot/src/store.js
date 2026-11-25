@@ -51,14 +51,14 @@ export async function requestLink(userId, phone, code) {
   const key = normalizePhone(phone)
   if (!admin) {
     dryLinks.set(key, { userId, verified: false })
-    dryOtps.set(key, code)
+    dryOtps.set(key, { code, expiresAt: Date.now() + 5 * 60 * 1000 })
     return { phone: key }
   }
   const { error } = await requireAdmin().from('whatsapp_links').upsert({
     user_id: userId,
     phone: key,
     otp_code: code,
-    otp_expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    otp_expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     verified: false,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id' })
@@ -68,7 +68,15 @@ export async function requestLink(userId, phone, code) {
 
 export async function hasPendingOtp(phone) {
   const key = normalizePhone(phone)
-  if (!admin) return dryOtps.has(key)
+  if (!admin) {
+    const pending = dryOtps.get(key)
+    if (!pending) return false
+    if (pending.expiresAt < Date.now()) {
+      dryOtps.delete(key)
+      return false
+    }
+    return true
+  }
   const { data, error } = await requireAdmin()
     .from('whatsapp_links')
     .select('otp_code')
@@ -83,8 +91,8 @@ export async function verifyOtp(phone, code) {
   const key = normalizePhone(phone)
   const clean = String(code || '').trim()
   if (!admin) {
-    const expected = dryOtps.get(key)
-    if (!expected || expected !== clean) return null
+    const pending = dryOtps.get(key)
+    if (!pending || pending.expiresAt < Date.now() || pending.code !== clean) return null
     const link = dryLinks.get(key)
     if (!link) return null
     dryOtps.delete(key)

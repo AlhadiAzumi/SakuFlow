@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import PixelIcon from './PixelIcon'
 
 export const BOT_COMMANDS = [
@@ -16,6 +17,8 @@ export const BOT_COMMANDS = [
 ]
 
 export default function BotCommands({ compact = false }) {
+  const [demoOtp] = useState(() => Math.floor(100000 + Math.random() * 900000).toString())
+
   return (
     <div className={`bot-commands${compact ? ' bot-commands--compact' : ''}`}>
       <p className="bot-commands__note">
@@ -38,6 +41,9 @@ export default function BotCommands({ compact = false }) {
       <p className="bot-commands__foot">
         Nominal bisa ditulis <code>25rb</code>, <code>50 ribu</code>, <code>3,5 juta</code>, atau <code>Rp125.000</code>.
         Tanggal bisa pakai <code>kemarin</code>, <code>hari ini</code>, <code>tanggal 12</code>, atau <code>2026-11-24</code>.
+      </p>
+      <p className="bot-commands__foot">
+        Contoh verifikasi WhatsApp: <code>/verif {demoOtp}</code>. Kode contoh dibuat acak setiap halaman dimuat.
       </p>
     </div>
   )

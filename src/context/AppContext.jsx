@@ -1,6 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getCategory, isSavingsTx } from '../lib/categories'
-import { formatRupiah } from '../lib/format'
 import { isCloudMode, supabase } from '../lib/supabase'
 
 const STORAGE_KEY = 'catatan-uang:transactions:v1'
@@ -226,16 +225,14 @@ export function AppProvider({ children }) {
           setTransactions((prev) => prev.some((item) => item.id === tx.id)
             ? prev
             : [tx, ...prev])
-          setLastSyncedTx({
-            id: tx.id,
-            amount: tx.amount,
-            type: tx.type,
-            note: tx.note || '',
-            receivedAt: tx.created_at || new Date().toISOString(),
-          })
           if (!localInsertIds.current.has(tx.id)) {
-            const label = isSavingsTx(tx) ? 'Tabungan' : tx.type === 'income' ? 'Masuk' : 'Keluar'
-            showToast(`Catatan baru masuk: ${label} ${formatRupiah(tx.amount)}`)
+            setLastSyncedTx({
+              id: tx.id,
+              amount: tx.amount,
+              type: tx.type,
+              note: tx.note || '',
+              receivedAt: tx.created_at || new Date().toISOString(),
+            })
           }
           localInsertIds.current.delete(tx.id)
         } else if (payload.eventType === 'UPDATE') {

@@ -81,15 +81,15 @@ export async function linkRequest(req, res) {
     const phone = normalizePhone(body?.phone)
     if (phone.length < 10) return sendJson(req, res, 400, { error: 'Nomor WhatsApp tidak valid.' })
 
-    const code = config.dryOtpCode || String(crypto.randomInt(100000, 1000000))
+    const code = String(crypto.randomInt(100000, 1000000))
     await store.requestLink(userId, phone, code)
 
     if (config.dryRun) {
       console.log(`[DRY-RUN OTP → ${phone}] ${code}`)
     } else {
-      await sendWhatsAppMessage(phone, `Kode verifikasi Catatan Uang Harian: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`)
+      await sendWhatsAppMessage(phone, `Kode verifikasi Sakunode: ${code}\n\nBalas pesan ini dengan 6 digit kode tersebut untuk menghubungkan akunmu.`)
     }
-    return sendJson(req, res, 200, { ok: true, phone, message: 'Kode OTP dikirim ke WhatsApp kamu.' })
+    return sendJson(req, res, 200, { ok: true, phone, otp: code, delivered: !config.dryRun, message: 'Kode OTP dibuat. Salin kode ini atau kirim ke bot WhatsApp.' })
   } catch (error) {
     return fail(req, res, error)
   }

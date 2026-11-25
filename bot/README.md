@@ -114,11 +114,10 @@ Untuk uji tanpa WA/Supabase:
 
 ```bash
 set BOT_DRY_RUN=true
-set BOT_DRY_OTP_CODE=123456
 npm start
 ```
 
-Semua balasan tampil di terminal dengan prefix `[DRY-RUN WA → ...]`.
+Kode OTP selalu acak 6 digit dan hanya berlaku 5 menit. Semua balasan tampil di terminal dengan prefix `[DRY-RUN WA → ...]`.
 
 ## 6. Deploy ke Vercel (Meta-only)
 

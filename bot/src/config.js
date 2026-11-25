@@ -27,5 +27,4 @@ export const config = {
   supabaseUrl: env('SUPABASE_URL'),
   serviceRoleKey: env('SUPABASE_SERVICE_ROLE_KEY'),
   dryRun: env('BOT_DRY_RUN', 'false') === 'true',
-  dryOtpCode: env('BOT_DRY_OTP_CODE'),
 }

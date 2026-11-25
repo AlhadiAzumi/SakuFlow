@@ -166,7 +166,7 @@ app.post('/api/link/request', requireUser, async (req, res) => {
   try {
     const phone = normalizePhone(req.body?.phone)
     if (phone.length < 10) return res.status(400).json({ error: 'Nomor WhatsApp tidak valid.' })
-    const code = config.dryOtpCode || String(crypto.randomInt(100000, 1000000))
+    const code = String(crypto.randomInt(100000, 1000000))
     await store.requestLink(req.user.id, phone, code)
 
     // Kode tetap tersimpan dan dikembalikan ke UI walau WhatsApp gagal

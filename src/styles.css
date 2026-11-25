@@ -221,28 +221,38 @@ code {
   50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.04); }
 }
 
-/* Konfirmasi visual transaksi terbaru dari WhatsApp / perangkat lain. */
-.sync-pill {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 8px;
-  max-width: 100%;
-  padding: 8px 13px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #e2e8f0;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-  animation: rise-in 0.45s var(--ease-out) backwards;
+/* Toast melayang untuk konfirmasi transaksi terbaru dari bot / perangkat lain. */
+.sync-toast {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: sync-toast-in 0.34s var(--ease-out) forwards;
 }
-.sync-pill i {
-  width: 7px; height: 7px; flex: none;
-  border-radius: 50%;
-  background: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+.sync-toast.is-leaving { animation: sync-toast-out 0.28s ease-in forwards; }
+.sync-toast__close {
+  margin-left: 2px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sync-toast__close:hover { color: #fff; }
+@keyframes sync-toast-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sync-toast-out {
+  to { opacity: 0; transform: translateY(12px); }
+}
+@media (max-width: 640px) {
+  .sync-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    margin: 0 auto;
+  }
 }
 
 .user-chip {
@@ -1189,6 +1199,8 @@ code {
 .whatsapp-panel__otp { margin-top: 14px; border: 1px solid #bfdbfe; background: var(--primary-soft); border-radius: 14px; padding: 14px; }
 .whatsapp-panel__otp-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
 .whatsapp-panel__otp-code { display: block; color: var(--primary); font-size: 26px; font-weight: 800; letter-spacing: 6px; font-variant-numeric: tabular-nums; }
+.whatsapp-panel__otp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.whatsapp-panel__otp-actions .button { padding: 7px 12px; font-size: 11.5px; }
 .whatsapp-panel__otp p { margin: 10px 0 8px; font-size: 12px; color: var(--muted); }
 .whatsapp-panel__otp a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; }
 .whatsapp-panel__otp-note { display: block; margin-top: 8px; font-size: 11px; color: #b45309; }
@@ -1890,7 +1902,6 @@ code {
 .dash-shell .page--home { gap: 18px; }
 .dash-shell .dash-intro { margin-bottom: 4px; }
 .dash-shell .dash-intro h1 { font-size: clamp(28px, 3.4vw, 40px); }
-.dash-shell .sync-pill { border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); }
 
 .dash-shell .summary-grid { gap: 16px; margin-bottom: 4px; }
 .dash-shell .summary-card {

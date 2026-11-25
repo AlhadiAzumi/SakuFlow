@@ -48,8 +48,9 @@ export async function handleMessage(message, { send = sendText } = {}) {
   }
 
   if (await store.hasPendingOtp(phone)) {
-    if (/^\d{4,8}$/.test(text)) {
-      const userId = await store.verifyOtp(phone, text)
+    const otpMatch = text.match(/^(?:\/?(?:verif|otp)\s+)?(\d{4,8})$/i)
+    if (otpMatch) {
+      const userId = await store.verifyOtp(phone, otpMatch[1])
       await reply(userId
         ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
