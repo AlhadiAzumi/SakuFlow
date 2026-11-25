@@ -145,8 +145,8 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
   const navLabel = isLoggedIn ? 'Dashboard' : 'Masuk'
   const primaryLabel = isLoggedIn ? 'Buka Dashboard' : 'Mulai Catat Gratis'
   const footerHref = (link) => {
-    if (link === 'Kebijakan Privasi') return 'https://github.com/AlhadiAzumi/SakuFlow/blob/main/PRIVACY.md'
-    if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/SakuFlow'
+    if (link === 'Kebijakan Privasi') return 'https://github.com/AlhadiAzumi/Sakunode/blob/main/PRIVACY.md'
+    if (link === 'GitHub') return 'https://github.com/AlhadiAzumi/Sakunode'
     return NAV.find((item) => item.label === link)?.href || '#top'
   }
   const isExternalLink = (link) => link === 'Kebijakan Privasi' || link === 'GitHub'
@@ -626,7 +626,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
             </p>
             <a
-              href="https://github.com/AlhadiAzumi/SakuFlow"
+              href="https://github.com/AlhadiAzumi/Sakunode"
               target="_blank"
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:underline"
