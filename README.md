@@ -145,6 +145,12 @@ create policy "Users can read own WhatsApp link"
 
 7. Jalankan ulang `npm run dev`. Halaman login akan muncul otomatis, dengan indikator **Live** di header.
 
+### Batas percobaan login
+
+Di halaman masuk, setiap email dibatasi **7 kali percobaan gagal dalam 30 menit**. Setelah itu tombol masuk dinonaktifkan dan muncul hitung mundur sampai jendela 30 menit berakhir. Riwayat gagal tersimpan di `localStorage` browser dan otomatis dihapus setelah jendela selesai atau setelah login berhasil. Akun yang berbeda dihitung terpisah, dan perpindahan tab Masuk/Daftar tidak mengubah hitungan.
+
+Ini adalah pengaman di sisi browser. Supabase Auth tetap menjadi pengaman utama di sisi server, jadi sebaiknya aktifkan juga CAPTCHA di **Authentication → Security / Captcha** bila tersedia pada paket yang dipakai, terutama jika aplikasi dibuka publik.
+
 > Catatan: kunci `anon` aman dipakai di sisi klien karena akses data dijaga oleh Row Level Security (RLS).
 
 ## Struktur singkat
@@ -158,6 +164,7 @@ src/
     analytics.js           agregasi bulanan, insight, tren, budget, tabungan
     categories.js          daftar kategori + warna/emoji
     format.js              Rupiah & tanggal
+    loginGuard.js          pembatas 7 percobaan login gagal per 30 menit
     supabase.js            inisialisasi client (atau mode lokal)
   components/              UI (grafik alur, ringkasan, form, budget, bot, dll.)
 bot/                       server bot WhatsApp (Node + Express)

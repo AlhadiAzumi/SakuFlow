@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
+import {
+  clearLoginFailures,
+  formatWait,
+  getLoginLock,
+  isCredentialError,
+  LOGIN_WINDOW_LABEL,
+  recordFailedLogin,
+} from '../lib/loginGuard'
 import { fetchAuthSettings } from '../lib/supabase'
 import LogoMark from './LogoMark'
 
@@ -41,6 +49,19 @@ export default function AuthScreen({ onBack }) {
   const [loading, setLoading] = useState(false)
   const [sentEmail, setSentEmail] = useState('')
   const [googleEnabled, setGoogleEnabled] = useState(null)
+  const [loginLock, setLoginLock] = useState(() => getLoginLock(email))
+
+  useEffect(() => {
+    setLoginLock(getLoginLock(email))
+  }, [email])
+
+  useEffect(() => {
+    if (!loginLock.locked) return undefined
+    const timer = window.setTimeout(() => {
+      setLoginLock(getLoginLock(email))
+    }, Math.min(Math.max(loginLock.remainingMs, 0) + 50, 1000))
+    return () => window.clearTimeout(timer)
+  }, [email, loginLock])
 
   useEffect(() => {
     let active = true
@@ -75,9 +96,17 @@ export default function AuthScreen({ onBack }) {
         setError('Konfirmasi kata sandi belum sama.')
         return
       }
-    } else if (password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.')
-      return
+    } else {
+      const guard = getLoginLock(email)
+      setLoginLock(guard)
+      if (guard.locked) {
+        setError('Terlalu banyak percobaan gagal. Tunggu sebentar sebelum mencoba lagi.')
+        return
+      }
+      if (password.length < 6) {
+        setError('Kata sandi minimal 6 karakter.')
+        return
+      }
     }
 
     setLoading(true)
@@ -91,9 +120,21 @@ export default function AuthScreen({ onBack }) {
         }
       } else {
         await signIn(email, password)
+        clearLoginFailures(email)
+        setLoginLock(getLoginLock(email))
       }
     } catch (err) {
-      setError(friendlyError(err))
+      if (mode === 'signin' && isCredentialError(err)) {
+        const next = recordFailedLogin(email)
+        setLoginLock(next)
+        if (next.locked) {
+          setError('Terlalu banyak percobaan gagal. Akun ini dikunci sementara.')
+        } else {
+          setError(`${friendlyError(err)} Sisa ${next.attemptsLeft} percobaan dalam ${LOGIN_WINDOW_LABEL}.`)
+        }
+      } else {
+        setError(friendlyError(err))
+      }
     } finally {
       setLoading(false)
     }
@@ -111,6 +152,7 @@ export default function AuthScreen({ onBack }) {
   }
 
   const copy = COPY[mode]
+  const isLocked = mode === 'signin' && loginLock.locked
 
   return (
     <div className="auth-page pixel-app">
@@ -191,8 +233,15 @@ export default function AuthScreen({ onBack }) {
             )}
             {error && <p className="form-error" role="alert">{error}</p>}
             {notice && <p className="form-notice" role="status">{notice}</p>}
-            <button type="submit" className="button button--primary button--full" disabled={loading}>
-              {loading ? 'Tunggu…' : copy.action}
+            {mode === 'signin' && loginLock.count > 0 && (
+              <p className="auth-lock-note" role="status" aria-live="polite">
+                {isLocked
+                  ? `Pembatasan aktif. Bisa coba lagi dalam ${formatWait(loginLock.remainingMs)}.`
+                  : `Sisa ${loginLock.attemptsLeft} percobaan dalam ${LOGIN_WINDOW_LABEL}.`}
+              </p>
+            )}
+            <button type="submit" className="button button--primary button--full" disabled={loading || isLocked}>
+              {isLocked ? 'Dikunci sementara' : loading ? 'Tunggu…' : copy.action}
               <span className="button__icon"><PixelIcon name="arrow-up-right" size={13} /></span>
             </button>
             {mode === 'signup' && (
