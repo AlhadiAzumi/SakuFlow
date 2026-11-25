@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import CategoryIcon from './CategoryIcon'
 import PixelIcon from './PixelIcon'
-import { getCategory } from '../lib/categories'
+import { getCategory, isSavingsTx } from '../lib/categories'
 import { formatDayHeading, formatRupiah } from '../lib/format'
 
 export default function TransactionList({ items, onEdit, onDelete, compact = false }) {
@@ -11,7 +11,8 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return items.filter((tx) => {
-      if (typeFilter !== 'all' && tx.type !== typeFilter) return false
+      if (typeFilter === 'savings' && !isSavingsTx(tx)) return false
+      if (typeFilter !== 'all' && typeFilter !== 'savings' && tx.type !== typeFilter) return false
       if (!needle) return true
       const category = getCategory(tx.type, tx.category)
       return `${category.label} ${tx.note || ''}`.toLowerCase().includes(needle)
@@ -54,6 +55,7 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
               { id: 'all', label: 'Semua' },
               { id: 'expense', label: 'Keluar' },
               { id: 'income', label: 'Masuk' },
+              { id: 'savings', label: 'Tabungan' },
             ].map((option) => (
               <button
                 type="button"
@@ -99,11 +101,11 @@ export default function TransactionList({ items, onEdit, onDelete, compact = fal
                         {tx.source === 'whatsapp' && (
                           <PixelIcon name="whatsapp" size={12} title="WhatsApp" className="transaction-row__source" />
                         )}{' '}
-                        {tx.note || (tx.type === 'income' ? 'Uang masuk' : 'Pengeluaran')}
+                        {tx.note || (isSavingsTx(tx) ? 'Uang ditabung' : tx.type === 'income' ? 'Uang masuk' : 'Pengeluaran')}
                       </span>
                     </button>
-                    <span className={`transaction-row__amount transaction-row__amount--${tx.type}`}>
-                      {tx.type === 'income' ? '+' : '−'}{formatRupiah(tx.amount)}
+                    <span className={`transaction-row__amount transaction-row__amount--${isSavingsTx(tx) ? 'savings' : tx.type}`}>
+                      {isSavingsTx(tx) ? '→' : tx.type === 'income' ? '+' : '−'}{formatRupiah(tx.amount)}
                     </span>
                     <button
                       type="button"

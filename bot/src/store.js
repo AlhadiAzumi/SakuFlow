@@ -152,21 +152,23 @@ export async function getMonthTotals(userId, monthKey) {
     const items = dryTransactions.filter((item) => item.user_id === userId && String(item.date).startsWith(monthKey))
     return {
       income: items.filter((i) => i.type === 'income').reduce((s, i) => s + i.amount, 0),
-      expense: items.filter((i) => i.type === 'expense').reduce((s, i) => s + i.amount, 0),
+      expense: items.filter((i) => i.type === 'expense' && i.category !== 'tabungan').reduce((s, i) => s + i.amount, 0),
+      savings: items.filter((i) => i.type === 'expense' && i.category === 'tabungan').reduce((s, i) => s + i.amount, 0),
       count: items.length,
     }
   }
   const { start, end } = monthRange(monthKey)
   const { data, error } = await requireAdmin()
     .from('transactions')
-    .select('type, amount')
+    .select('type, amount, category')
     .eq('user_id', userId)
     .gte('date', start)
     .lte('date', end)
   if (error) throw error
   return {
     income: (data || []).filter((i) => i.type === 'income').reduce((s, i) => s + Number(i.amount || 0), 0),
-    expense: (data || []).filter((i) => i.type === 'expense').reduce((s, i) => s + Number(i.amount || 0), 0),
+    expense: (data || []).filter((i) => i.type === 'expense' && i.category !== 'tabungan').reduce((s, i) => s + Number(i.amount || 0), 0),
+    savings: (data || []).filter((i) => i.type === 'expense' && i.category === 'tabungan').reduce((s, i) => s + Number(i.amount || 0), 0),
     count: data?.length || 0,
   }
 }

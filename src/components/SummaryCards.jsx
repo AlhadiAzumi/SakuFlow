@@ -1,7 +1,7 @@
 import PixelIcon from './PixelIcon'
 import { formatRupiah } from '../lib/format'
 
-export default function SummaryCards({ income, expense, balance }) {
+export default function SummaryCards({ income, expense, savings = 0, balance }) {
   const cards = [
     {
       label: 'Uang masuk',
@@ -18,11 +18,18 @@ export default function SummaryCards({ income, expense, balance }) {
       caption: 'Pengeluaran bulan ini',
     },
     {
+      label: 'Tabungan',
+      value: savings,
+      icon: 'piggy',
+      tone: 'savings',
+      caption: 'Disisihkan bulan ini',
+    },
+    {
       label: balance >= 0 ? 'Sisa uang' : 'Defisit',
       value: Math.abs(balance),
       icon: balance >= 0 ? 'wallet' : 'alert',
       tone: balance >= 0 ? 'balance' : 'danger',
-      caption: balance >= 0 ? 'Masih tersisa' : 'Pengeluaran melebihi pemasukan',
+      caption: balance >= 0 ? 'Sisa setelah tabungan' : 'Lebih besar dari pemasukan',
     },
   ]
 

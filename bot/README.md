@@ -155,7 +155,9 @@ Panduan lengkap Meta Business + webhook ada di [`../docs/DEPLOY-VERCEL.md`](../d
 | `keluar 25rb buat kopi` | Pengeluaran Rp25.000, kategori Makan & Minum |
 | `beli bensin 50 ribu kemarin` | Pengeluaran Rp50.000, kategori Transportasi |
 | `keluar 18rb transport tanggal 12` | Pengeluaran tanggal 12 bulan ini |
-| `ringkasan` / `rekap` | Total masuk/keluar/sisa bulan ini |
+| `nabung 15 ribu` | Tabungan Rp15.000, tidak dihitung sebagai pengeluaran |
+| `kasi 65 ribu ke tabungan` | Tabungan Rp65.000, mengurangi sisa uang |
+| `ringkasan` / `rekap` | Total masuk, keluar, tabungan, dan sisa bulan ini |
 | `riwayat` | 5 catatan terakhir |
 | `status` | Status koneksi & jumlah catatan |
 | `hapus` / `clear` / `batal` | Hapus 1 catatan terakhir |

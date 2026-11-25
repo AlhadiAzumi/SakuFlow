@@ -188,7 +188,7 @@ Singkatnya:
 2. Isi `VITE_BOT_API_URL=http://localhost:3001` di `.env` website, lalu jalankan ulang web.
 3. Daftarkan `https://<domain>/webhook` di Meta → WhatsApp → Configuration, lalu subscribe field `messages`.
 4. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu balas kode 6 digit itu di WA.
-5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `ringkasan`, dll.
+5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `nabung 15 ribu`, `ringkasan`, dll.
 6. Tiap `message.id` hanya diproses sekali. Webhook dilindungi HMAC-SHA256.
 
 Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true`. Balasan bot muncul di terminal.

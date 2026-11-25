@@ -1,4 +1,4 @@
-import { EXPENSE_CATEGORIES, getCategory } from './categories'
+import { EXPENSE_CATEGORIES, getCategory, isSavingsTx } from './categories'
 import { formatRupiah, shiftMonth, toDateKey } from './format'
 
 export const getMonthTransactions = (transactions, monthKey) =>
@@ -9,14 +9,17 @@ export const summarize = (items) => {
     .filter((tx) => tx.type === 'income')
     .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
   const expense = items
-    .filter((tx) => tx.type === 'expense')
+    .filter((tx) => tx.type === 'expense' && !isSavingsTx(tx))
     .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
-  return { income, expense, balance: income - expense }
+  const savings = items
+    .filter(isSavingsTx)
+    .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
+  return { income, expense, savings, balance: income - expense - savings }
 }
 
 export const expenseByCategory = (items) => {
   const totals = {}
-  items.filter((tx) => tx.type === 'expense').forEach((tx) => {
+  items.filter((tx) => tx.type === 'expense' && !isSavingsTx(tx)).forEach((tx) => {
     totals[tx.category] = (totals[tx.category] || 0) + (Number(tx.amount) || 0)
   })
 
@@ -36,7 +39,7 @@ export const getTrend = (transactions, monthKey, count = 6) =>
 
 export const getBudgetStatus = (monthItems, budgets = {}) => {
   const spent = {}
-  monthItems.filter((tx) => tx.type === 'expense').forEach((tx) => {
+  monthItems.filter((tx) => tx.type === 'expense' && !isSavingsTx(tx)).forEach((tx) => {
     spent[tx.category] = (spent[tx.category] || 0) + (Number(tx.amount) || 0)
   })
 
@@ -73,7 +76,7 @@ export const getSavingsProgress = (balance, target) => {
 const expenseInRange = (transactions, from, to) =>
   transactions
     .filter((tx) => {
-      if (tx.type !== 'expense') return false
+      if (tx.type !== 'expense' || isSavingsTx(tx)) return false
       const key = String(tx.date || '')
       return key >= from && (!to || key < to)
     })

@@ -44,6 +44,22 @@ test('kategori transport, tagihan, dan hiburan', () => {
   assert.equal(parseMessage('nonton 100 ribu', NOW).category, 'hiburan')
 })
 
+test('perintah tabungan dikenali tanpa mengubah tipe transaksi', () => {
+  const nabung = parseMessage('nabung 15 ribu', NOW)
+  assert.equal(nabung.intent, 'savings')
+  assert.equal(nabung.amount, 15000)
+  assert.equal(nabung.category, 'tabungan')
+  assert.equal(nabung.date, '2026-11-21')
+
+  const kasi = parseMessage('kasi 65 ribu ke tabungan kemarin', NOW)
+  assert.equal(kasi.intent, 'savings')
+  assert.equal(kasi.amount, 65000)
+  assert.equal(kasi.category, 'tabungan')
+  assert.equal(kasi.date, '2026-11-20')
+
+  assert.equal(parseMessage('tabungan', NOW).intent, 'unknown')
+})
+
 test('perintah bantuan dan ringkasan', () => {
   for (const text of ['bantuan', 'help', 'menu', 'daftar perintah', 'halo']) {
     assert.equal(parseMessage(text, NOW).intent, 'help')

@@ -59,6 +59,12 @@ export function detectCategory(text, type) {
   return match ? match.id : type === 'income' ? 'pendapatan_lain' : 'lainnya'
 }
 
+export function detectSavings(text) {
+  const lower = String(text || '').toLowerCase()
+  if (/\b(nabung|nabungkan|menabung|tabung|tabungan|setor|setoran|simpan|menyimpan|sisihkan)\b/.test(lower)) return true
+  return /\b(kasi|kasih|masukin|masukkan|transfer)\b.*\btabungan\b/.test(lower)
+}
+
 const pad = (n) => String(n).padStart(2, '0')
 const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 
@@ -95,6 +101,19 @@ export function parseMessage(text, now = new Date()) {
   if (/^(hapus|hapus catatan|hapus transaksi terakhir|hapus terakhir|hapus 1|hapus satu|batal|batalkan|undo|clear)$/.test(lower)) return { intent: 'deleteLast' }
   if (/\b(ringkasan|rekap|summary|total bulan ini|rekap bulan ini|ringkasan bulan ini)\b/.test(lower)) return { intent: 'summary' }
 
+  if (detectSavings(lower)) {
+    const amount = extractAmount(lower)
+    if (amount !== null) {
+      return {
+        intent: 'savings',
+        amount,
+        category: 'tabungan',
+        date: detectDate(lower, now),
+        note: raw.slice(0, 80),
+      }
+    }
+  }
+
   const amount = extractAmount(lower)
   if (amount === null) return { intent: 'unknown' }
 
@@ -119,9 +138,11 @@ export const HELP_TEXT = [
   '• "beli bensin 50 ribu kemarin"',
   '• "gaji 3,5 juta hari ini"',
   '• "keluar 18rb transport tanggal 12"',
+  '• "nabung 15 ribu"',
+  '• "kasi 65 ribu ke tabungan"',
   '',
   'Perintah:',
-  '• "ringkasan" / "rekap": total uang masuk & keluar bulan ini',
+  '• "ringkasan" / "rekap": total masuk, keluar, tabungan & sisa bulan ini',
   '• "riwayat": 5 catatan terakhir',
   '• "status": cek koneksi nomor & jumlah catatan',
   '• "hapus" / "clear" / "batal": hapus 1 catatan terakhir',

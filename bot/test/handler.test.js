@@ -126,3 +126,28 @@ test('clear all / hapus semua menghapus seluruh catatan milik nomor terhubung', 
   const notLinked = await collectReply('clear all', '6281111111111')
   assert.match(notLinked, /belum terhubung/)
 })
+
+test('tabungan lewat chat mengurangi sisa tanpa masuk pengeluaran', async () => {
+  const phone = '6283333333333'
+  await store.requestLink('user-tabungan', phone, '333333')
+  await store.verifyOtp(phone, '333333')
+
+  await collectReply('masuk gaji 5 juta', phone)
+  const saved = await collectReply('nabung 15 ribu', phone)
+  assert.match(saved, /Tabungan tersimpan/)
+  assert.match(saved, /Rp15\.000/)
+  assert.match(saved, /Sisa sekarang: Rp4\.985\.000/)
+
+  const rekap = await collectReply('ringkasan', phone)
+  assert.match(rekap, /Uang keluar: Rp0/)
+  assert.match(rekap, /Tabungan: Rp15\.000/)
+  assert.match(rekap, /Sisa: Rp4\.985\.000/)
+
+  const riwayat = await collectReply('riwayat', phone)
+  assert.match(riwayat, /Tabungan/)
+
+  await collectReply('kasi 65 ribu ke tabungan', phone)
+  const rekapKedua = await collectReply('ringkasan', phone)
+  assert.match(rekapKedua, /Tabungan: Rp80\.000/)
+  assert.match(rekapKedua, /Sisa: Rp4\.920\.000/)
+})

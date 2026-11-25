@@ -17,9 +17,21 @@ export const INCOME_CATEGORIES = [
   { id: 'pendapatan_lain', label: 'Lainnya', icon: 'other', color: '#6EE7B7' },
 ]
 
-export const getCategories = (type) => (type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES)
+export const SAVINGS_CATEGORY = { id: 'tabungan', label: 'Tabungan', icon: 'piggy', color: '#2563EB' }
+export const SAVINGS_CATEGORIES = [SAVINGS_CATEGORY]
+
+// Tabungan sengaja disimpan sebagai category 'tabungan' di tabel transactions
+// yang sama. Dengan begitu tidak perlu mengubah constraint tipe di Supabase.
+export const isSavingsTx = (tx) => String(tx?.category || '') === SAVINGS_CATEGORY.id
+
+export const getCategories = (type) => {
+  if (type === 'income') return INCOME_CATEGORIES
+  if (type === 'savings') return SAVINGS_CATEGORIES
+  return EXPENSE_CATEGORIES
+}
 
 export const getCategory = (type, id) => {
+  if (isSavingsTx({ category: id })) return SAVINGS_CATEGORY
   const found = getCategories(type).find((c) => c.id === id)
   return found || { id: id || 'lainnya', label: 'Lainnya', icon: 'other', color: '#94A3B8' }
 }

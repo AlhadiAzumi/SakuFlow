@@ -1,6 +1,6 @@
 import CategoryIcon from './CategoryIcon'
 import PixelIcon from './PixelIcon'
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../lib/categories'
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, SAVINGS_CATEGORIES } from '../lib/categories'
 
 const HINTS = {
   makanan: 'Kopi, sarapan, jajan',
@@ -16,6 +16,7 @@ const HINTS = {
   usaha: 'Jualan, klien, proyek',
   penerimaan: 'Bonus, hadiah, transfer',
   pendapatan_lain: 'Pemasukan di luar gaji',
+  tabungan: 'Uang yang disisihkan',
 }
 
 function LegendGroup({ title, note, items }) {
@@ -56,6 +57,7 @@ export default function IconLegend() {
       <div className="icon-legend__body">
         <LegendGroup title="Uang keluar" note="Ke mana uangmu pergi" items={EXPENSE_CATEGORIES} />
         <LegendGroup title="Uang masuk" note="Dari mana uangmu datang" items={INCOME_CATEGORIES} />
+        <LegendGroup title="Tabungan" note="Uang yang kamu sisihkan" items={SAVINGS_CATEGORIES} />
       </div>
 
       <div className="icon-legend__nav">

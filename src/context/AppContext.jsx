@@ -1,4 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { isSavingsTx } from '../lib/categories'
 import { formatRupiah } from '../lib/format'
 import { isCloudMode, supabase } from '../lib/supabase'
 
@@ -233,7 +234,7 @@ export function AppProvider({ children }) {
             receivedAt: tx.created_at || new Date().toISOString(),
           })
           if (!localInsertIds.current.has(tx.id)) {
-            const label = tx.type === 'income' ? 'Masuk' : 'Keluar'
+            const label = isSavingsTx(tx) ? 'Tabungan' : tx.type === 'income' ? 'Masuk' : 'Keluar'
             showToast(`Catatan baru masuk: ${label} ${formatRupiah(tx.amount)}`)
           }
           localInsertIds.current.delete(tx.id)

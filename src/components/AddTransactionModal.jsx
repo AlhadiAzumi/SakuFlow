@@ -23,7 +23,9 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
     if (!open) return
     setForm(initial
       ? {
-          type: initial.type || 'expense',
+          type: initial.category === 'tabungan' && initial.type === 'expense'
+            ? 'savings'
+            : initial.type || 'expense',
           amount: String(initial.amount || ''),
           category: initial.category || 'lainnya',
           date: initial.date || todayKey(),
@@ -74,7 +76,10 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
     setSaving(true)
     setError('')
     try {
-      await onSave({ ...form, amount })
+      const record = form.type === 'savings'
+        ? { ...form, amount, type: 'expense', category: 'tabungan' }
+        : { ...form, amount }
+      await onSave(record)
     } catch (err) {
       setError(err?.message || 'Gagal menyimpan catatan. Coba lagi.')
     } finally {
@@ -99,6 +104,9 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
             </button>
             <button type="button" className={form.type === 'income' ? 'is-active is-active--in' : ''} onClick={() => setType('income')}>
               <PixelIcon name="arrow-down-left" size={15} /> Uang masuk
+            </button>
+            <button type="button" className={form.type === 'savings' ? 'is-active is-active--savings' : ''} onClick={() => setType('savings')}>
+              <PixelIcon name="piggy" size={15} /> Tabungan
             </button>
           </div>
 
@@ -152,7 +160,7 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
                 type="text"
                 value={form.note}
                 maxLength={80}
-                placeholder="Mis. kopi sama teman"
+                placeholder={form.type === 'savings' ? 'Mis. dana liburan' : 'Mis. kopi sama teman'}
                 onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
               />
             </label>

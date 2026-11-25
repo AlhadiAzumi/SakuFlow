@@ -25,6 +25,7 @@ import {
   getTrend,
   summarize,
 } from './lib/analytics'
+import { isSavingsTx } from './lib/categories'
 import { currentMonthKey, formatMonthLabel, formatRupiah, formatTimeAgo } from './lib/format'
 import { DASHBOARD_TABS } from './lib/navigation'
 
@@ -71,7 +72,7 @@ export default function App() {
   const trend = useMemo(() => getTrend(transactions, month), [transactions, month])
   const insight = useMemo(() => getInsight(transactions, monthItems), [transactions, monthItems])
   const budgetStatus = useMemo(() => getBudgetStatus(monthItems, settings.budgets), [monthItems, settings.budgets])
-  const savingsProgress = useMemo(() => getSavingsProgress(summary.balance, settings.savingsTarget), [summary.balance, settings.savingsTarget])
+  const savingsProgress = useMemo(() => getSavingsProgress(summary.savings, settings.savingsTarget), [summary.savings, settings.savingsTarget])
   const overBudget = budgetStatus.filter((item) => item.status === 'over')
   const nearBudget = budgetStatus.filter((item) => item.status === 'warning')
 
@@ -242,7 +243,7 @@ export default function App() {
                 >
                   <i />
                   Sinkron terakhir: {formatTimeAgo(lastSyncedTx.receivedAt, syncTick)} •{' '}
-                  {lastSyncedTx.type === 'income' ? 'Masuk' : 'Keluar'}{' '}
+                  {isSavingsTx(lastSyncedTx) ? 'Tabungan' : lastSyncedTx.type === 'income' ? 'Masuk' : 'Keluar'}{' '}
                   {formatRupiah(lastSyncedTx.amount)}
                 </div>
               )}
@@ -264,13 +265,13 @@ export default function App() {
                   <span className="welcome-banner__icon"><PixelIcon name="sparkles" size={26} /></span>
                   <div>
                     <strong>Langkah pertama dimulai dari satu catatan.</strong>
-                    <p>Tambahkan uang masuk atau pengeluaran pertamamu untuk melihat peta uangmu.</p>
+                    <p>Tambahkan uang masuk, pengeluaran, atau tabungan pertamamu untuk melihat peta uangmu.</p>
                   </div>
                   <button type="button" className="button button--primary" onClick={openAdd}>Catat sekarang</button>
                 </div>
               )}
 
-              <SummaryCards income={summary.income} expense={summary.expense} balance={summary.balance} />
+              <SummaryCards income={summary.income} expense={summary.expense} savings={summary.savings} balance={summary.balance} />
 
               {overBudget.length > 0 && (
                 <div className="alert-banner alert-banner--danger" role="status">
@@ -294,7 +295,7 @@ export default function App() {
               <div className="dash-card-grid">
                 <Reveal className="dash-span-2" delay={60}>
                   <section className="panel panel--flow">
-                    <MoneyFlow income={summary.income} expenses={categories} savingsTarget={settings.savingsTarget} />
+                    <MoneyFlow income={summary.income} expenses={categories} savings={summary.savings} savingsTarget={settings.savingsTarget} />
                   </section>
                 </Reveal>
 

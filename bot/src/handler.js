@@ -26,6 +26,8 @@ async function buildGuideText(phone) {
     'Format catatan:',
     '• keluar 25rb kopi',
     '• masuk uang 500 ribu',
+    '• nabung 15 ribu',
+    '• kasi 65 ribu ke tabungan',
     '• ringkasan',
     '• hapus semua',
     '',
@@ -165,10 +167,46 @@ export async function handleMessage(message, { send = sendText } = {}) {
       `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()}`,
       `Uang masuk: ${rupiah(totals.income)}`,
       `Uang keluar: ${rupiah(totals.expense)}`,
-      `Sisa: ${rupiah(totals.income - totals.expense)}`,
+      `Tabungan: ${rupiah(totals.savings || 0)}`,
+      `Sisa: ${rupiah(totals.income - totals.expense - (totals.savings || 0))}`,
       `${totals.count} transaksi tercatat.`,
     ].join('\n'))
     return { type: 'summary', ok: true, phone, userId, totals }
+  }
+
+  if (parsed.intent === 'savings') {
+    const userId = await store.getLinkedUser(phone)
+    if (!userId) {
+      await reply('Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
+      return { type: 'savings', ok: false, phone, reason: 'not_linked' }
+    }
+    // Tabungan disimpan sebagai category 'tabungan' di tabel transactions.
+    // Ini menghindari perubahan constraint tipe di database Supabase.
+    await store.insertTransaction({
+      user_id: userId,
+      type: 'expense',
+      amount: parsed.amount,
+      category: 'tabungan',
+      note: parsed.note,
+      date: parsed.date,
+      source: 'whatsapp',
+      bot_message_id: message.id || null,
+      created_at: new Date().toISOString(),
+    })
+    let totals = { income: 0, expense: 0, savings: 0, count: 0 }
+    try {
+      totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
+    } catch (error) {
+      console.error('[Bot] Gagal mengambil rekap setelah tabungan tersimpan:', error)
+    }
+    await reply([
+      'Tabungan tersimpan.',
+      `${rupiah(parsed.amount)} • Tabungan`,
+      `Total tabungan bulan ini: ${rupiah(totals.savings || 0)}.`,
+      `Sisa sekarang: ${rupiah(totals.income - totals.expense - (totals.savings || 0))}.`,
+      'Cek websitenya, datanya langsung muncul.',
+    ].join('\n'))
+    return { type: 'savings', ok: true, phone, userId, amount: parsed.amount }
   }
 
   if (parsed.intent === 'transaction') {
@@ -191,7 +229,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
     const category = getCategory(parsed.type, parsed.category)
     // Transaksi sudah tersimpan. Kalau rekap gagal, jangan sampai user
     // dikabari "gagal menyimpan". Kirim konfirmasi dengan rekap kosong.
-    let totals = { income: 0, expense: 0, count: 0 }
+    let totals = { income: 0, expense: 0, savings: 0, count: 0 }
     try {
       totals = await store.getMonthTotals(userId, parsed.date.slice(0, 7))
     } catch (error) {
@@ -200,7 +238,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
     await reply([
       `${parsed.type === 'income' ? 'Uang masuk' : 'Uang keluar'} tersimpan.`,
       `${rupiah(parsed.amount)} • ${category.label}`,
-      `Total bulan ini: masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}.`,
+      `Total bulan ini: masuk ${rupiah(totals.income)}, keluar ${rupiah(totals.expense)}, tabungan ${rupiah(totals.savings || 0)}.`,
       'Cek websitenya, datanya langsung muncul.',
     ].join('\n'))
     return { type: 'transaction', ok: true, phone, userId, amount: parsed.amount, category: parsed.category }

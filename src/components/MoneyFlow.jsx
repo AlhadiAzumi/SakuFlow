@@ -5,32 +5,45 @@ import { formatRupiah } from '../lib/format'
 
 const SEGMENTS = 12
 
-function buildItems(income, expenseItems) {
+function buildItems(income, expenseItems, savings = 0) {
   const items = expenseItems
     .filter((item) => item.amount > 0)
     .map((item) => ({ ...item }))
-    .sort((a, b) => b.amount - a.amount)
 
-  const totalExpense = items.reduce((sum, item) => sum + item.amount, 0)
-  const leftover = income - totalExpense
+  if (savings > 0) {
+    items.push({
+      id: 'tabungan',
+      label: 'Tabungan',
+      icon: 'piggy',
+      color: '#2563EB',
+      amount: savings,
+      isSavings: true,
+    })
+  }
+
+  const totalExpense = expenseItems.reduce((sum, item) => sum + item.amount, 0)
+  const leftover = income - totalExpense - savings
   if (leftover > 0) {
     items.push({
       id: 'sisa',
-      label: 'Sisa / Tabungan',
-      icon: 'piggy',
-      color: '#2563EB',
+      label: 'Sisa uang',
+      icon: 'wallet',
+      color: '#38BDF8',
       amount: leftover,
       isLeftover: true,
     })
   }
-  return items
+  return items.sort((a, b) => b.amount - a.amount)
 }
 
-export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
-  const items = useMemo(() => buildItems(income, expenses), [income, expenses])
+export default function MoneyFlow({ income, expenses, savings = 0, savingsTarget = 0 }) {
+  const items = useMemo(() => buildItems(income, expenses, savings), [income, expenses, savings])
   const total = items.reduce((sum, item) => sum + item.amount, 0)
   const hasLeftover = items.some((item) => item.isLeftover)
-  const sourceLabel = income > 0 && hasLeftover ? 'Uang masuk bulan ini' : 'Total pengeluaran bulan ini'
+  const allocated = expenses.reduce((sum, item) => sum + item.amount, 0) + savings
+  const sourceLabel = income > 0 && income >= allocated
+    ? 'Uang masuk bulan ini'
+    : 'Total uang teralokasi bulan ini'
 
   if (!items.length || total <= 0) {
     return (
@@ -60,7 +73,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
 
       <p className="flow-chart__legend">
         <PixelIcon name="info" size={13} />
-        Baca dari atas ke bawah: uang masuk dibagi ke tiap pos pengeluaran. Makin banyak kotak terisi, makin besar porsinya.
+        Baca dari atas ke bawah: uang masuk dibagi ke pengeluaran, tabungan, dan sisa. Makin banyak kotak terisi, makin besar porsinya.
       </p>
 
       <div className="flow-board__map">
@@ -106,7 +119,7 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
               </div>
               <div className="flow-dest__amount">
                 <strong>{formatRupiah(item.amount)}</strong>
-                <small>{item.isLeftover ? 'ditabung' : 'terpakai'}</small>
+                <small>{item.isLeftover ? 'tersisa' : item.isSavings ? 'ditabung' : 'terpakai'}</small>
               </div>
             </li>
           )
@@ -116,8 +129,10 @@ export default function MoneyFlow({ income, expenses, savingsTarget = 0 }) {
       <p className="flow-board__foot">
         <PixelIcon name="check" size={13} />
         {income > 0 && hasLeftover
-          ? 'Total semua pos di atas sama dengan uang masuk bulan ini. Sisa yang tidak dipakai masuk ke tabungan.'
-          : 'Total semua pos di atas sama dengan total pengeluaran bulan ini. Belum ada sisa yang bisa ditabung.'}
+          ? 'Total semua pos di atas sama dengan uang masuk bulan ini. Sisa yang belum dipakai tetap tercatat.'
+          : savings > 0
+            ? 'Tabungan ikut masuk peta ini, tetapi tidak dihitung sebagai pengeluaran.'
+            : 'Total semua pos di atas sama dengan total pengeluaran bulan ini. Belum ada tabungan yang tercatat.'}
       </p>
     </div>
   )
