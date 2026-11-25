@@ -179,6 +179,14 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             ))}
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <div className="hidden items-center gap-3 border-r border-slate-200 pr-3 lg:flex">
+              <a href="/privacy" className="whitespace-nowrap text-[11.5px] font-semibold text-slate-500 transition hover:text-blue-700">
+                Privasi
+              </a>
+              <a href="/terms" className="whitespace-nowrap text-[11.5px] font-semibold text-slate-500 transition hover:text-blue-700">
+                Syarat
+              </a>
+            </div>
             <DarkPill onClick={onEnter} className="hidden sm:inline-flex">{navLabel}</DarkPill>
             <button
               type="button"
@@ -206,6 +214,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 {item.label}
               </a>
             ))}
+            <div className="mt-2 flex items-center gap-4 border-t border-slate-100 px-3 pt-3 text-[11.5px] font-semibold text-slate-500">
+              <a href="/privacy">Kebijakan Privasi</a>
+              <a href="/terms">Syarat &amp; Ketentuan</a>
+            </div>
             <button type="button" onClick={onEnter} className="mt-2 w-full rounded-full bg-slate-900 px-4 py-3 text-sm font-bold text-white">
               {isLoggedIn ? 'Buka Dashboard' : 'Masuk ke Sakunode'}
             </button>
