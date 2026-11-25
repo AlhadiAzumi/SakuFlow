@@ -140,7 +140,7 @@ create policy "Users can read own WhatsApp link"
    1. Google Cloud Console → **APIs & Services → OAuth consent screen**, isi nama aplikasi `Sakunode`, lalu simpan.
    2. **Credentials → Create Credentials → OAuth client ID → Web application**. Pada *Authorized redirect URIs*, tambahkan `https://<project-ref>.supabase.co/auth/v1/callback` (project-ref ada di Project URL Supabase).
    3. Salin **Client ID** dan **Client Secret** ke Supabase → **Authentication → Providers → Google**, lalu aktifkan provider.
-   4. Supabase → **Authentication → URL Configuration**: isi *Site URL* dengan `https://sakuflow-mu.vercel.app`, dan *Additional Redirect URLs* dengan `http://localhost:5173/**` serta `https://sakuflow-mu.vercel.app/**`.
+   4. Supabase → **Authentication → URL Configuration**: isi *Site URL* dengan `https://sakunode.web.id`, dan *Additional Redirect URLs* dengan `http://localhost:5173/**`, `https://sakunode.web.id/**`, serta `https://sakuflow-mu.vercel.app/**` bila domain lama masih aktif dan ikut redirect.
    5. Secara default Supabase meminta verifikasi email untuk pendaftaran manual. Bila ingin langsung masuk setelah daftar, matikan **Authentication → Providers → Email → Confirm email**.
 
 7. Jalankan ulang `npm run dev`. Halaman login akan muncul otomatis, dengan indikator **Live** di header.

@@ -267,7 +267,7 @@ export default function AuthScreen({ onBack }) {
             <ol>
               <li>Di Supabase: <strong>Authentication → Providers → Google</strong>, aktifkan provider dan isi Client ID + Client Secret.</li>
               <li>Di Google Cloud Console: tambahkan redirect URI <code>https://&lt;project-ref&gt;.supabase.co/auth/v1/callback</code> pada OAuth Client.</li>
-              <li>Di Supabase: <strong>Authentication → URL Configuration</strong>, tambahkan <code>{typeof window !== 'undefined' ? window.location.origin : 'https://sakuflow-mu.vercel.app'}</code> ke Site URL / Additional Redirect URLs.</li>
+              <li>Di Supabase: <strong>Authentication → URL Configuration</strong>, tambahkan <code>{typeof window !== 'undefined' ? window.location.origin : 'https://sakunode.web.id'}</code> ke Site URL / Additional Redirect URLs.</li>
             </ol>
           </details>
         )}

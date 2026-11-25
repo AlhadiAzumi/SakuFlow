@@ -16,6 +16,7 @@ export const config = {
     ...env('WEB_ORIGIN', '').split(',').map((s) => s.trim().replace(/\/$/, '')),
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://sakunode.web.id',
     'https://sakuflow-mu.vercel.app',
   ].filter(Boolean))],
   verifyToken: env('WHATSAPP_VERIFY_TOKEN'),

@@ -134,7 +134,7 @@ npx vercel
 - `app.listen()` hanya dipanggil bila `process.env.VERCEL` tidak ada.
 - `npm run build` sudah tersedia (no-op) supaya Vercel tidak gagal build.
 
-Environment Variables di Vercel: samakan dengan daftar `.env` di atas, dengan `WEB_ORIGIN=https://<project>.vercel.app` dan `VITE_BOT_API_URL` diisi di project website.
+Environment Variables di Vercel: samakan dengan daftar `.env` di atas, dengan `WEB_ORIGIN=https://sakunode.web.id` dan `VITE_BOT_API_URL` diisi di project website. Domain lama `https://sakuflow-mu.vercel.app` sudah ada di daftar origin bawaan, jadi tidak perlu dihapus walau sudah redirect ke domain baru.
 
 Panduan lengkap Meta Business + webhook ada di [`../docs/DEPLOY-VERCEL.md`](../docs/DEPLOY-VERCEL.md).
 

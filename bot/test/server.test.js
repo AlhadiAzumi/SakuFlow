@@ -11,7 +11,7 @@ const savedEnv = {
 // Import server.js tanpa memulai port 3001 dan dengan origin tambahan.
 process.env.BOT_DRY_RUN = 'true'
 process.env.VERCEL = '1'
-process.env.WEB_ORIGIN = 'https://sakuflow-mu.vercel.app, https://extra.example.com/'
+process.env.WEB_ORIGIN = 'https://extra.example.com/'
 
 const { default: app } = await import('../src/server.js')
 
@@ -45,6 +45,15 @@ test('preflight OPTIONS diizinkan untuk origin production', async () => {
   assert.equal(response.status, 204)
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://sakuflow-mu.vercel.app')
   assert.match(response.headers.get('access-control-allow-methods') || '', /POST/)
+})
+
+test('domain baru dan domain lama sama sama diizinkan', async () => {
+  for (const origin of ['https://sakunode.web.id', 'https://sakuflow-mu.vercel.app']) {
+    const response = await fetch(`${base}/api/link/status`, {
+      headers: { Origin: origin },
+    })
+    assert.equal(response.headers.get('access-control-allow-origin'), origin)
+  }
 })
 
 test('WEB_ORIGIN dengan trailing slash dinormalisasi', async () => {

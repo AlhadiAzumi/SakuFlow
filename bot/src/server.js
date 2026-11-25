@@ -30,6 +30,7 @@ const configuredOrigins = (process.env.WEB_ORIGIN || '')
 const allowedOrigins = [...new Set([
   ...configuredOrigins,
   'http://localhost:5173',
+  'https://sakunode.web.id',
   'https://sakuflow-mu.vercel.app',
 ])]
 

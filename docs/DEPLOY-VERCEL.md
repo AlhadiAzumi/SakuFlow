@@ -56,7 +56,7 @@ Jangan pakai prefix `VITE_` untuk secret.
 | `WHATSAPP_APP_SECRET` | `abc...` |
 | `WHATSAPP_VERIFY_TOKEN` | `catatan-uang-secret` |
 | `WHATSAPP_API_VERSION` | `v25.0` |
-| `WEB_ORIGIN` | `https://<website>.vercel.app` |
+| `WEB_ORIGIN` | `https://sakunode.web.id` (domain lama boleh tetap masuk daftar kalau masih redirect) |
 | `BOT_DRY_RUN` | `false` |
 
 Variabel `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, dan `VITE_BOT_API_URL` tetap diisi di **project website**, bukan di project bot.
