@@ -1,5 +1,5 @@
 -- ============================================================
--- Catatan Uang Harian — setup database Supabase
+-- Catatan Uang Harian, setup database Supabase
 -- Cara pakai: Supabase → SQL Editor → New query → paste semua → Run
 -- Aman dijalankan ulang (idempotent).
 -- ============================================================

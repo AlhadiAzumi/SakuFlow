@@ -242,7 +242,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
-              Catat uang masuk dan keluar cukup lewat chat. Lihat ke mana uangmu pergi lewat diagram alur yang enak dibaca. Tanpa ribet, tanpa spreadsheet.
+              Sakunode adalah aplikasi pencatatan keuangan harian terintegrasi bot WhatsApp dan dashboard visualisasi arus kas. Catat uang masuk, keluar, dan tabungan cukup lewat chat, lalu lihat ke mana uangmu pergi lewat diagram alur yang enak dibaca.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -382,7 +382,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             Dirancang untuk Pencatatan Harian Tanpa Ribet
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-slate-500">
-            Semua yang kamu butuhkan untuk tahu ke mana uang pergi, dalam satu tempat yang ringan.
+            Sakunode menggabungkan bot WhatsApp untuk pencatatan cepat dan dashboard web untuk visualisasi arus kas. Semua yang kamu butuhkan untuk tahu ke mana uang pergi ada dalam satu tempat yang ringan.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-2.5">
             {FEATURE_BADGES.map(({ label, icon }) => (

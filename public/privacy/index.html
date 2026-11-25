@@ -6,23 +6,38 @@
     <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#2563EB" />
     <title>Kebijakan Privasi | Sakunode</title>
-    <meta name="description" content="Kebijakan Privasi Sakunode: data apa yang dikumpulkan, cara dipakai, dan bagaimana data email serta profil Google hanya dipakai untuk autentikasi akun." />
+    <meta name="description" content="Kebijakan Privasi Sakunode: data akun Google, catatan transaksi WhatsApp dan dashboard, penggunaan data, keamanan, penghapusan akun, dan kontak resmi." />
     <link rel="canonical" href="https://sakunode.web.id/privacy" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://sakunode.web.id/privacy" />
     <meta property="og:site_name" content="Sakunode" />
     <meta property="og:title" content="Kebijakan Privasi | Sakunode" />
-    <meta property="og:description" content="Data email dan profil Google di Sakunode hanya dipakai untuk autentikasi akun. Baca detail kebijakan privasi kami." />
+    <meta property="og:description" content="Data Google dan catatan keuangan kamu di Sakunode hanya dipakai untuk autentikasi, identifikasi, dan sinkronisasi data keuangan pribadi." />
     <meta property="og:image" content="https://sakunode.web.id/icon-512.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Kebijakan Privasi | Sakunode" />
-    <meta name="twitter:description" content="Data email dan profil Google di Sakunode hanya dipakai untuk autentikasi akun." />
+    <meta name="twitter:description" content="Data Google dan catatan keuangan kamu di Sakunode hanya dipakai untuk autentikasi, identifikasi, dan sinkronisasi data keuangan pribadi." />
     <meta name="twitter:image" content="https://sakunode.web.id/icon-512.png" />
     <link rel="icon" type="image/svg+xml" href="/iconsakunode.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/legal.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Kebijakan Privasi Sakunode",
+        "url": "https://sakunode.web.id/privacy",
+        "description": "Kebijakan privasi aplikasi Sakunode untuk data akun Google dan catatan keuangan.",
+        "inLanguage": "id",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Sakunode",
+          "url": "https://sakunode.web.id/"
+        }
+      }
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -33,7 +48,7 @@
         </a>
         <nav class="header-links" aria-label="Navigasi hukum">
           <a href="/privacy">Privasi</a>
-          <a href="/terms">Syarat &amp; Ketentuan</a>
+          <a href="/terms">Syarat dan Ketentuan</a>
         </nav>
       </div>
     </header>
@@ -43,68 +58,83 @@
         <span class="kicker">Dokumen resmi</span>
         <h1>Kebijakan Privasi Sakunode</h1>
         <p class="lede">
-          Sakunode adalah aplikasi pencatat keuangan berbasis web dan bot WhatsApp yang membantu kamu melihat ke mana uang pergi. Dokumen ini menjelaskan data apa yang kami kumpulkan, cara kami memakainya, dan hak kamu atas data tersebut.
+          Sakunode adalah aplikasi pencatatan keuangan harian yang dioperasikan di <strong>https://sakunode.web.id</strong>. Sakunode terintegrasi dengan bot WhatsApp dan dashboard web untuk visualisasi arus kas. Kebijakan ini menjelaskan data apa yang kami kumpulkan, bagaimana kami memakainya, dan hak kamu atas data tersebut.
         </p>
         <p class="updated">Terakhir diperbarui: 26 November 2026</p>
       </section>
 
       <article class="card">
-        <h2>1. Data yang kami kumpulkan</h2>
+        <h2>1. Pendahuluan dan Identitas Aplikasi</h2>
+        <p>
+          Sakunode adalah aplikasi pencatatan keuangan harian berbasis web yang bisa diakses di <a href="https://sakunode.web.id/">https://sakunode.web.id</a>. Pengguna dapat mencatat pemasukan, pengeluaran, dan tabungan lewat bot WhatsApp atau lewat dashboard web, lalu melihat ringkasan dan visualisasi arus kas. Kebijakan privasi ini berlaku untuk seluruh pengguna website dan bot WhatsApp Sakunode.
+        </p>
+        <p class="updated">Terakhir diperbarui: 26 November 2026.</p>
+
+        <h2>2. Data yang Kami Kumpulkan</h2>
+        <p>Kami hanya mengumpulkan data yang diperlukan untuk menjalankan layanan:</p>
         <ul>
-          <li><strong>Akun:</strong> alamat email dan data autentikasi. Kami tidak menyimpan kata sandi kamu. Autentikasi dikelola oleh Supabase Auth.</li>
-          <li><strong>Login Google:</strong> nama tampilan, email, dan informasi profil dasar dari akun Google kamu.</li>
-          <li><strong>Data keuangan:</strong> jenis transaksi, nominal, kategori, tanggal, catatan opsional, batas budget, dan target tabungan.</li>
-          <li><strong>WhatsApp:</strong> nomor telepon, kode verifikasi, isi pesan yang kamu kirim ke bot, dan ID pesan untuk mencegah pemrosesan ganda.</li>
-          <li><strong>Perangkat:</strong> pada mode lokal, data tetap disimpan di browser kamu sendiri.</li>
+          <li>
+            <strong>Data akun melalui Google OAuth:</strong> jika kamu memilih masuk dengan Google, kami menerima <strong>nama lengkap, alamat email, foto profil</strong>, dan identifier akun Google kamu. Data ini diberikan oleh Google setelah kamu menyetujui izin akses.
+          </li>
+          <li>
+            <strong>Data akun email:</strong> alamat email dan data autentikasi. Kami tidak pernah menyimpan kata sandi kamu. Autentikasi dikelola oleh Supabase Auth.
+          </li>
+          <li>
+            <strong>Data transaksi dari dashboard web:</strong> jenis transaksi, nominal, kategori, tanggal, catatan opsional, batas budget per kategori, dan target tabungan yang kamu isi sendiri.
+          </li>
+          <li>
+            <strong>Data transaksi dari WhatsApp Bot:</strong> nomor telepon yang kamu daftarkan, isi pesan dan perintah yang kamu kirim, nominal dan kategori yang kamu sampaikan, kode verifikasi OTP, serta ID pesan WhatsApp untuk mencegah pesan diproses dua kali.
+          </li>
+          <li>
+            <strong>Data perangkat:</strong> jika kamu memakai mode lokal tanpa Supabase, catatan disimpan di <code>localStorage</code> browser kamu sendiri dan tidak dikirim ke server kami.
+          </li>
         </ul>
 
         <div class="callout">
           <p>
-            Data email dan profil Google yang kamu berikan hanya dipakai untuk autentikasi akun Sakunode, yaitu membuat atau mengenali akunmu. Kami tidak memakainya untuk iklan, profil pemasaran, atau membagikannya kepada pihak ketiga.
+            Kami tidak memakai iklan pihak ketiga, pelacak, atau analitik untuk membangun profil pemasaran kamu.
           </p>
         </div>
 
-        <h2>2. Cara kami memakai data</h2>
+        <h2>3. Penggunaan Data Google User</h2>
         <p>
-          Data dipakai untuk menampilkan ringkasan dan visualisasi alur uang, menyinkronkan catatan antarperangkat, menghubungkan nomor WhatsApp ke akun, menjawab perintah seperti <code>ringkasan</code> dan <code>bantuan</code>, serta mengirim kuitansi konfirmasi transaksi.
+          Data profil Google yang kami terima, yaitu nama lengkap, alamat email, dan foto profil, <strong>hanya digunakan untuk autentikasi akun, identifikasi pengguna, dan sinkronisasi data keuangan pribadi kamu</strong>. Artinya data tersebut dipakai untuk membuat atau mengenali akun Sakunode kamu dan memastikan catatan keuanganmu tersinkron dengan akun yang benar di berbagai perangkat.
+        </p>
+        <p>
+          Kami tidak menggunakan data Google tersebut untuk iklan, profil pemasaran, penjualan data, atau tujuan komersial lainnya.
         </p>
 
-        <h2>3. Penyimpanan dan pihak ketiga</h2>
+        <h2>4. Penyimpanan dan Keamanan Data</h2>
         <p>
-          Data disimpan di Supabase. Pesan WhatsApp diproses melalui Meta WhatsApp Cloud API. Verifikasi keamanan login memakai Cloudflare Turnstile. Kami tidak menjual atau menyewakan data kamu untuk iklan. Kunci akses server hanya tersimpan di server bot dan tidak pernah dikirim ke browser.
+          Data disimpan secara terenkripsi menggunakan infrastruktur database cloud yang aman. Koneksi antara browser, bot, dan database memakai HTTPS atau TLS sehingga data terenkripsi saat dikirim. Data yang disimpan juga dilindungi oleh enkripsi pada sisi penyimpanan cloud.
+        </p>
+        <p>
+          Akses data dibatasi dengan Row Level Security sehingga hanya pemilik akun yang dapat membaca dan mengubah datanya. Kunci akses server hanya tersimpan di lingkungan server bot dan tidak pernah dikirim ke browser. Kode verifikasi dihapus setelah berhasil dipakai, dan webhook WhatsApp diverifikasi dengan tanda tangan HMAC-SHA256.
         </p>
 
-        <h2>4. Keamanan</h2>
+        <h2>5. Pembagian Data ke Pihak Ketiga</h2>
         <p>
-          Akses data dibatasi dengan Row Level Security sehingga hanya pemilik akun yang dapat membaca dan mengubah datanya. Percobaan masuk dibatasi 7 kali gagal per 30 menit. Webhook WhatsApp diverifikasi dengan tanda tangan HMAC-SHA256.
+          Sakunode <strong>tidak menjual, menyewakan, atau membagikan data pribadi maupun data Google pengguna kepada pihak ketiga mana pun untuk tujuan iklan atau komersial</strong>.
+        </p>
+        <p>
+          Kami hanya memakai penyedia layanan infra untuk menjalankan fitur, yaitu Supabase untuk database dan autentikasi, Meta WhatsApp Cloud API untuk pesan bot, dan Cloudflare Turnstile untuk verifikasi keamanan login. Setiap penyedia memproses data seperlunya dan tunduk pada kebijakan privasi mereka sendiri.
         </p>
 
-        <h2>5. Retensi dan penghapusan</h2>
+        <h2>6. Retensi dan Penghapusan Data</h2>
         <p>
-          Data disimpan sampai kamu menghapusnya. Kamu bisa mengunduh data dalam bentuk Excel dan menghapus data lokal melalui menu Setelan. Untuk penghapusan data cloud permanen, hubungi kami lewat email di bawah. Kode verifikasi dihapus setelah berhasil dipakai.
+          Data disimpan selama akun kamu aktif dan diperlukan untuk layanan. Kamu dapat menghapus seluruh data lokal kapan saja lewat menu Setelan di aplikasi, serta mengunduh catatan dalam format Excel sebelum menghapusnya.
+        </p>
+        <p>
+          Kamu juga berhak meminta <strong>penghapusan akun beserta seluruh riwayat transaksinya kapan saja</strong>. Kirim permintaan lewat email dukungan resmi di bawah. Setelah identitas kamu diverifikasi, kami akan menghapus akun dan seluruh data keuangan yang terkait.
         </p>
 
-        <h2>6. Hak kamu</h2>
+        <h2>7. Kontak Kami</h2>
         <p>
-          Kamu berhak mengakses, mengubah, mengunduh, atau meminta penghapusan data pribadi. Kirim permintaan ke alamat email di bawah.
-        </p>
-
-        <h2>7. Anak-anak</h2>
-        <p>
-          Layanan ini tidak ditujukan untuk anak di bawah usia 13 tahun.
-        </p>
-
-        <h2>8. Perubahan kebijakan</h2>
-        <p>
-          Perubahan diumumkan dengan memperbarui tanggal di bagian atas halaman ini.
-        </p>
-
-        <h2>9. Kontak</h2>
-        <p>
-          Email: <a href="mailto:sakunode@gmail.com">sakunode@gmail.com</a>
+          Untuk pertanyaan privasi, bantuan akun, atau permintaan penghapusan data, hubungi email dukungan resmi Sakunode:
+          <a href="mailto:sakunode@gmail.com">sakunode@gmail.com</a>.
         </p>
         <p>
-          Baca juga <a href="/terms">Syarat &amp; Ketentuan Sakunode</a>.
+          Baca juga <a href="/terms">Syarat dan Ketentuan Sakunode</a>.
         </p>
       </article>
 
