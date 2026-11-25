@@ -20,6 +20,7 @@ export default function WhatsAppLink() {
   const [checking, setChecking] = useState(Boolean(API_URL) && mode === 'cloud')
   const [loading, setLoading] = useState(false)
   const [otp, setOtp] = useState('')
+  const [waiting, setWaiting] = useState(false)
   const [delivered, setDelivered] = useState(false)
   const [cooldown, setCooldown] = useState(0)
   const [copied, setCopied] = useState(false)
@@ -61,10 +62,10 @@ export default function WhatsAppLink() {
     return () => { active = false }
   }, [callApi, mode])
 
-  // Saat kode OTP tampil, pantau status koneksi tiap 3 detik. Begitu nomor
-  // terhubung dari sisi bot, UI langsung berubah tanpa refresh manual.
+  // Setelah OTP diminta, pantau status tiap 3 detik. Bot tidak membalas chat,
+  // jadi satu-satunya konfirmasi ada di halaman ini.
   useEffect(() => {
-    if (!otp || !API_URL || mode !== 'cloud') return undefined
+    if (!waiting || !API_URL || mode !== 'cloud') return undefined
     let active = true
     let timer
 
@@ -74,6 +75,7 @@ export default function WhatsAppLink() {
         if (!active) return
         if (data.linked) {
           setStatus({ linked: true, phone: data.phone })
+          setWaiting(false)
           setOtp('')
           showToast('Nomor WhatsApp berhasil dihubungkan.')
           return
@@ -86,7 +88,7 @@ export default function WhatsAppLink() {
 
     checkStatus()
     return () => { active = false; clearTimeout(timer) }
-  }, [otp, callApi, mode, showToast])
+  }, [waiting, callApi, mode, showToast])
 
   const requestOtp = async (event) => {
     event?.preventDefault()
@@ -98,12 +100,13 @@ export default function WhatsAppLink() {
       })
       setStatus({ linked: false, phone: result.phone })
       setOtp(String(result.otp || ''))
+      setWaiting(true)
       setDelivered(Boolean(result.delivered))
       setCooldown(30)
       setCopied(false)
       showToast(result.delivered
-        ? 'Kode OTP acak dikirim ke WhatsApp. Balas pesan bot dengan kode tersebut.'
-        : 'Kode OTP acak siap. Salin atau kirim manual lewat tautan WhatsApp di bawah.')
+        ? 'Kode OTP acak dikirim ke WhatsApp. Setelah kirim ke bot, kembali ke halaman ini untuk cek status.'
+        : 'Kode OTP acak siap. Kirim lewat tautan WhatsApp di bawah, lalu kembali ke halaman ini untuk cek status.')
     } catch (error) {
       showToast(error.message || 'Gagal mengirim kode OTP.', 'error')
     } finally {
@@ -122,6 +125,25 @@ export default function WhatsAppLink() {
     }
   }
 
+  const refreshStatus = async () => {
+    setLoading(true)
+    try {
+      const data = await callApi('/api/link/status')
+      setStatus({ linked: Boolean(data.linked), phone: data.phone })
+      if (data.linked) {
+        setWaiting(false)
+        setOtp('')
+        showToast('Nomor WhatsApp sudah terhubung.')
+      } else {
+        showToast('Belum terhubung. Kirim kode OTP ke bot, lalu cek lagi di sini.')
+      }
+    } catch (error) {
+      showToast(error.message || 'Gagal mengecek status koneksi.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const waHref = otp
     ? `${BOT_WA_URL}${BOT_WA_URL.includes('?') ? '&' : '?'}text=${encodeURIComponent(`/verif ${otp}`)}`
     : BOT_WA_URL
@@ -131,6 +153,7 @@ export default function WhatsAppLink() {
     try {
       await callApi('/api/link', { method: 'DELETE' })
       setStatus({ linked: false, phone: null })
+      setWaiting(false)
       setOtp('')
       showToast('Nomor WhatsApp diputuskan.')
     } catch (error) {
@@ -191,32 +214,44 @@ export default function WhatsAppLink() {
             </button>
           </form>
 
-          {otp && (
+          {waiting && (
             <div className="whatsapp-panel__otp" role="status">
-              <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
-              <code className="whatsapp-panel__otp-code">{otp}</code>
-              <p>Salin kode ini, lalu kirim ke bot WhatsApp agar nomormu langsung terhubung. Berlaku 5 menit dan hanya bisa dipakai sekali.</p>
+              {otp && (
+                <>
+                  <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
+                  <code className="whatsapp-panel__otp-code">{otp}</code>
+                </>
+              )}
+              <p>
+                Kirim kode ini ke bot WhatsApp lewat tautan di bawah. Bot tidak membalas chat, jadi setelah pesan terkirim
+                langsung kembali ke halaman ini. Status akan dicek otomatis, atau tekan <strong>Cek status</strong>.
+              </p>
               <div className="whatsapp-panel__otp-actions">
-                <button type="button" className="button button--ghost" onClick={copyOtp}>
-                  {copied ? 'Kode tersalin' : 'Salin kode'}
-                </button>
+                {otp && (
+                  <button type="button" className="button button--ghost" onClick={copyOtp}>
+                    {copied ? 'Kode tersalin' : 'Salin kode'}
+                  </button>
+                )}
                 <button type="button" className="button button--ghost" onClick={requestOtp} disabled={loading || cooldown > 0}>
                   {cooldown > 0 ? `Kode baru ${cooldown} dtk` : 'Minta kode baru'}
                 </button>
+                <button type="button" className="button button--ghost" onClick={refreshStatus} disabled={loading}>
+                  Cek status
+                </button>
                 <a href={waHref} target="_blank" rel="noreferrer">
-                  Kirim kode ke WhatsApp bot
+                  Buka chat bot WhatsApp
                 </a>
               </div>
               {!delivered && (
                 <span className="whatsapp-panel__otp-note">
-                  Pesan otomatis tidak terkirim. Silakan salin kode lalu kirim manual lewat tautan bot di atas.
+                  Pesan otomatis tidak terkirim. Tetap pakai tautan bot di atas, lalu kembali ke halaman ini untuk cek status.
                 </span>
               )}
             </div>
           )}
         </>
       )}
-      <p className="whatsapp-panel__hint">Balas bot dengan 6 digit kode OTP dari menu Setelan Sakunode.</p>
+      <p className="whatsapp-panel__hint">Bot tidak membalas chat. Setelah kirim kode OTP, kembali ke halaman ini untuk melihat status koneksi.</p>
     </section>
   )
 }
