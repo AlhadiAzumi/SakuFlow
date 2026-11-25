@@ -149,9 +149,21 @@ create policy "Users can read own WhatsApp link"
 
 Di halaman masuk, setiap email dibatasi **7 kali percobaan gagal dalam 30 menit**. Setelah itu tombol masuk dinonaktifkan dan muncul hitung mundur sampai jendela 30 menit berakhir. Riwayat gagal tersimpan di `localStorage` browser dan otomatis dihapus setelah jendela selesai atau setelah login berhasil. Akun yang berbeda dihitung terpisah, dan perpindahan tab Masuk/Daftar tidak mengubah hitungan.
 
-Ini adalah pengaman di sisi browser. Supabase Auth tetap menjadi pengaman utama di sisi server, jadi sebaiknya aktifkan juga CAPTCHA di **Authentication → Security / Captcha** bila tersedia pada paket yang dipakai, terutama jika aplikasi dibuka publik.
+Ini adalah pengaman di sisi browser. Pengaman utama di sisi server ada di Supabase Auth lewat Cloudflare Turnstile seperti dijelaskan berikut.
 
-> Catatan: kunci `anon` aman dipakai di sisi klien karena akses data dijaga oleh Row Level Security (RLS).
+### Cloudflare Turnstile
+
+Form masuk dan daftar sudah memakai Turnstile mode **Managed**. Widget tampil otomatis dan tokennya dikirim ke `signInWithPassword` dan `signUp` Supabase lewat opsi `captchaToken`. Token selalu di-reset setelah satu kali submit.
+
+Penyiapan di dashboard:
+
+1. Di Cloudflare, buat widget Turnstile gratis. Pada **Hostname Management**, tambahkan `sakunode.web.id` dan `localhost`. Tidak perlu memindahkan DNS ke Cloudflare.
+2. Salin **Site Key**. Nilai bawaan sudah ditaruh di `src/lib/turnstile.js`, dan bisa ditimpa lewat `VITE_TURNSTILE_SITE_KEY` di Vercel Environment Variables.
+3. Di Supabase, buka **Authentication → Attack Protection**, aktifkan **Enable Captcha protection**, pilih **Cloudflare Turnstile**, lalu tempel **Secret Key**. Jangan pernah menaruh Secret Key di frontend atau di repo.
+
+Untuk uji lokal tanpa widget asli, Cloudflare menyediakan dummy key. Ingat untuk memakai key asli sebelum rilis. Mode lokal tanpa Supabase tidak menampilkan widget karena tidak ada permintaan auth ke server.
+
+> Catatan: kunci `anon` dan Site Key Turnstile aman dipakai di sisi klien. Akses data dijaga oleh Row Level Security (RLS), dan Secret Key Turnstile hanya ada di Supabase.
 
 ## Struktur singkat
 
@@ -165,6 +177,7 @@ src/
     categories.js          daftar kategori + warna/emoji
     format.js              Rupiah & tanggal
     loginGuard.js          pembatas 7 percobaan login gagal per 30 menit
+    turnstile.js           site key Cloudflare Turnstile untuk frontend
     supabase.js            inisialisasi client (atau mode lokal)
   components/              UI (grafik alur, ringkasan, form, budget, bot, dll.)
 bot/                       server bot WhatsApp (Node + Express)

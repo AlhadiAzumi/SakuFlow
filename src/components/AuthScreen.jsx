@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
+import { TURNSTILE_SITE_KEY } from '../lib/turnstile'
 import PixelIcon from './PixelIcon'
 import { useApp } from '../context/useApp'
 import {
@@ -28,6 +30,7 @@ const COPY = {
 function friendlyError(error) {
   const text = String(error?.message || error || '')
   const lower = text.toLowerCase()
+  if (lower.includes('captcha') || lower.includes('turnstile')) return 'Verifikasi keamanan gagal. Tunggu sebentar lalu coba lagi.'
   if (lower.includes('invalid login credentials')) return 'Email atau kata sandi salah. Coba lagi, atau daftar dulu kalau belum punya akun.'
   if (lower.includes('email not confirmed')) return 'Email belum terverifikasi. Buka tautan verifikasi di inbox kamu (cek juga folder Spam).'
   if (lower.includes('already registered') || lower.includes('user already exists')) return 'Email ini sudah terdaftar. Silakan masuk.'
@@ -38,7 +41,7 @@ function friendlyError(error) {
 }
 
 export default function AuthScreen({ onBack }) {
-  const { signIn, signUp, signInWithGoogle } = useApp()
+  const { signIn, signUp, signInWithGoogle, mode: appMode } = useApp()
   const [mode, setMode] = useState('signin')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -49,6 +52,9 @@ export default function AuthScreen({ onBack }) {
   const [loading, setLoading] = useState(false)
   const [sentEmail, setSentEmail] = useState('')
   const [googleEnabled, setGoogleEnabled] = useState(null)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const turnstileRef = useRef(null)
+  const needsCaptcha = appMode === 'cloud'
   const [loginLock, setLoginLock] = useState(() => getLoginLock(email))
 
   useEffect(() => {
@@ -77,6 +83,8 @@ export default function AuthScreen({ onBack }) {
     setNotice('')
     setSentEmail('')
     setConfirmPassword('')
+    setCaptchaToken('')
+    turnstileRef.current?.reset()
   }
 
   const submit = async (event) => {
@@ -109,17 +117,22 @@ export default function AuthScreen({ onBack }) {
       }
     }
 
+    if (needsCaptcha && !captchaToken) {
+      setError('Verifikasi keamanan belum selesai. Tunggu sebentar lalu coba lagi.')
+      return
+    }
+
     setLoading(true)
     try {
       if (mode === 'signup') {
-        const result = await signUp(email, password, name)
+        const result = await signUp(email, password, name, captchaToken)
         if (result?.needsConfirmation) {
           setSentEmail(email)
         } else {
           setNotice('Akun berhasil dibuat. Selamat datang di Sakunode!')
         }
       } else {
-        await signIn(email, password)
+        await signIn(email, password, captchaToken)
         clearLoginFailures(email)
         setLoginLock(getLoginLock(email))
       }
@@ -136,6 +149,8 @@ export default function AuthScreen({ onBack }) {
         setError(friendlyError(err))
       }
     } finally {
+      turnstileRef.current?.reset()
+      setCaptchaToken('')
       setLoading(false)
     }
   }
@@ -231,6 +246,22 @@ export default function AuthScreen({ onBack }) {
                 <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Tulis ulang kata sandi" autoComplete="new-password" required />
               </label>
             )}
+            {needsCaptcha && (
+              <div className="auth-captcha">
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={setCaptchaToken}
+                  onExpire={() => setCaptchaToken('')}
+                  onError={() => {
+                    setCaptchaToken('')
+                    setError('Verifikasi keamanan gagal dimuat. Periksa koneksi lalu muat ulang halaman.')
+                  }}
+                  options={{ theme: 'light', size: 'flexible' }}
+                />
+                <small className="field__hint">Verifikasi otomatis, tanpa perlu menjawab tebakan.</small>
+              </div>
+            )}
             {error && <p className="form-error" role="alert">{error}</p>}
             {notice && <p className="form-notice" role="status">{notice}</p>}
             {mode === 'signin' && loginLock.count > 0 && (
@@ -240,7 +271,11 @@ export default function AuthScreen({ onBack }) {
                   : `Sisa ${loginLock.attemptsLeft} percobaan dalam ${LOGIN_WINDOW_LABEL}.`}
               </p>
             )}
-            <button type="submit" className="button button--primary button--full" disabled={loading || isLocked}>
+            <button
+              type="submit"
+              className="button button--primary button--full"
+              disabled={loading || isLocked || (needsCaptcha && !captchaToken)}
+            >
               {isLocked ? 'Dikunci sementara' : loading ? 'Tunggu…' : copy.action}
               <span className="button__icon"><PixelIcon name="arrow-up-right" size={13} /></span>
             </button>

@@ -389,13 +389,17 @@ export function AppProvider({ children }) {
     setLastSyncedTx((prev) => (prev?.id === id ? null : prev))
   }, [rememberLocalId])
 
-  const signIn = useCallback(async (email, password) => {
+  const signIn = useCallback(async (email, password, captchaToken = '') => {
     if (!isCloudMode) return
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
+    })
     if (error) throw error
   }, [])
 
-  const signUp = useCallback(async (email, password, displayName = '') => {
+  const signUp = useCallback(async (email, password, displayName = '', captchaToken = '') => {
     if (!isCloudMode) return { needsConfirmation: false }
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -403,6 +407,7 @@ export function AppProvider({ children }) {
       options: {
         data: displayName ? { display_name: displayName.trim().slice(0, 24) } : {},
         emailRedirectTo: window.location.origin,
+        ...(captchaToken ? { captchaToken } : {}),
       },
     })
     if (error) throw error
