@@ -25,7 +25,7 @@ Data disimpan di **Supabase** (PostgreSQL + Auth). Pesan WhatsApp diproses melal
 
 ### 4. Retensi dan penghapusan
 
-Data disimpan sampai kamu menghapusnya. Kamu bisa mengunduh data dalam bentuk JSON dan menghapus data lokal melalui menu **Setelan** di aplikasi. Untuk menghapus data cloud secara permanen, hubungi kami lewat email di bawah. Kode OTP dihapus otomatis setelah verifikasi berhasil.
+Data disimpan sampai kamu menghapusnya. Kamu bisa mengunduh data dalam bentuk Excel dan menghapus data lokal melalui menu **Setelan** di aplikasi. Untuk menghapus data cloud secara permanen, hubungi kami lewat email di bawah. Kode OTP dihapus otomatis setelah verifikasi berhasil.
 
 ### 5. Keamanan
 
@@ -72,7 +72,7 @@ Data is stored in **Supabase** (PostgreSQL + Auth). WhatsApp messages are proces
 
 ### 4. Retention and deletion
 
-Data is kept until you delete it. You can export your data as JSON and clear local data from the **Settings** menu. To permanently delete cloud data, contact us at the email below. OTP codes are removed after successful verification.
+Data is kept until you delete it. You can export your data as an Excel workbook and clear local data from the **Settings** menu. To permanently delete cloud data, contact us at the email below. OTP codes are removed after successful verification.
 
 ### 5. Security
 

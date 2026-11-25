@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { isSavingsTx } from '../lib/categories'
+import { getCategory, isSavingsTx } from '../lib/categories'
 import { formatRupiah } from '../lib/format'
 import { isCloudMode, supabase } from '../lib/supabase'
 
@@ -425,24 +425,86 @@ export function AppProvider({ children }) {
     if (error) throw error
   }, [])
 
-  const exportData = useCallback(() => {
-    const payload = {
-      exported_at: new Date().toISOString(),
-      mode: isCloudMode ? 'cloud' : 'local',
-      profile,
-      settings,
-      transactions,
+  const exportData = useCallback(async () => {
+    const typeLabel = (tx) => isSavingsTx(tx) ? 'Tabungan' : tx.type === 'income' ? 'Masuk' : 'Keluar'
+    const categoryLabel = (tx) => getCategory(tx.type, tx.category).label
+
+    const sheets = [
+      {
+        name: 'Transaksi',
+        rows: [
+          ['Tanggal', 'Jenis', 'Kategori', 'Nominal', 'Catatan', 'Sumber', 'ID'],
+          ...transactions
+            .filter((tx) => !isSavingsTx(tx))
+            .map((tx) => [
+              tx.date || '',
+              typeLabel(tx),
+              categoryLabel(tx),
+              Math.max(0, Number(tx.amount) || 0),
+              tx.note || '',
+              tx.source || 'web',
+              tx.id || '',
+            ]),
+        ],
+      },
+      {
+        name: 'Tabungan',
+        rows: [
+          ['Tanggal', 'Nominal', 'Catatan', 'Sumber', 'ID'],
+          ...transactions
+            .filter(isSavingsTx)
+            .map((tx) => [
+              tx.date || '',
+              Math.max(0, Number(tx.amount) || 0),
+              tx.note || '',
+              tx.source || 'web',
+              tx.id || '',
+            ]),
+        ],
+      },
+      {
+        name: 'Budget',
+        rows: [
+          ['Jenis', 'Kategori', 'Nominal'],
+          ...Object.entries(settings.budgets || {})
+            .map(([id, value]) => [
+              'Budget',
+              getCategory('expense', id).label,
+              Math.max(0, Number(value) || 0),
+            ]),
+          ['Target tabungan', 'Per bulan', Math.max(0, Number(settings.savingsTarget) || 0)],
+        ],
+      },
+      {
+        name: 'Profil',
+        rows: [
+          ['Kolom', 'Nilai'],
+          ['Nama', profile.username || ''],
+          ['Email', session?.user?.email || ''],
+          ['Mode', isCloudMode ? 'Cloud' : 'Lokal'],
+          ['Jumlah transaksi', transactions.length],
+          ['Diekspor pada', new Date().toLocaleString('id-ID')],
+        ],
+      },
+    ]
+
+    try {
+      // JSZip hanya dimuat saat user benar-benar mengunduh, supaya bundle awal tetap ringan.
+      const { buildWorkbookBlob } = await import('../lib/exportExcel')
+      const blob = await buildWorkbookBlob(sheets)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `catatan-uang-${new Date().toISOString().slice(0, 10)}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      showToast('Data berhasil diunduh sebagai Excel.')
+    } catch (error) {
+      showToast(error?.message || 'Gagal membuat file Excel.', 'error')
     }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `catatan-uang-${new Date().toISOString().slice(0, 10)}.json`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
-  }, [transactions, settings, profile])
+  }, [transactions, settings, profile, session?.user?.email, showToast])
 
   const clearLocalData = useCallback(() => {
     writeLocal([])

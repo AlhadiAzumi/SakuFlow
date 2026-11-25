@@ -43,7 +43,7 @@ export default function DataSettings() {
 
         <div className="settings-actions">
           <button type="button" className="button button--outline" onClick={exportData}>
-            <PixelIcon name="download" size={16} /> Unduh data (JSON)
+            <PixelIcon name="download" size={16} /> Unduh data (Excel)
           </button>
           {mode === 'cloud' ? (
             <button type="button" className="button button--ghost" onClick={handleSignOut}>
