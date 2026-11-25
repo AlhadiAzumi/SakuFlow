@@ -56,6 +56,7 @@ export default function App() {
   } = useApp()
 
   const [tab, setTab] = useState('home')
+  const [settingsPage, setSettingsPage] = useState('hub')
   const [view, setView] = useState('landing')
   const [showAuth, setShowAuth] = useState(false)
   const [month, setMonth] = useState(currentMonthKey())
@@ -123,8 +124,9 @@ export default function App() {
     )
   }
 
-  const switchTab = (next) => {
+  const switchTab = (next, nextSettingsPage = 'hub') => {
     setTab(next)
+    setSettingsPage(nextSettingsPage)
     setSidebarOpen(false)
   }
 
@@ -184,7 +186,7 @@ export default function App() {
         lastSyncedTx={lastSyncedTx}
         syncTick={syncTick}
         onOpenAdd={openAdd}
-        onOpenProfile={() => switchTab('settings')}
+        onOpenProfile={() => switchTab('settings', 'profil')}
         onHome={() => { setView('landing'); setSidebarOpen(false) }}
         onClose={() => setSidebarOpen(false)}
       />
@@ -218,7 +220,7 @@ export default function App() {
               <button
                 type="button"
                 className="user-chip"
-                onClick={() => switchTab('settings')}
+                onClick={() => switchTab('settings', 'profil')}
                 title="Buka profil & setelan"
                 aria-label="Buka profil & setelan"
               >
@@ -299,9 +301,9 @@ export default function App() {
                   </section>
                 </Reveal>
 
-                <Reveal delay={100}><SavingsCard progress={savingsProgress} onOpenSettings={() => switchTab('settings')} /></Reveal>
+                <Reveal delay={100}><SavingsCard progress={savingsProgress} onOpenSettings={() => switchTab('settings', 'budget')} /></Reveal>
 
-                <Reveal delay={140}><BudgetPanel budgets={budgetStatus} onOpenSettings={() => switchTab('settings')} /></Reveal>
+                <Reveal delay={140}><BudgetPanel budgets={budgetStatus} onOpenSettings={() => switchTab('settings', 'budget')} /></Reveal>
 
                 <Reveal delay={180}><InsightCard insight={insight} /></Reveal>
 
@@ -350,7 +352,7 @@ export default function App() {
               </section>
             </div>
           ) : (
-            <Settings />
+            <Settings page={settingsPage} onPage={setSettingsPage} />
           )}
         </main>
       </div>

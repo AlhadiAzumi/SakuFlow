@@ -895,6 +895,39 @@ code {
 .mode-badge--local { background: #fff7ed; color: #c2410c; }
 .settings-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; }
 
+.settings-subpage { gap: 16px; }
+.settings-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  align-self: flex-start;
+  border: 0; background: none; padding: 0;
+  color: var(--primary-dark); font-size: 12px; font-weight: 800;
+  cursor: pointer;
+}
+.settings-back:hover { color: var(--primary); }
+.settings-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.settings-hub__card {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; text-align: left;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.settings-hub__card:hover { transform: translateY(-3px); border-color: #bfdbfe; }
+.settings-hub__icon {
+  width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+.settings-hub__body { flex: 1; min-width: 0; }
+.settings-hub__body strong { display: block; font-size: 13.5px; }
+.settings-hub__body span { display: block; color: var(--muted); font-size: 11.5px; line-height: 1.5; margin-top: 3px; }
+.settings-hub__arrow { color: var(--primary); margin-top: 10px; }
+
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -1603,6 +1636,7 @@ code {
   .welcome-banner { flex-wrap: wrap; }
   .welcome-banner .button { width: 100%; }
   .budget-settings-grid { grid-template-columns: 1fr; }
+  .settings-hub { grid-template-columns: 1fr; }
   .icon-legend__body, .icon-legend__grid { grid-template-columns: 1fr; }
   .bot-commands__row { grid-template-columns: 1fr; gap: 3px; }
   .budget-intro, .savings-card--empty { flex-wrap: wrap; }

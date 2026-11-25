@@ -133,7 +133,7 @@ export default function WhatsAppLink() {
         Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di Sakunode (bot tidak mengirim balasan chat).
       </p>
 
-      <BotCommands compact />
+      <BotCommands />
 
       {checking ? (
         <p className="whatsapp-panel__muted">Mengecek status koneksi…</p>
