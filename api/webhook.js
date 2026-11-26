@@ -25,6 +25,10 @@ export default async function handler(req, res) {
 
   try {
     if (!isValidMetaSignature(raw, req.headers?.['x-hub-signature-256'])) {
+      console.warn('[Webhook Signature Ditolak]', {
+        hasSecret: Boolean(process.env.WHATSAPP_APP_SECRET),
+        signaturePrefix: String(req.headers?.['x-hub-signature-256'] || '').slice(0, 12) || null,
+      })
       return sendPlain(req, res, 401, 'UNAUTHORIZED')
     }
 

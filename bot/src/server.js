@@ -100,6 +100,10 @@ app.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
     // Tanpa tanda tangan HMAC yang sah, siapa pun bisa mengaku sebagai nomor
     // mana pun dan menulis/menghapus catatan milik pengguna lain.
     if (!isValidMetaSignature(rawBody, req.headers['x-hub-signature-256'])) {
+      console.warn('[Webhook Signature Ditolak]', {
+        hasSecret: Boolean(process.env.WHATSAPP_APP_SECRET),
+        signaturePrefix: String(req.headers['x-hub-signature-256'] || '').slice(0, 12) || null,
+      })
       return res.status(401).send('UNAUTHORIZED')
     }
 

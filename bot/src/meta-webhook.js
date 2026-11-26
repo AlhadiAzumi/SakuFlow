@@ -4,6 +4,8 @@ import { sendWhatsAppMessage } from './meta.js'
 
 const processed = new Map()
 
+const maskPhone = (value) => String(value || '').replace(/^(\d{2,4})\d+(\d{2,4})$/, '$1****$2')
+
 export function clearProcessedMessages() {
   processed.clear()
 }
@@ -14,7 +16,10 @@ export function clearProcessedMessages() {
 export async function processMetaWebhook(payload, {
   send,
   reply = sendWhatsAppMessage,
-  onExtracted = (info) => console.log('[Msg Extracted]', info),
+  onExtracted = (info) => console.log('[Msg Extracted]', {
+    from: maskPhone(info.from),
+    textLength: String(info.text || '').length,
+  }),
   onResult = (result) => console.log('[DB / OTP Result]', result),
 } = {}) {
   const results = []
