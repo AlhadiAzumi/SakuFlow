@@ -60,22 +60,22 @@ test('perintah tabungan dikenali tanpa mengubah tipe transaksi', () => {
   assert.equal(parseMessage('tabungan', NOW).intent, 'unknown')
 })
 
-test('perintah bantuan dan ringkasan', () => {
+test('perintah yang butuh balasan tidak dikenali sebagai transaksi', () => {
   for (const text of ['bantuan', 'help', 'menu', 'daftar perintah', 'halo']) {
-    assert.equal(parseMessage(text, NOW).intent, 'help')
+    assert.equal(parseMessage(text, NOW).intent, 'unknown')
   }
   for (const text of ['ringkasan', 'ringkasan bulan ini', 'rekap', 'total bulan ini']) {
-    assert.equal(parseMessage(text, NOW).intent, 'summary')
+    assert.equal(parseMessage(text, NOW).intent, 'unknown')
+  }
+  for (const text of ['status', 'cek status', 'koneksi']) {
+    assert.equal(parseMessage(text, NOW).intent, 'unknown')
+  }
+  for (const text of ['riwayat', 'lihat riwayat', '5 terakhir', 'history']) {
+    assert.equal(parseMessage(text, NOW).intent, 'unknown')
   }
 })
 
-test('perintah status, riwayat, dan hapus transaksi terakhir', () => {
-  for (const text of ['status', 'cek status', 'koneksi']) {
-    assert.equal(parseMessage(text, NOW).intent, 'status')
-  }
-  for (const text of ['riwayat', 'lihat riwayat', '5 terakhir', 'history']) {
-    assert.equal(parseMessage(text, NOW).intent, 'history')
-  }
+test('perintah hapus transaksi terakhir tetap dikenali', () => {
   for (const text of ['clear', 'hapus', 'HAPUS CATATAN', 'BATAL', 'batalkan', 'undo', 'hapus terakhir']) {
     assert.equal(parseMessage(text, NOW).intent, 'deleteLast')
   }

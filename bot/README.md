@@ -156,14 +156,10 @@ Panduan lengkap Meta Business + webhook ada di [`../docs/DEPLOY-VERCEL.md`](../d
 | `keluar 18rb transport tanggal 12` | Pengeluaran tanggal 12 bulan ini |
 | `nabung 15 ribu` | Tabungan Rp15.000, tidak dihitung sebagai pengeluaran |
 | `kasi 65 ribu ke tabungan` | Tabungan Rp65.000, mengurangi sisa uang |
-| `ringkasan` / `rekap` | Total masuk, keluar, tabungan, dan sisa bulan ini |
-| `riwayat` | 5 catatan terakhir |
-| `status` | Status koneksi & jumlah catatan |
 | `hapus` / `clear` / `batal` | Hapus 1 catatan terakhir |
 | `hapus semua` / `clear all` | Hapus seluruh catatan (tidak bisa dibatalkan) |
-| `bantuan` / `menu` | Daftar perintah |
 
-Catatan: bot bersifat **satu arah**. Pesan dan perintah diproses, tetapi bot tidak mengirim balasan chat; hasilnya langsung terlihat di website.
+Catatan: bot bersifat **satu arah**. Pesan dan perintah diproses, tetapi bot tidak mengirim balasan chat; hasilnya langsung terlihat di website. Perintah yang hanya menampilkan info seperti `ringkasan`, `riwayat`, `status`, dan `bantuan` sengaja tidak disediakan.
 
 ## Endpoint API
 

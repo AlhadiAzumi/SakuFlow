@@ -1,37 +1,24 @@
 import { getCategory } from '../../src/lib/categories.js'
-import { HELP_TEXT, normalizePhone, parseMessage } from './parser.js'
+import { normalizePhone, parseMessage } from './parser.js'
 import * as store from './store.js'
 import { sendText } from './whatsapp.js'
 
 const rupiah = (value) => `Rp${new Intl.NumberFormat('id-ID').format(Math.round(value || 0))}`
-const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 
-async function buildGuideText(phone) {
-  let linked = false
-  try {
-    linked = Boolean(await store.getLinkedUser(phone))
-  } catch (error) {
-    console.error('[Bot] Gagal mengecek status koneksi nomor:', error)
-  }
-
-  const status = linked
-    ? 'Status nomor: sudah terhubung dengan akun Sakunode.'
-    : 'Status nomor: belum terhubung. Buka website Sakunode → Setelan → Hubungkan WhatsApp, lalu balas kode OTP 6 digit dari menu tersebut di sini.'
-
+function buildGuideText() {
   return [
     'Bot Sakunode aktif.',
-    status,
-    'Aku hanya membaca chat, tidak membalas. Hasilnya cek di website Sakunode.',
+    'Aku hanya membaca dan menyimpan catatan. Hasilnya cek di website Sakunode.',
     '',
-    'Format catatan:',
+    'Contoh catatan:',
     '• keluar 25rb kopi',
     '• masuk uang 500 ribu',
+    '• beli bensin 50 ribu kemarin',
+    '• gaji 3,5 juta hari ini',
     '• nabung 15 ribu',
     '• kasi 65 ribu ke tabungan',
-    '• ringkasan',
-    '• hapus semua',
     '',
-    'Ketik "bantuan" untuk daftar perintah lengkap.',
+    'Salah catat? Kirim "hapus" atau "hapus semua".',
   ].join('\n')
 }
 
@@ -58,63 +45,13 @@ export async function handleMessage(message, { send = sendText } = {}) {
     }
   }
 
-  // Sapaan / menu / teks uji (mis. "halo", "ck") bukan transaksi, tapi tetap
-  // dibalas supaya user tahu bot aktif dan tahu status koneksi nomornya.
+  // Sapaan dan teks uji bukan transaksi, cukup beri panduan singkat.
   if (/^(halo|hi|hai|menu|permisi|p|ck)$/i.test(text)) {
-    await reply(await buildGuideText(phone))
+    await reply(buildGuideText())
     return { type: 'guide', ok: true, phone }
   }
 
   const parsed = parseMessage(text)
-
-  if (parsed.intent === 'help') {
-    await reply(HELP_TEXT)
-    return { type: 'help', ok: true, phone }
-  }
-
-  if (parsed.intent === 'status') {
-    const userId = await store.getLinkedUser(phone)
-    if (!userId) {
-      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP 6 digit.')
-      return { type: 'status', ok: false, phone, reason: 'not_linked' }
-    }
-    let count = 0
-    try {
-      count = await store.countTransactions(userId)
-    } catch (error) {
-      console.error('[Bot] Gagal menghitung transaksi untuk status:', error)
-    }
-    await reply([
-      'Status: nomor WhatsApp kamu sudah terhubung dengan akun Sakunode.',
-      `Total catatan tersimpan: ${count}.`,
-      'Ketik "ringkasan" untuk rekap bulan ini atau "riwayat" untuk 5 catatan terakhir.',
-    ].join('\n'))
-    return { type: 'status', ok: true, phone, userId, count }
-  }
-
-  if (parsed.intent === 'history') {
-    const userId = await store.getLinkedUser(phone)
-    if (!userId) {
-      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
-      return { type: 'history', ok: false, phone, reason: 'not_linked' }
-    }
-    const items = await store.listRecentTransactions(userId, 5)
-    if (!items.length) {
-      await reply('Belum ada catatan tersimpan. Kirim misalnya "keluar 25rb kopi" untuk mulai mencatat.')
-    } else {
-      await reply([
-        `${items.length} catatan terakhir:`,
-        ...items.map((item) => {
-          const category = getCategory(item.type, item.category)
-          const note = item.note ? ` • ${String(item.note).slice(0, 40)}` : ''
-          return `• ${item.date} • ${category.label} • ${rupiah(item.amount)}${note}`
-        }),
-        '',
-        'Ketik "ringkasan" untuk total bulan ini.',
-      ].join('\n'))
-    }
-    return { type: 'history', ok: true, phone, userId, count: items.length }
-  }
 
   if (parsed.intent === 'deleteAll') {
     const userId = await store.getLinkedUser(phone)
@@ -130,7 +67,6 @@ export async function handleMessage(message, { send = sendText } = {}) {
     await reply([
       `${deleted} catatan dihapus semuanya.`,
       'Data di website juga ikut terhapus. Tindakan ini tidak bisa dibatalkan.',
-      'Ketik "riwayat" untuk memastikan catatan sudah kosong.',
     ].join('\n'))
     return { type: 'delete_all', ok: true, phone, userId, deleted }
   }
@@ -150,29 +86,9 @@ export async function handleMessage(message, { send = sendText } = {}) {
     await reply([
       'Catatan terakhir dihapus.',
       `${deleted.date} • ${category.label} • ${rupiah(deleted.amount)}`,
-      'Data di website juga ikut terhapus. Ketik "riwayat" untuk cek sisa catatan.',
+      'Data di website juga ikut terhapus.',
     ].join('\n'))
     return { type: 'delete_last', ok: true, phone, userId, deleted: true }
-  }
-
-  if (parsed.intent === 'summary') {
-    const userId = await store.getLinkedUser(phone)
-    if (!userId) {
-      await reply('Nomor ini belum terhubung. Buka website → Setelan → Hubungkan WhatsApp dulu, ya.')
-      return { type: 'summary', ok: false, phone, reason: 'not_linked' }
-    }
-    const now = new Date()
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const totals = await store.getMonthTotals(userId, monthKey)
-    await reply([
-      `Rekap ${MONTHS[now.getMonth()]} ${now.getFullYear()}`,
-      `Uang masuk: ${rupiah(totals.income)}`,
-      `Uang keluar: ${rupiah(totals.expense)}`,
-      `Tabungan: ${rupiah(totals.savings || 0)}`,
-      `Sisa: ${rupiah(totals.income - totals.expense - (totals.savings || 0))}`,
-      `${totals.count} transaksi tercatat.`,
-    ].join('\n'))
-    return { type: 'summary', ok: true, phone, userId, totals }
   }
 
   if (parsed.intent === 'savings') {
@@ -245,6 +161,6 @@ export async function handleMessage(message, { send = sendText } = {}) {
     return { type: 'transaction', ok: true, phone, userId, amount: parsed.amount, category: parsed.category }
   }
 
-  await reply(await buildGuideText(phone))
+  await reply(buildGuideText())
   return { type: 'guide', ok: true, phone }
 }

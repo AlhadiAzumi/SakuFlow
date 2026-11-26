@@ -59,7 +59,6 @@ export default function MoneyFlow({ income, expenses, savings = 0, savingsTarget
     <div className="flow-chart flow-board">
       <div className="flow-chart__heading">
         <div>
-          <span className="pixel-eyebrow">PETA ALAH UANG / BULAN INI</span>
           <h2>Ke mana uangmu pergi?</h2>
         </div>
         <div className="flow-chart__total">

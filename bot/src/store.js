@@ -184,7 +184,7 @@ export async function getMonthTotals(userId, monthKey) {
   }
 }
 
-// Dipakai perintah "status": total seluruh catatan milik user (lintas bulan).
+// Total seluruh catatan milik user (lintas bulan), dipakai kebutuhan internal dan pengujian.
 export async function countTransactions(userId) {
   if (!admin) return dryTransactions.filter((item) => item.user_id === userId).length
   const { count, error } = await requireAdmin()
@@ -195,12 +195,12 @@ export async function countTransactions(userId) {
   return count || 0
 }
 
-// Dipakai perintah "riwayat".
+// Dipakai penghapusan transaksi terakhir dan pengujian.
 export async function listRecentTransactions(userId, limit = 5) {
   if (!admin) {
     // created_at punya resolusi milidetik, jadi dua transaksi yang masuk
     // bersamaan bisa punya nilai sama. Urutan penyisipan jadi penentu terakhir
-    // supaya "riwayat" dan "hapus transaksi terakhir" selalu konsisten.
+    // supaya "hapus transaksi terakhir" selalu konsisten.
     return dryTransactions
       .map((item, index) => ({ item, index }))
       .filter(({ item }) => item.user_id === userId)
@@ -222,7 +222,7 @@ export async function listRecentTransactions(userId, limit = 5) {
 }
 
 // Dipakai perintah "hapus"/"clear": hapus tepat 1 transaksi terakhir milik user.
-// Urutan memakai kriteria yang sama dengan "riwayat" supaya konsisten.
+// Urutan memakai kriteria yang sama dengan daftar transaksi terakhir supaya konsisten.
 export async function deleteLastTransaction(userId) {
   const [last] = await listRecentTransactions(userId, 1)
   if (!last) return null

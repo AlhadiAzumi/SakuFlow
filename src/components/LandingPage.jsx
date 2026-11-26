@@ -27,7 +27,7 @@ const PERSONAS = [
     tab: 'Mahasiswa & Anak Kost',
     title: 'Uang jajan terkontrol',
     desc: 'Catat pengeluaran harian tanpa perlu buka spreadsheet. Cukup chat, lalu lihat sisa uang bulan ini.',
-    points: ['Budget makan & kopi', 'Pengingat budget hampir habis', 'Ringkasan lewat WhatsApp'],
+    points: ['Budget makan & kopi', 'Pengingat budget hampir habis', 'Catat langsung lewat WhatsApp'],
     stat: 'Rp1.250.000',
     statLabel: 'Rata-rata hemat per bulan',
   },
@@ -664,49 +664,53 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
         </Reveal>
       </section>
 
-      <footer className="bg-white px-4 py-14 sm:px-6 lg:px-8">
-        <Reveal className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <Brand onHome={() => scrollToSection('top')} />
-            <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-slate-500">
-              Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
-            </p>
-          </div>
-          {[
-            { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
-            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'Syarat & Ketentuan'] },
-            { title: 'Bantuan', links: ['Panduan Mulai', 'Kontak', 'Status Layanan'] },
-          ].map((col) => (
-            <div key={col.title}>
-              <p className="text-[12px] font-extrabold text-slate-900">{col.title}</p>
-              <ul className="mt-4 space-y-2.5">
-                {col.links.map((link) => {
-                  const target = footerLink(link)
-                  const className = 'text-[11.5px] font-medium text-slate-500 transition hover:text-blue-600'
-                  return (
-                    <li key={link}>
-                      {target.section ? (
-                        <button type="button" onClick={() => scrollToSection(target.section)} className={className}>
-                          {link}
-                        </button>
-                      ) : (
-                        <a
-                          href={target.href}
-                          target={target.external ? '_blank' : undefined}
-                          rel="noreferrer"
-                          className={className}
-                        >
-                          {link}
-                        </a>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
+      <footer className="bg-white px-4 py-10 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-12">
+            <div className="sm:w-56 sm:shrink-0">
+              <Brand onHome={() => scrollToSection('top')} />
+              <p className="mt-3 hidden max-w-xs text-[12px] leading-relaxed text-slate-500 sm:block">
+                Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
+              </p>
             </div>
-          ))}
+            <div className="grid grid-cols-3 gap-3 sm:gap-8">
+              {[
+                { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
+                { title: 'Perusahaan', links: ['Kebijakan Privasi', 'Syarat & Ketentuan'] },
+                { title: 'Bantuan', links: ['Kontak'] },
+              ].map((col) => (
+                <div key={col.title}>
+                  <p className="text-[11px] font-extrabold text-slate-900 sm:text-[12px]">{col.title}</p>
+                  <ul className="mt-3 space-y-2 sm:space-y-2.5">
+                    {col.links.map((link) => {
+                      const target = footerLink(link)
+                      const className = 'text-[10.5px] font-medium text-slate-500 transition hover:text-blue-600 sm:text-[11.5px]'
+                      return (
+                        <li key={link}>
+                          {target.section ? (
+                            <button type="button" onClick={() => scrollToSection(target.section)} className={className}>
+                              {link}
+                            </button>
+                          ) : (
+                            <a
+                              href={target.href}
+                              target={target.external ? '_blank' : undefined}
+                              rel="noreferrer"
+                              className={className}
+                            >
+                              {link}
+                            </a>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
         </Reveal>
-        <div className="mx-auto mt-10 max-w-7xl text-center text-[11px] text-slate-400">
+        <div className="mx-auto mt-8 max-w-7xl text-center text-[11px] text-slate-400">
           © {new Date().getFullYear()} Sakunode. Dibuat untuk membantu arus kas yang lebih tenang.
         </div>
       </footer>

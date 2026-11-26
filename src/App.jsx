@@ -26,7 +26,7 @@ import {
   getTrend,
   summarize,
 } from './lib/analytics'
-import { currentMonthKey, formatMonthLabel } from './lib/format'
+import { currentMonthKey } from './lib/format'
 import { DASHBOARD_TABS } from './lib/navigation'
 import { buildPath, isProtectedPath, navigate, normalizePath, routeFromPath } from './lib/router'
 
@@ -240,8 +240,6 @@ export default function App() {
         displayName={displayName}
         email={user?.email || ''}
         avatar={profile.avatar}
-        lastSyncedTx={lastSyncedTx}
-        syncTick={syncTick}
         onOpenAdd={openAdd}
         onOpenProfile={() => switchTab('settings', 'profil')}
         onHome={() => { setView('landing'); setSidebarOpen(false) }}
@@ -296,7 +294,6 @@ export default function App() {
             <div className="page page--home">
               <div className="page-heading dash-intro">
                 <div>
-                  <span className="pixel-eyebrow">MODE CATAT / {mode === 'cloud' ? 'ONLINE' : 'LOKAL'}</span>
                   <h1>Halo, {displayName}</h1>
                   <p>Yuk lihat ke mana uangmu pergi <span className="text-gradient font-extrabold">bulan ini</span>.</p>
                 </div>
@@ -382,7 +379,6 @@ export default function App() {
             <div className="page page--notes">
               <div className="page-heading dash-intro">
                 <div>
-                  <span className="pixel-eyebrow">BUKU CATATAN / {formatMonthLabel(month)}</span>
                   <h1>Catatan <span className="text-gradient">uang</span></h1>
                   <p>{monthItems.length} transaksi bulan ini. Ketuk catatan untuk mengubahnya.</p>
                 </div>

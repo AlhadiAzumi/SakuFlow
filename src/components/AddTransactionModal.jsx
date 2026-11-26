@@ -128,7 +128,7 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
 
           <div className="field">
             <span className="field__label">Kategori</span>
-            <div className="category-grid">
+            <div className={`category-grid${categories.length === 1 ? ' category-grid--single' : ''}`}>
               {categories.map((category) => (
                 <button
                   type="button"

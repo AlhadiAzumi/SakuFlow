@@ -230,7 +230,7 @@ function VerticalConnector({ color }) {
     <div className="flex flex-col items-center" style={{ color }}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
       <span className="fund-flow-vertical-line" aria-hidden="true" />
-      <span className="-mt-2 text-[11px] font-extrabold">{'>>>'}</span>
+      <span className="fund-flow-arrow -mt-2 text-[11px] font-extrabold">{'vvv'}</span>
       <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
     </div>
   )

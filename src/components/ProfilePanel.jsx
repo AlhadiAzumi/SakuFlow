@@ -96,7 +96,6 @@ export default function ProfilePanel() {
           <h2 className="panel__title">Profil kamu</h2>
           <p className="profile-panel__desc">Nama dan foto ini yang tampil di dashboard Sakunode.</p>
         </div>
-        <span className="pixel-eyebrow">IDENTITAS</span>
       </div>
 
       <form onSubmit={save} className="profile-panel__form">

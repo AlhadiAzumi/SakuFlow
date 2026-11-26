@@ -8,12 +8,8 @@ export const BOT_COMMANDS = [
   { command: 'gaji 3,5 juta hari ini', meaning: 'Catat gaji tanggal hari ini.' },
   { command: 'nabung 15 ribu', meaning: 'Catat Rp15.000 sebagai tabungan.' },
   { command: 'kasi 65 ribu ke tabungan', meaning: 'Catat Rp65.000 sebagai tabungan.' },
-  { command: 'ringkasan / rekap', meaning: 'Lihat total masuk, keluar, tabungan, dan sisa bulan ini.' },
-  { command: 'riwayat', meaning: 'Lihat 5 catatan terakhir kamu.' },
-  { command: 'status', meaning: 'Cek apakah nomor WhatsApp sudah terhubung.' },
   { command: 'hapus / clear / batal', meaning: 'Hapus 1 catatan terakhir.' },
   { command: 'hapus semua / clear all', meaning: 'Hapus seluruh catatan. Tidak bisa dibatalkan.' },
-  { command: 'bantuan / menu', meaning: 'Tampilkan daftar perintah dari bot.' },
 ]
 
 export default function BotCommands({ compact = false }) {
@@ -24,7 +20,7 @@ export default function BotCommands({ compact = false }) {
       <p className="bot-commands__note">
         <PixelIcon name="info" size={16} />
         <span>
-          <strong>Bot Sakunode itu satu arah.</strong> Bot membaca pesan dan perintahmu, tetapi{' '}
+          <strong>Bot Sakunode itu satu arah.</strong> Bot hanya membaca dan menyimpan catatan,{' '}
           <strong>tidak membalas chat WhatsApp</strong>. Semua hasil langsung muncul di dashboard website.
         </span>
       </p>

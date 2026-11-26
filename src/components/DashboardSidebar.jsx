@@ -1,7 +1,7 @@
 import LogoMark from './LogoMark'
 import PixelIcon from './PixelIcon'
 import { DASHBOARD_TABS } from '../lib/navigation'
-import { currentMonthKey, formatMonthLabel, formatTimeAgo, shiftMonth } from '../lib/format'
+import { currentMonthKey, formatMonthLabel, shiftMonth } from '../lib/format'
 
 export default function DashboardSidebar({
   open,
@@ -13,8 +13,6 @@ export default function DashboardSidebar({
   displayName,
   email,
   avatar,
-  lastSyncedTx,
-  syncTick,
   onOpenAdd,
   onOpenProfile,
   onHome,
@@ -97,18 +95,8 @@ export default function DashboardSidebar({
             </div>
           </div>
 
-          <div className="dash-sidebar__status">
-            <span className="dash-sidebar__mode">{mode === 'cloud' ? 'ONLINE · LIVE' : 'MODE LOKAL'}</span>
-            {lastSyncedTx && (
-              <span className="dash-sidebar__sync" title={lastSyncedTx.note || 'Transaksi terakhir tersinkron'}>
-                <i />
-                Sinkron {formatTimeAgo(lastSyncedTx.receivedAt, syncTick)}
-              </span>
-            )}
-          </div>
-
           <button type="button" className="dash-sidebar__home" onClick={onHome}>
-            Lihat beranda <PixelIcon name="arrow-up-right" size={13} />
+            Kembali ke Sakunode <PixelIcon name="arrow-up-right" size={13} />
           </button>
         </div>
       </aside>

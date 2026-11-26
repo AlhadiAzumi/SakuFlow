@@ -24,32 +24,38 @@ async function collectReply(text, from = '6281234567890') {
   return replies.join('\n')
 }
 
+const monthKeyNow = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
 test('sapaan dan teks uji dibalas panduan singkat', async () => {
   for (const text of ['halo', 'menu', 'hai', 'ck']) {
     const reply = await collectReply(text)
     assert.match(reply, /Bot Sakunode aktif/)
-    assert.match(reply, /Status nomor: belum terhubung/)
-    assert.match(reply, /kode OTP 6 digit/)
+    assert.match(reply, /Hasilnya cek di website Sakunode/)
     assert.match(reply, /keluar 25rb kopi/)
-    assert.match(reply, /Format catatan/)
+    assert.match(reply, /Contoh catatan/)
+    assert.doesNotMatch(reply, /Status nomor/)
   }
 })
 
 test('pesan yang tidak dikenal tetap dibalas panduan', async () => {
   const reply = await collectReply('blablabla')
   assert.match(reply, /Bot Sakunode aktif/)
-  assert.match(reply, /Status nomor: belum terhubung/)
-  assert.match(reply, /Format catatan/)
+  assert.match(reply, /Contoh catatan/)
+  assert.doesNotMatch(reply, /Status nomor/)
 })
 
-test('panduan menampilkan status nomor yang sudah terhubung', async () => {
+test('panduan tidak menampilkan status koneksi walaupun nomor sudah terhubung', async () => {
   const phone = '6289999999999'
   await store.requestLink('user-uji', phone, '482913')
   await store.verifyOtp(phone, '482913')
 
   const reply = await collectReply('halo', phone)
-  assert.match(reply, /Status nomor: sudah terhubung/)
-  assert.doesNotMatch(reply, /belum terhubung/)
+  assert.match(reply, /Bot Sakunode aktif/)
+  assert.doesNotMatch(reply, /Status nomor/)
+  assert.doesNotMatch(reply, /terhubung/)
 })
 
 test('verifikasi OTP mengembalikan hasil database', async () => {
@@ -91,40 +97,24 @@ test('verifikasi menerima /verif dan kode tidak bisa dipakai ulang', async () =>
   assert.notEqual(second.verified, true)
 })
 
-test('status, riwayat, dan hapus 1 transaksi terakhir bekerja untuk nomor terhubung', async () => {
+test('hapus 1 transaksi terakhir bekerja untuk nomor terhubung', async () => {
   const phone = '6285555555555'
   await store.requestLink('user-clear', phone, '111111')
   await store.verifyOtp(phone, '111111')
+  const userId = await store.getLinkedUser(phone)
 
   await collectReply('keluar 10rb kopi', phone)
   await collectReply('masuk gaji 2 juta', phone)
-
-  const status = await collectReply('status', phone)
-  assert.match(status, /sudah terhubung/)
-  assert.match(status, /Total catatan tersimpan: 2/)
-
-  const history = await collectReply('riwayat', phone)
-  assert.match(history, /2 catatan terakhir/)
-  assert.match(history, /kopi/)
-  assert.match(history, /gaji/i)
+  assert.equal(await store.countTransactions(userId), 2)
 
   // "clear" sekarang menghapus tepat satu catatan (yang terakhir), bukan semua.
   const clear = await collectReply('clear', phone)
   assert.match(clear, /Catatan terakhir dihapus/)
   assert.match(clear, /Rp2\.000\.000/)
-
-  const remaining = await collectReply('riwayat', phone)
-  assert.match(remaining, /1 catatan terakhir/)
-  assert.match(remaining, /kopi/)
-  assert.doesNotMatch(remaining, /gaji/i)
+  assert.equal(await store.countTransactions(userId), 1)
 
   await collectReply('hapus', phone)
-  const after = await collectReply('riwayat', phone)
-  assert.match(after, /Belum ada catatan tersimpan/)
-
-  const statusAfter = await collectReply('status', phone)
-  assert.match(statusAfter, /sudah terhubung/)
-  assert.match(statusAfter, /Total catatan tersimpan: 0/)
+  assert.equal(await store.countTransactions(userId), 0)
 
   const emptyDelete = await collectReply('batal', phone)
   assert.match(emptyDelete, /Belum ada catatan yang bisa dihapus/)
@@ -134,16 +124,17 @@ test('clear all / hapus semua menghapus seluruh catatan milik nomor terhubung', 
   const phone = '6284444444444'
   await store.requestLink('user-clear-all', phone, '222222')
   await store.verifyOtp(phone, '222222')
+  const userId = await store.getLinkedUser(phone)
 
   await collectReply('keluar 10rb kopi', phone)
   await collectReply('masuk gaji 2 juta', phone)
-  assert.match(await collectReply('status', phone), /Total catatan tersimpan: 2/)
+  assert.equal(await store.countTransactions(userId), 2)
 
   const cleared = await collectReply('clear all', phone)
   assert.match(cleared, /2 catatan dihapus semuanya/)
   assert.match(cleared, /tidak bisa dibatalkan/)
+  assert.equal(await store.countTransactions(userId), 0)
 
-  assert.match(await collectReply('riwayat', phone), /Belum ada catatan tersimpan/)
   assert.match(await collectReply('hapus semua', phone), /Belum ada catatan yang bisa dihapus/)
 
   const notLinked = await collectReply('clear all', '6281111111111')
@@ -154,6 +145,8 @@ test('tabungan lewat chat mengurangi sisa tanpa masuk pengeluaran', async () => 
   const phone = '6283333333333'
   await store.requestLink('user-tabungan', phone, '333333')
   await store.verifyOtp(phone, '333333')
+  const userId = await store.getLinkedUser(phone)
+  const monthKey = monthKeyNow()
 
   await collectReply('masuk gaji 5 juta', phone)
   const saved = await collectReply('nabung 15 ribu', phone)
@@ -161,16 +154,17 @@ test('tabungan lewat chat mengurangi sisa tanpa masuk pengeluaran', async () => 
   assert.match(saved, /Rp15\.000/)
   assert.match(saved, /Sisa sekarang: Rp4\.985\.000/)
 
-  const rekap = await collectReply('ringkasan', phone)
-  assert.match(rekap, /Uang keluar: Rp0/)
-  assert.match(rekap, /Tabungan: Rp15\.000/)
-  assert.match(rekap, /Sisa: Rp4\.985\.000/)
+  let totals = await store.getMonthTotals(userId, monthKey)
+  assert.equal(totals.expense, 0)
+  assert.equal(totals.savings, 15000)
+  assert.equal(totals.income - totals.expense - totals.savings, 4985000)
 
-  const riwayat = await collectReply('riwayat', phone)
-  assert.match(riwayat, /Tabungan/)
+  const items = await store.listRecentTransactions(userId, 5)
+  assert.equal(items.length, 2)
+  assert.equal(items[0].category, 'tabungan')
 
   await collectReply('kasi 65 ribu ke tabungan', phone)
-  const rekapKedua = await collectReply('ringkasan', phone)
-  assert.match(rekapKedua, /Tabungan: Rp80\.000/)
-  assert.match(rekapKedua, /Sisa: Rp4\.920\.000/)
+  totals = await store.getMonthTotals(userId, monthKey)
+  assert.equal(totals.savings, 80000)
+  assert.equal(totals.income - totals.expense - totals.savings, 4920000)
 })

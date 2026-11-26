@@ -62,7 +62,6 @@ export default function Settings({ page = 'hub', onPage }) {
 
       <div className="page-heading settings-heading">
         <div>
-          <span className="pixel-eyebrow">SETELAN / {copy.title.toUpperCase()}</span>
           <h1>{copy.title}</h1>
           <p>{copy.desc}</p>
         </div>

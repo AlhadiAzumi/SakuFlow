@@ -94,12 +94,11 @@ export function parseMessage(text, now = new Date()) {
   const lower = raw.toLowerCase()
 
   if (!raw) return { intent: 'unknown' }
-  if (/^(bantuan|help|panduan|panduan bot|perintah|daftar perintah|\?|halo|hi|hai|menu)$/.test(lower)) return { intent: 'help' }
-  if (/^(status|status koneksi|cek status|koneksi|cek koneksi)$/.test(lower)) return { intent: 'status' }
-  if (/^(riwayat|lihat riwayat|terakhir|5 terakhir|catatan terakhir|transaksi terakhir|history)$/.test(lower)) return { intent: 'history' }
+  // Perintah yang hanya menampilkan info sengaja tidak dikenali: bot satu arah,
+  // jadi tidak ada gunanya meminta balasan untuk status, riwayat, rekap, atau menu.
+  if (/^(bantuan|help|panduan|panduan bot|perintah|daftar perintah|\?|halo|hi|hai|menu|status|status koneksi|cek status|koneksi|cek koneksi|riwayat|lihat riwayat|terakhir|5 terakhir|catatan terakhir|transaksi terakhir|history|ringkasan|ringkasan bulan ini|rekap|rekap bulan ini|summary|total bulan ini)$/.test(lower)) return { intent: 'unknown' }
   if (/^(hapus semua|hapus semua catatan|hapus semua laporan|hapus semua transaksi|hapus semua riwayat|hapus semua data|clear all|clear semua|reset|reset semua)$/.test(lower)) return { intent: 'deleteAll' }
   if (/^(hapus|hapus catatan|hapus transaksi terakhir|hapus terakhir|hapus 1|hapus satu|batal|batalkan|undo|clear)$/.test(lower)) return { intent: 'deleteLast' }
-  if (/\b(ringkasan|rekap|summary|total bulan ini|rekap bulan ini|ringkasan bulan ini)\b/.test(lower)) return { intent: 'summary' }
 
   if (detectSavings(lower)) {
     const amount = extractAmount(lower)
@@ -128,26 +127,3 @@ export function parseMessage(text, now = new Date()) {
   }
 }
 
-export const HELP_TEXT = [
-  'Halo! Aku bot Sakunode.',
-  'Catatan: aku hanya membaca chatmu, tidak membalas pesan. Cek hasilnya di website Sakunode.',
-  '',
-  'Catat uang, tinggal chat seperti:',
-  '• "masuk uang 500 ribu"',
-  '• "keluar 25rb buat kopi"',
-  '• "beli bensin 50 ribu kemarin"',
-  '• "gaji 3,5 juta hari ini"',
-  '• "keluar 18rb transport tanggal 12"',
-  '• "nabung 15 ribu"',
-  '• "kasi 65 ribu ke tabungan"',
-  '',
-  'Perintah:',
-  '• "ringkasan" / "rekap": total masuk, keluar, tabungan & sisa bulan ini',
-  '• "riwayat": 5 catatan terakhir',
-  '• "status": cek koneksi nomor & jumlah catatan',
-  '• "hapus" / "clear" / "batal": hapus 1 catatan terakhir',
-  '• "hapus semua" / "clear all": hapus seluruh catatan (tidak bisa dibatalkan)',
-  '• "bantuan" / "menu": tampilkan pesan ini',
-  '',
-  'Setiap perintah langsung muncul di website kamu.',
-].join('\n')
