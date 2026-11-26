@@ -80,6 +80,7 @@ test('request OTP mengembalikan kode walau WhatsApp gagal', async () => {
   const data = await response.json()
   assert.equal(data.ok, true)
   assert.match(data.otp, /^\d{6}$/)
+  assert.match(data.linkToken, /^[a-f0-9]{32}$/)
   assert.equal(data.delivered, false)
   assert.equal(data.phone, '6281234567890')
 })
@@ -100,7 +101,7 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
     },
     body: JSON.stringify({ phone }),
   })
-  const { otp, phone: normalizedPhone } = await request.json()
+  const { otp, linkToken, phone: normalizedPhone } = await request.json()
 
   const webhookBody = JSON.stringify({
     object: 'whatsapp_business_account',
@@ -111,7 +112,7 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
           messages: [{
             id: `wamid.otp.${Date.now()}`,
             from: normalizedPhone,
-            text: { body: otp },
+            text: { body: `/verif ${otp} ${linkToken}` },
           }],
           statuses: [{
             id: 'wamid.status.uji',
@@ -151,4 +152,25 @@ test('webhook memakai payload.entry dan mencatat log OTP', async () => {
   })
   const statusData = await status.json()
   assert.equal(statusData.linked, true)
+})
+
+test('webhook tanpa signature Meta ditolak saat app secret aktif', async () => {
+  const { config } = await import('../src/config.js')
+  const savedSecret = config.appSecret
+  const savedDryRun = config.dryRun
+  config.appSecret = 'rahasia-uji'
+  config.dryRun = false
+
+  try {
+    const response = await fetch(`${base}/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ object: 'whatsapp_business_account', entry: [] }),
+    })
+    assert.equal(response.status, 401)
+    assert.equal(await response.text(), 'UNAUTHORIZED')
+  } finally {
+    config.appSecret = savedSecret
+    config.dryRun = savedDryRun
+  }
 })

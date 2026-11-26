@@ -35,12 +35,13 @@ export async function handleMessage(message, { send = sendText } = {}) {
   }
 
   if (await store.hasPendingOtp(phone)) {
-    const otpMatch = text.match(/^(?:\/?(?:verif|otp)\s+)?(\d{4,8})$/i)
+    // Format: "/verif <kode> <token>". Token berasal dari sesi web pemohon.
+    const otpMatch = text.match(/^(?:\/?(?:verif|otp)\s+)?(\d{4,8})\s+([A-Za-z0-9_-]{16,64})$/i)
     if (otpMatch) {
-      const userId = await store.verifyOtp(phone, otpMatch[1])
+      const userId = await store.verifyOtp(phone, otpMatch[1], otpMatch[2])
       await reply(userId
         ? 'Nomor WhatsApp kamu berhasil dihubungkan. Sekarang kamu bisa langsung chat catatan uang di sini.'
-        : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, ya.')
+        : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, lalu kirim lewat tautan yang ada di halaman Setelan.')
       return { type: 'otp', ok: Boolean(userId), verified: Boolean(userId), phone, userId: userId || null }
     }
   }
@@ -94,7 +95,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
   if (parsed.intent === 'savings') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
-      await reply('Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
+      await reply('Nomor ini belum terhubung. Buka Setelan di website, lalu kirim kode lewat tautan bot.')
       return { type: 'savings', ok: false, phone, reason: 'not_linked' }
     }
     // Tabungan disimpan sebagai category 'tabungan' di tabel transactions.
@@ -129,7 +130,7 @@ export async function handleMessage(message, { send = sendText } = {}) {
   if (parsed.intent === 'transaction') {
     const userId = await store.getLinkedUser(phone)
     if (!userId) {
-      await reply('Nomor ini belum terhubung ke akun. Buka website → Setelan → Hubungkan WhatsApp, lalu balas kode OTP yang kami kirim.')
+      await reply('Nomor ini belum terhubung. Buka Setelan di website, lalu kirim kode lewat tautan bot.')
       return { type: 'transaction', ok: false, phone, reason: 'not_linked' }
     }
     await store.insertTransaction({

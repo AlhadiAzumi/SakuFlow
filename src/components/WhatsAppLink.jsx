@@ -20,6 +20,7 @@ export default function WhatsAppLink() {
   const [checking, setChecking] = useState(Boolean(API_URL) && mode === 'cloud')
   const [loading, setLoading] = useState(false)
   const [otp, setOtp] = useState('')
+  const [linkToken, setLinkToken] = useState('')
   const [waiting, setWaiting] = useState(false)
   const [delivered, setDelivered] = useState(false)
   const [cooldown, setCooldown] = useState(0)
@@ -93,6 +94,7 @@ export default function WhatsAppLink() {
   const requestOtp = async (event) => {
     event?.preventDefault()
     setLoading(true)
+    setLinkToken('')
     try {
       const result = await callApi('/api/link/request', {
         method: 'POST',
@@ -100,13 +102,14 @@ export default function WhatsAppLink() {
       })
       setStatus({ linked: false, phone: result.phone })
       setOtp(String(result.otp || ''))
+      setLinkToken(String(result.linkToken || ''))
       setWaiting(true)
       setDelivered(Boolean(result.delivered))
-      setCooldown(30)
+      setCooldown(60)
       setCopied(false)
       showToast(result.delivered
-        ? 'Kode OTP acak dikirim ke WhatsApp. Setelah kirim ke bot, kembali ke halaman ini untuk cek status.'
-        : 'Kode OTP acak siap. Kirim lewat tautan WhatsApp di bawah, lalu kembali ke halaman ini untuk cek status.')
+        ? 'Kode dikirim ke WhatsApp. Kirim lewat tautan bot, lalu cek status di sini.'
+        : 'Kode siap. Kirim lewat tautan bot, lalu cek status di sini.')
     } catch (error) {
       showToast(error.message || 'Gagal mengirim kode OTP.', 'error')
     } finally {
@@ -117,7 +120,8 @@ export default function WhatsAppLink() {
   const copyOtp = async () => {
     if (!otp) return
     try {
-      await navigator.clipboard.writeText(otp)
+      const command = linkToken ? `/verif ${otp} ${linkToken}` : otp
+      await navigator.clipboard.writeText(command)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -133,6 +137,7 @@ export default function WhatsAppLink() {
       if (data.linked) {
         setWaiting(false)
         setOtp('')
+        setLinkToken('')
         showToast('Nomor WhatsApp sudah terhubung.')
       } else {
         showToast('Belum terhubung. Kirim kode OTP dulu.')
@@ -145,7 +150,7 @@ export default function WhatsAppLink() {
   }
 
   const waHref = otp
-    ? `${BOT_WA_URL}${BOT_WA_URL.includes('?') ? '&' : '?'}text=${encodeURIComponent(`/verif ${otp}`)}`
+    ? `${BOT_WA_URL}${BOT_WA_URL.includes('?') ? '&' : '?'}text=${encodeURIComponent(`/verif ${otp} ${linkToken}`)}`
     : BOT_WA_URL
 
   const disconnect = async () => {
@@ -155,6 +160,7 @@ export default function WhatsAppLink() {
       setStatus({ linked: false, phone: null })
       setWaiting(false)
       setOtp('')
+      setLinkToken('')
       showToast('Nomor WhatsApp diputuskan.')
     } catch (error) {
       showToast(error.message || 'Gagal memutuskan nomor.', 'error')
@@ -228,7 +234,7 @@ export default function WhatsAppLink() {
               <div className="whatsapp-panel__otp-actions">
                 {otp && (
                   <button type="button" className="button button--ghost" onClick={copyOtp}>
-                    {copied ? 'Kode tersalin' : 'Salin kode'}
+                    {copied ? 'Perintah tersalin' : 'Salin perintah'}
                   </button>
                 )}
                 <button type="button" className="button button--ghost" onClick={requestOtp} disabled={loading || cooldown > 0}>

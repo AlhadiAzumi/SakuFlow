@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import PixelIcon from './PixelIcon'
 
 export const BOT_COMMANDS = [
@@ -13,8 +12,6 @@ export const BOT_COMMANDS = [
 ]
 
 export default function BotCommands({ compact = false }) {
-  const [demoOtp] = useState(() => Math.floor(100000 + Math.random() * 900000).toString())
-
   return (
     <div className={`bot-commands${compact ? ' bot-commands--compact' : ''}`}>
       <p className="bot-commands__note">
@@ -34,7 +31,7 @@ export default function BotCommands({ compact = false }) {
       </div>
 
       <p className="bot-commands__foot">
-        Nominal: <code>25rb</code>, <code>3,5 juta</code>. Tanggal: <code>kemarin</code>, <code>tanggal 12</code>. Verifikasi: <code>/verif {demoOtp}</code>.
+        Nominal: <code>25rb</code>, <code>3,5 juta</code>. Tanggal: <code>kemarin</code>, <code>tanggal 12</code>. Verifikasi OTP lewat tautan di halaman Setelan.
       </p>
     </div>
   )

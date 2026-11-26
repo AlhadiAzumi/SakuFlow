@@ -87,12 +87,40 @@ create policy "Users can update own settings"
 -- Website hanya perlu select lewat API bot.
 create table if not exists public.whatsapp_links (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  phone text not null unique,
+  phone text not null,
   otp_code text,
+  link_token text,
   otp_expires_at timestamptz,
   verified boolean not null default false,
   updated_at timestamptz not null default now()
 );
+
+-- Token rahasia milik pemohon. Verifikasi wajib menyertakan token ini supaya
+-- kode OTP saja tidak cukup untuk mengikat nomor ke sebuah akun.
+alter table public.whatsapp_links add column if not exists link_token text;
+
+-- Nomor hanya unik setelah terverifikasi. Permintaan yang masih pending tidak
+-- boleh "memesan" nomor, karena itu membuat nomor orang lain bisa dikunci.
+do $$
+declare c record;
+begin
+  for c in
+    select conname
+    from pg_constraint
+    where conrelid = 'public.whatsapp_links'::regclass
+      and contype = 'u'
+      and conkey = array[
+        (select attnum from pg_attribute
+          where attrelid = 'public.whatsapp_links'::regclass and attname = 'phone')
+      ]
+  loop
+    execute format('alter table public.whatsapp_links drop constraint %I', c.conname);
+  end loop;
+end $$;
+
+create unique index if not exists whatsapp_links_phone_verified_idx
+  on public.whatsapp_links (phone)
+  where verified;
 
 alter table public.whatsapp_links enable row level security;
 

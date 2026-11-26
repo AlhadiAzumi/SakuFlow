@@ -19,8 +19,8 @@ Folder `bot/` sekarang **Meta-only**: Baileys, QR, dan sesi lokal sudah dihapus.
 ## Yang sudah ada
 
 - **Parser regex** untuk nominal `ribu`/`rb`/`k`/`juta`/`jt`/`Rp...`, tipe masuk/keluar, kategori, dan tanggal.
-- **Link akun via OTP**: user isi nomor di website, bot kirim 6 digit kode lewat Cloud API, user balas kode itu di WA.
-- **Balasan struk** tiap transaksi + perintah `ringkasan` dan `bantuan`.
+- **Link akun via OTP**: user minta kode di website, bot kirim kode lewat Cloud API, user kirim kode lewat tautan WhatsApp yang berisi token pemohon.
+- **Bot satu arah**: catatan tersimpan di dashboard. Perintah yang hanya meminta balasan sengaja tidak dikenali.
 - **Idempoten**: `message.id` yang sama tidak diproses dua kali (dijaga juga unique index di DB).
 - **Verifikasi webhook** HMAC-SHA256 lewat header `X-Hub-Signature-256`.
 - **Mode dry-run** untuk mencoba tanpa token Meta maupun Supabase.

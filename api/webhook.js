@@ -19,15 +19,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(req, res, ['GET', 'POST'])
 
   const raw = await readRawBody(req)
-  console.log('[Webhook Masuk]', JSON.stringify(req.body ?? raw))
   const rawText = raw.toString('utf8')
-  let rawPayload = rawText
-  try {
-    rawPayload = JSON.parse(rawText)
-  } catch {
-    // Teks apa adanya tetap dicetak bukan JSON valid.
-  }
-  console.log('[Webhook Parsed]', JSON.stringify(rawPayload))
+  // Jangan pernah mencetak payload mentah: berisi nomor dan isi pesan pengguna.
+  console.log('[Webhook Masuk]', { bytes: raw.length })
 
   try {
     if (!isValidMetaSignature(raw, req.headers?.['x-hub-signature-256'])) {

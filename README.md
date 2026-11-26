@@ -211,8 +211,8 @@ Singkatnya:
 1. Jalankan `npm install` di folder `bot/`, salin `.env.example` → `.env`, isi kredensial Supabase **service_role** dan kredensial Meta (`WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`).
 2. Isi `VITE_BOT_API_URL=http://localhost:3001` di `.env` website, lalu jalankan ulang web.
 3. Daftarkan `https://<domain>/webhook` di Meta → WhatsApp → Configuration, lalu subscribe field `messages`.
-4. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu balas kode 6 digit itu di WA.
-5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `nabung 15 ribu`, `ringkasan`, dll.
+4. Di website: **Setelan → Catat cukup dengan chat → Kirim kode OTP**, lalu kirim kode lewat tautan WhatsApp di halaman itu.
+5. Sekarang tinggal chat: `keluar 25rb buat kopi`, `gaji 3,5 juta`, `nabung 15 ribu`, dll. Bot tidak membalas chat.
 6. Tiap `message.id` hanya diproses sekali. Webhook dilindungi HMAC-SHA256.
 
 Bisa dicoba dulu tanpa Meta/Supabase dengan `BOT_DRY_RUN=true`. Balasan bot muncul di terminal.

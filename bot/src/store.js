@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import crypto from 'node:crypto'
 import { config } from './config.js'
 import { normalizePhone } from './parser.js'
 
@@ -48,17 +49,84 @@ export async function getLinkStatus(userId) {
   return data || null
 }
 
-export async function requestLink(userId, phone, code) {
+const safeEqual = (a, b) => {
+  const left = Buffer.from(String(a || ''))
+  const right = Buffer.from(String(b || ''))
+  return left.length === right.length && left.length > 0 && crypto.timingSafeEqual(left, right)
+}
+
+const linkError = (code, message, extra = {}) => Object.assign(new Error(message), { code, ...extra })
+
+// otp_code disimpan sebagai hash, bukan plaintext. Hash mengikat kode ke token
+// pemohon, jadi baris yang terbaca lewat REST atau backup tidak berisi kode siap pakai.
+const hashOtp = (code, linkToken) => `sha256:${
+  crypto.createHash('sha256').update(`${String(code || '').trim()}:${String(linkToken || '')}`).digest('hex')
+}`
+
+// Nomor yang sudah terverifikasi milik akun lain tidak boleh dipakai lagi.
+export async function findVerifiedLink(phone) {
   const key = normalizePhone(phone)
   if (!admin) {
-    dryLinks.set(key, { userId, verified: false })
-    dryOtps.set(key, { code, expiresAt: Date.now() + 5 * 60 * 1000 })
+    const link = dryLinks.get(key)
+    return link?.verified ? { userId: link.userId, verified: true } : null
+  }
+  const { data, error } = await requireAdmin()
+    .from('whatsapp_links')
+    .select('user_id')
+    .eq('phone', key)
+    .eq('verified', true)
+    .maybeSingle()
+  if (error) throw error
+  return data ? { userId: data.user_id, verified: true } : null
+}
+
+export const LINK_COOLDOWN_MS = 60 * 1000
+
+export async function requestLink(userId, phone, code, linkToken) {
+  const key = normalizePhone(phone)
+
+  const taken = await findVerifiedLink(key)
+  if (taken && taken.userId !== userId) {
+    throw linkError('PHONE_TAKEN', 'Nomor ini sudah terhubung ke akun lain.')
+  }
+
+  if (!admin) {
+    const pending = dryOtps.get(key)
+    if (pending && pending.userId === userId && Date.now() - pending.createdAt < LINK_COOLDOWN_MS) {
+      const retryAfter = Math.ceil((LINK_COOLDOWN_MS - (Date.now() - pending.createdAt)) / 1000)
+      throw linkError('COOLDOWN', `Tunggu ${retryAfter} detik sebelum minta kode baru.`, { retryAfter })
+    }
+    dryLinks.set(key, { userId, verified: false, linkToken })
+    dryOtps.set(key, {
+      codeHash: hashOtp(code, linkToken),
+      linkToken,
+      userId,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    })
     return { phone: key }
   }
+
+  // Cooldown disimpan di database supaya berlaku lintas instance serverless.
+  const { data: own, error: ownError } = await requireAdmin()
+    .from('whatsapp_links')
+    .select('phone, updated_at, verified')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (ownError) throw ownError
+  if (own && own.phone === key && !own.verified) {
+    const elapsed = Date.now() - new Date(own.updated_at).getTime()
+    if (elapsed < LINK_COOLDOWN_MS) {
+      const retryAfter = Math.ceil((LINK_COOLDOWN_MS - elapsed) / 1000)
+      throw linkError('COOLDOWN', `Tunggu ${retryAfter} detik sebelum minta kode baru.`, { retryAfter })
+    }
+  }
+
   const { error } = await requireAdmin().from('whatsapp_links').upsert({
     user_id: userId,
     phone: key,
-    otp_code: code,
+    otp_code: hashOtp(code, linkToken),
+    link_token: linkToken,
     otp_expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     verified: false,
     updated_at: new Date().toISOString(),
@@ -88,33 +156,51 @@ export async function hasPendingOtp(phone) {
   return Boolean(data?.otp_code)
 }
 
-export async function verifyOtp(phone, code) {
+export async function verifyOtp(phone, code, linkToken) {
   const key = normalizePhone(phone)
   const clean = String(code || '').trim()
+  const token = String(linkToken || '').trim()
+  // Tanpa token milik pemohon, kode OTP saja tidak boleh mengikat nomor.
+  if (!token) return null
   if (!admin) {
     const pending = dryOtps.get(key)
-    if (!pending || pending.expiresAt < Date.now() || pending.code !== clean) return null
+    if (!pending || pending.expiresAt < Date.now()) return null
+    if (!safeEqual(pending.codeHash, hashOtp(clean, token))) return null
+    if (!safeEqual(pending.linkToken, token)) return null
     const link = dryLinks.get(key)
     if (!link) return null
     dryOtps.delete(key)
     link.verified = true
+    link.linkToken = null
     return link.userId
   }
   const client = requireAdmin()
   const { data, error } = await client
     .from('whatsapp_links')
-    .select('user_id, otp_code, otp_expires_at')
+    .select('user_id, otp_code, link_token, otp_expires_at')
     .eq('phone', key)
     .eq('verified', false)
     .maybeSingle()
   if (error) throw error
-  if (!data?.otp_code || data.otp_code !== clean) return null
+  if (!data?.otp_code || !safeEqual(data.otp_code, hashOtp(clean, token))) return null
+  if (!data.link_token || !safeEqual(data.link_token, token)) return null
   if (new Date(data.otp_expires_at).getTime() < Date.now()) return null
+
+  // Jangan pernah menimpa nomor yang sudah terverifikasi milik akun lain.
+  const taken = await findVerifiedLink(key)
+  if (taken && taken.userId !== data.user_id) return null
 
   const { error: updateError } = await client
     .from('whatsapp_links')
-    .update({ verified: true, otp_code: null, otp_expires_at: null, updated_at: new Date().toISOString() })
+    .update({
+      verified: true,
+      otp_code: null,
+      link_token: null,
+      otp_expires_at: null,
+      updated_at: new Date().toISOString(),
+    })
     .eq('phone', key)
+    .eq('user_id', data.user_id)
   if (updateError) throw updateError
   return data.user_id
 }
