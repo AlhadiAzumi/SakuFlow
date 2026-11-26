@@ -36,8 +36,9 @@ export async function handleMessage(message, { send = sendText } = {}) {
 
   const pendingOtp = await store.hasPendingOtp(phone)
   if (pendingOtp) {
-    // Format: "/verif <kode> <token>". Token berasal dari sesi web pemohon.
-    const otpMatch = text.match(/^(?:\/?(?:verif|otp)\s+)?(\d{4,8})\s+([A-Za-z0-9_-]{16,64})$/i)
+    // Format utama: "/verif <kode> <token>". Token berasal dari sesi web pemohon.
+    // Pemisah "/" atau ":" juga diterima supaya salinan dari tautan tidak gagal.
+    const otpMatch = text.match(/^(?:(?:\/?(?:verif|otp))[\s/:]+)?(\d{4,8})[\s/:]+([A-Za-z0-9_-]{16,64})$/i)
     if (otpMatch) {
       const userId = await store.verifyOtp(phone, otpMatch[1], otpMatch[2])
       await reply(userId
@@ -48,9 +49,10 @@ export async function handleMessage(message, { send = sendText } = {}) {
   }
 
   // Balasan kode tanpa token jangan sampai terbaca sebagai transaksi, baik saat
-  // OTP masih pending maupun setelah nomor terhubung.
-  if (/^(?:\/?(?:verif|otp)\s+)?\d{4,8}$/i.test(text)) {
-    await reply('Kirim kode lewat tautan bot di halaman Setelan, ya.')
+  // OTP masih pending maupun setelah nomor terhubung. Ini juga menangkap
+  // salinan format "verif/<kode>" yang sering dikirim tanpa token.
+  if (/^(?:(?:\/?(?:verif|otp))[\s/:]+)?\d{4,8}$/i.test(text)) {
+    await reply('Salin perintah lengkap di halaman Setelan, lalu kirim ke bot ini, ya.')
     return { type: 'otp', ok: false, verified: false, phone, reason: 'missing_token' }
   }
 

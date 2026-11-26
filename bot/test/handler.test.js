@@ -100,19 +100,36 @@ test('verifikasi menerima /verif dan kode tidak bisa dipakai ulang', async () =>
   assert.notEqual(second.verified, true)
 })
 
+test('verifikasi menerima salinan format verif/<kode> <token>', async () => {
+  config.dryRun = true
+  const phone = '6366666666666'
+  await store.requestLink('user-verif-slash', phone, '246810', LINK_TOKEN)
+
+  const result = await handleMessage(
+    { id: 'otp-slash-1', from: phone, text: { body: `verif/246810/${LINK_TOKEN}` } },
+    { send: async () => ({ dry: true }) },
+  )
+
+  assert.equal(result.type, 'otp')
+  assert.equal(result.verified, true)
+})
+
 test('kode OTP tanpa token pemohon tidak mengikat nomor ke akun', async () => {
   config.dryRun = true
   const phone = '6281212121212'
   await store.requestLink('user-penyerang', phone, '918273', LINK_TOKEN)
 
-  // Pemilik nomor membalas kode saja, seperti yang dulu diperintahkan pesan OTP.
-  const result = await handleMessage(
-    { id: 'otp-tanpa-token', from: phone, text: { body: '/verif 918273' } },
-    { send: async () => ({ dry: true }) },
-  )
+  // Pemilik nomor membalas kode saja, termasuk salinan format "verif/<kode>".
+  for (const [index, text] of ['/verif 918273', 'verif/918273'].entries()) {
+    const result = await handleMessage(
+      { id: `otp-tanpa-token-${index}`, from: phone, text: { body: text } },
+      { send: async () => ({ dry: true }) },
+    )
 
-  assert.equal(result.verified, false)
-  assert.equal(result.reason, 'missing_token')
+    assert.equal(result.verified, false)
+    assert.equal(result.reason, 'missing_token')
+  }
+
   assert.equal(await store.getLinkedUser(phone), null)
   assert.equal(await store.hasPendingOtp(phone), true)
 })
@@ -125,13 +142,16 @@ test('balasan kode setelah nomor terhubung tidak membuat transaksi palsu', async
   const userId = await store.getLinkedUser(phone)
   const before = await store.countTransactions(userId)
 
-  const result = await handleMessage(
-    { id: 'otp-late-reply', from: phone, text: { body: '556677' } },
-    { send: async () => ({ dry: true }) },
-  )
+  for (const [index, text] of ['556677', 'verif/556677'].entries()) {
+    const result = await handleMessage(
+      { id: `otp-late-reply-${index}`, from: phone, text: { body: text } },
+      { send: async () => ({ dry: true }) },
+    )
 
-  assert.equal(result.verified, false)
-  assert.equal(result.reason, 'missing_token')
+    assert.equal(result.verified, false)
+    assert.equal(result.reason, 'missing_token')
+  }
+
   assert.equal(await store.countTransactions(userId), before)
 })
 

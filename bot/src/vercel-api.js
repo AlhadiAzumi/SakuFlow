@@ -142,7 +142,7 @@ export async function linkRequest(req, res) {
       await sendWhatsAppMessage(phone, [
         `Kode verifikasi Sakunode: ${code}`,
         '',
-        'Jangan balas pesan ini. Buka Setelan di website Sakunode, lalu kirim kode lewat tautan yang ada di sana.',
+        'Jangan balas pesan ini. Buka Setelan di website Sakunode, salin perintah lengkapnya, lalu kirim ke bot ini.',
         'Kalau kamu tidak meminta kode ini, abaikan saja pesan ini.',
       ].join('\n'))
     }

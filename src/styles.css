@@ -1176,6 +1176,7 @@ code {
 .whatsapp-panel__otp { margin-top: 14px; border: 1px solid #bfdbfe; background: var(--primary-soft); border-radius: 14px; padding: 14px; }
 .whatsapp-panel__otp-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
 .whatsapp-panel__otp-code { display: block; color: var(--primary); font-size: 26px; font-weight: 800; letter-spacing: 6px; font-variant-numeric: tabular-nums; }
+.whatsapp-panel__otp-command { display: block; margin-bottom: 2px; padding: 8px 10px; border: 1px solid #dbeafe; border-radius: 10px; background: #fff; color: #0f172a; font-size: 11.5px; line-height: 1.5; word-break: break-all; font-variant-numeric: tabular-nums; }
 .whatsapp-panel__otp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .whatsapp-panel__otp-actions .button { padding: 7px 12px; font-size: 11.5px; }
 .whatsapp-panel__otp p { margin: 10px 0 8px; font-size: 12px; color: var(--muted); }

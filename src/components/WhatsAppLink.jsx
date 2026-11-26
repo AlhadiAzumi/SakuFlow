@@ -226,10 +226,12 @@ export default function WhatsAppLink() {
                 <>
                   <span className="whatsapp-panel__otp-label">Kode OTP kamu</span>
                   <code className="whatsapp-panel__otp-code">{otp}</code>
+                  <span className="whatsapp-panel__otp-label">Perintah verifikasi</span>
+                  <code className="whatsapp-panel__otp-command">{linkToken ? `/verif ${otp} ${linkToken}` : otp}</code>
                 </>
               )}
               <p>
-                Kirim kode lewat tautan di bawah, lalu kembali ke halaman ini. Status dicek otomatis.
+                Kirim perintah persis seperti di atas lewat tautan bot. Status dicek otomatis.
               </p>
               <div className="whatsapp-panel__otp-actions">
                 {otp && (
