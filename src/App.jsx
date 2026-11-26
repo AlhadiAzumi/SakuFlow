@@ -140,7 +140,9 @@ export default function App() {
       setSettingsPage('hub')
       setView('landing')
       setShowAuth(false)
-    } else if (isLoggedIn && current === '/masuk') {
+    } else if (isLoggedIn && (current === '/' || current === '/masuk')) {
+      // Login dari landing, /masuk, OAuth, atau tautan email harus langsung
+      // mendarat di dashboard. Path '/dashboard' juga menghapus sisa '#' di URL.
       navigate('/dashboard', { replace: true })
       setTab('home')
       setSettingsPage('hub')

@@ -60,6 +60,8 @@ export function isProtectedPath(pathname = '') {
 export function navigate(path, { replace = false } = {}) {
   if (typeof window === 'undefined') return
   const next = normalizePath(path)
-  if (window.location.pathname === next) return
+  // Tetap panggil replaceState bila path sama tapi masih ada sisa hash dari
+  // Supabase OAuth atau tautan verifikasi email.
+  if (window.location.pathname === next && !window.location.hash) return
   window.history[replace ? 'replaceState' : 'pushState']({ sakunode: true }, '', next)
 }
