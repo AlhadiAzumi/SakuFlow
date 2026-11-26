@@ -2098,3 +2098,27 @@ code {
   .fund-flow-arrow,
   .fund-flow-vertical-line { animation: none; }
 }
+
+/* ---------- Penyesuaian tambahan untuk layar handphone ---------- */
+
+@media (max-width: 620px) {
+  .dash-shell .bottom-nav { display: flex !important; }
+  .dash-shell .bottom-nav button { min-height: 52px; font-size: 11px; }
+  .dash-shell .fab { bottom: 96px; width: 52px; height: 52px; }
+  .dash-shell .dash-main { padding-bottom: 150px; }
+  .dash-shell .dash-topbar .app-header__inner { padding: 8px 12px; }
+  .dash-shell .dash-intro h1 { font-size: 24px; }
+  .dash-shell .summary-card { padding: 14px; }
+  .dash-shell .summary-card__label { font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .segmented { gap: 4px; padding: 3px; }
+  .segmented button { padding: 10px 6px; font-size: 11.5px; }
+  .pixel-landing .hero-shell { padding-left: 16px; padding-right: 16px; }
+  .pixel-landing .hero-shell h1 { font-size: 32px; }
+  .pixel-landing .pixel-eyebrow { font-size: 10px; }
+  .pixel-landing .pixel-chip { font-size: 10px; }
+  .pixel-landing footer { padding-top: 40px; padding-bottom: 40px; }
+  .pixel-landing footer ul { gap: 10px; }
+}

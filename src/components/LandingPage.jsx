@@ -174,7 +174,6 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
     if (link === 'Kebijakan Privasi') return { href: '/privacy' }
     if (link === 'Syarat & Ketentuan') return { href: '/terms' }
     if (link === 'Kontak') return { href: 'mailto:sakunode@gmail.com' }
-    if (link === 'GitHub') return { href: 'https://github.com/AlhadiAzumi/Sakunode', external: true }
     const section = NAV.find((item) => item.label === link)
     return section ? { section: section.id } : { href: '/' }
   }
@@ -672,18 +671,10 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-slate-500">
               Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
             </p>
-            <a
-              href="https://github.com/AlhadiAzumi/Sakunode"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:underline"
-            >
-              GitHub <PixelIcon name="external" size={12} />
-            </a>
           </div>
           {[
             { title: 'Produk', links: ['Fitur', 'Cara Kerja', 'Bot WhatsApp', 'Perintah Bot', 'Alur Dana'] },
-            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'Syarat & Ketentuan', 'GitHub'] },
+            { title: 'Perusahaan', links: ['Tentang Sakunode', 'Kebijakan Privasi', 'Syarat & Ketentuan'] },
             { title: 'Bantuan', links: ['Panduan Mulai', 'Kontak', 'Status Layanan'] },
           ].map((col) => (
             <div key={col.title}>
