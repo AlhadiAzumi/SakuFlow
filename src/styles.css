@@ -777,30 +777,6 @@ code {
 .amount-input input { border: 0; background: transparent; padding: 8px 0; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; outline: none; width: 100%; }
 
 .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.savings-category-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 54px;
-  padding: 11px 14px;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  background: var(--primary-soft);
-}
-.savings-category-card__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.savings-category-card__body strong { color: var(--primary-dark); font-size: 13px; }
-.savings-category-card__body small { color: var(--muted); font-size: 11px; }
-.savings-category-card__icon {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: var(--primary);
-  color: #fff;
-}
 .category-chip {
   border: 1px solid var(--border); background: var(--surface-soft);
   border-radius: 12px; padding: 10px 6px;
@@ -2046,6 +2022,7 @@ code {
 
 @media (max-width: 620px) {
   .dash-shell .summary-grid { grid-template-columns: 1fr 1fr; }
+  .dash-shell .summary-card--savings,
   .dash-shell .summary-card:last-child { grid-column: 1 / -1; }
   .dash-shell .dash-intro h1 { font-size: 26px; }
   .dash-shell .panel { padding: 20px 16px; }
