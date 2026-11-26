@@ -34,7 +34,8 @@ export async function handleMessage(message, { send = sendText } = {}) {
     return { type: 'empty', ok: false, phone }
   }
 
-  if (await store.hasPendingOtp(phone)) {
+  const pendingOtp = await store.hasPendingOtp(phone)
+  if (pendingOtp) {
     // Format: "/verif <kode> <token>". Token berasal dari sesi web pemohon.
     const otpMatch = text.match(/^(?:\/?(?:verif|otp)\s+)?(\d{4,8})\s+([A-Za-z0-9_-]{16,64})$/i)
     if (otpMatch) {
@@ -44,6 +45,13 @@ export async function handleMessage(message, { send = sendText } = {}) {
         : 'Kode tidak cocok atau sudah kedaluwarsa. Minta kode baru lewat website, lalu kirim lewat tautan yang ada di halaman Setelan.')
       return { type: 'otp', ok: Boolean(userId), verified: Boolean(userId), phone, userId: userId || null }
     }
+  }
+
+  // Balasan kode tanpa token jangan sampai terbaca sebagai transaksi, baik saat
+  // OTP masih pending maupun setelah nomor terhubung.
+  if (/^(?:\/?(?:verif|otp)\s+)?\d{4,8}$/i.test(text)) {
+    await reply('Kirim kode lewat tautan bot di halaman Setelan, ya.')
+    return { type: 'otp', ok: false, verified: false, phone, reason: 'missing_token' }
   }
 
   // Sapaan dan teks uji bukan transaksi, cukup beri panduan singkat.

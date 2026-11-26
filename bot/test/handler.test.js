@@ -111,10 +111,28 @@ test('kode OTP tanpa token pemohon tidak mengikat nomor ke akun', async () => {
     { send: async () => ({ dry: true }) },
   )
 
-  assert.notEqual(result.type, 'otp')
-  assert.notEqual(result.verified, true)
+  assert.equal(result.verified, false)
+  assert.equal(result.reason, 'missing_token')
   assert.equal(await store.getLinkedUser(phone), null)
   assert.equal(await store.hasPendingOtp(phone), true)
+})
+
+test('balasan kode setelah nomor terhubung tidak membuat transaksi palsu', async () => {
+  config.dryRun = true
+  const phone = '6281515151515'
+  await store.requestLink('user-otp-late', phone, '556677', LINK_TOKEN)
+  assert.equal(await store.verifyOtp(phone, '556677', LINK_TOKEN), 'user-otp-late')
+  const userId = await store.getLinkedUser(phone)
+  const before = await store.countTransactions(userId)
+
+  const result = await handleMessage(
+    { id: 'otp-late-reply', from: phone, text: { body: '556677' } },
+    { send: async () => ({ dry: true }) },
+  )
+
+  assert.equal(result.verified, false)
+  assert.equal(result.reason, 'missing_token')
+  assert.equal(await store.countTransactions(userId), before)
 })
 
 test('hapus 1 transaksi terakhir bekerja untuk nomor terhubung', async () => {
