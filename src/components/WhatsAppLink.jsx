@@ -231,12 +231,12 @@ export default function WhatsAppLink() {
                 </>
               )}
               <p>
-                Kirim perintah persis seperti di atas lewat tautan bot. Status dicek otomatis.
+                Kirim perintah terbaru persis seperti di atas lewat tautan bot. Kode baru membatalkan kode lama dan berlaku 5 menit.
               </p>
               <div className="whatsapp-panel__otp-actions">
                 {otp && (
                   <button type="button" className="button button--ghost" onClick={copyOtp}>
-                    {copied ? 'Perintah tersalin' : 'Salin perintah'}
+                    {copied ? 'Perintah tersalin' : 'Salin perintah terbaru'}
                   </button>
                 )}
                 <button type="button" className="button button--ghost" onClick={requestOtp} disabled={loading || cooldown > 0}>
