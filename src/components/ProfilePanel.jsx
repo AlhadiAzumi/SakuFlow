@@ -94,7 +94,7 @@ export default function ProfilePanel() {
       <div className="panel__header-row">
         <div>
           <h2 className="panel__title">Profil kamu</h2>
-          <p className="profile-panel__desc">Nama dan foto ini yang tampil di dashboard Sakunode.</p>
+          <p className="profile-panel__desc">Tampil di dashboard Sakunode.</p>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export default function ProfilePanel() {
                 <PixelIcon name="trash" size={14} /> Hapus foto
               </button>
             )}
-            <small>JPG/PNG • maks 5 MB • dipotong kotak 128 px</small>
+            <small>JPG/PNG, maks 5 MB</small>
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export default function ProfilePanel() {
             maxLength={24}
             placeholder="Nama panggilanmu"
           />
-          <small>Maksimal 24 karakter. Boleh beda dari nama email.</small>
+          <small>Maksimal 24 karakter.</small>
         </label>
 
         {error && <p className="form-error" role="alert">{error}</p>}

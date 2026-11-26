@@ -26,26 +26,26 @@ const PERSONAS = [
   {
     tab: 'Mahasiswa & Anak Kost',
     title: 'Uang jajan terkontrol',
-    desc: 'Catat pengeluaran harian tanpa perlu buka spreadsheet. Cukup chat, lalu lihat sisa uang bulan ini.',
-    points: ['Budget makan & kopi', 'Pengingat budget hampir habis', 'Catat langsung lewat WhatsApp'],
+    desc: 'Cukup chat, lalu lihat sisa uang bulan ini.',
+    points: ['Budget makan & kopi', 'Pengingat budget', 'Catat lewat WhatsApp'],
     stat: 'Rp1.250.000',
-    statLabel: 'Rata-rata hemat per bulan',
+    statLabel: 'Hemat per bulan',
   },
   {
     tab: 'Freelancer',
     title: 'Arus kas klien lebih jelas',
-    desc: 'Pemasukan dari berbagai proyek masuk otomatis ke satu tempat, lengkap dengan kategori dan tanggal.',
-    points: ['Pisahkan gaji & proyek', 'Lacak pembayaran masuk', 'Ekspor data ke JSON'],
+    desc: 'Pemasukan dari banyak proyek masuk ke satu tempat.',
+    points: ['Pisahkan gaji & proyek', 'Lacak pembayaran', 'Ekspor data ke Excel'],
     stat: 'Rp8.450.000',
-    statLabel: 'Saldo yang tercatat rapi',
+    statLabel: 'Saldo tercatat',
   },
   {
     tab: 'Pekerja Harian',
     title: 'Gaji habis? Tahu sebabnya',
-    desc: 'Kenali kategori pengeluaran terbesar hanya dengan melihat diagram alur dana yang mudah dibaca.',
+    desc: 'Lihat kategori terbesar dari diagram alur dana.',
     points: ['Diagram alur uang', 'Kategori pengeluaran', 'Target tabungan'],
     stat: '12 detik',
-    statLabel: 'Rata-rata waktu mencatat',
+    statLabel: 'Waktu mencatat',
   },
 ]
 
@@ -55,21 +55,18 @@ const DEMO_COMMANDS = [
     input: 'keluar 25rb buat kopi',
     title: 'Tersimpan di dashboard',
     amount: 'Rp25.000 • Makan & Minum',
-    note: 'Bot tidak membalas chat. Cek hasilnya di website.',
   },
   {
     label: 'Gaji masuk',
     input: 'masuk gaji 3,5 jt',
     title: 'Tersimpan di dashboard',
     amount: 'Rp3.500.000 • Gaji',
-    note: 'Bot tidak membalas chat. Saldo langsung bertambah.',
   },
   {
     label: 'Naik ojol',
     input: 'keluar 18rb transport',
     title: 'Tersimpan di dashboard',
     amount: 'Rp18.000 • Transport',
-    note: 'Kategori otomatis terdeteksi dari pesanmu.',
   },
 ]
 
@@ -256,7 +253,6 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
         <div className="hero-shell pixel-hero mx-auto max-w-7xl px-5 pb-28 pt-14 sm:px-10 sm:pt-20">
           <span className="pixel-stars" aria-hidden="true" />
           <Reveal className="relative z-10 mx-auto max-w-3xl text-center">
-            <span className="pixel-eyebrow justify-center text-blue-100">CATAT • CEK • EVALUASI • ULANGI</span>
             <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[64px]">
               Catat Keuangan Harian
               <br className="hidden sm:block" /> Lebih Cepat dengan{' '}
@@ -267,7 +263,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
-              Sakunode adalah aplikasi pencatatan keuangan harian terintegrasi bot WhatsApp dan dashboard visualisasi arus kas. Catat uang masuk, keluar, dan tabungan cukup lewat chat, lalu lihat ke mana uangmu pergi lewat diagram alur yang enak dibaca.
+              Catat uang lewat chat WhatsApp, lalu lihat arus kasmu di dashboard Sakunode.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -319,12 +315,11 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                 <div className="pixel-chat pixel-chat--out ml-auto max-w-[96%]" aria-live="polite">
                   <strong>{DEMO_COMMANDS[demo].title}</strong>
                   <span className="font-semibold tabular-nums text-slate-700">{DEMO_COMMANDS[demo].amount}</span>
-                  <span>{DEMO_COMMANDS[demo].note}</span>
                 </div>
               </div>
               <p className="mt-3 flex items-start gap-1.5 text-[10px] font-semibold leading-relaxed text-slate-500">
                 <PixelIcon name="info" size={12} className="mt-0.5 shrink-0 text-blue-600" />
-                Pratinjau hasil di dashboard, bukan balasan WhatsApp.
+                Hasil tampil di dashboard.
               </p>
             </article>
 
@@ -407,7 +402,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             Dirancang untuk Pencatatan Harian Tanpa Ribet
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-slate-500">
-            Sakunode menggabungkan bot WhatsApp untuk pencatatan cepat dan dashboard web untuk visualisasi arus kas. Semua yang kamu butuhkan untuk tahu ke mana uang pergi ada dalam satu tempat yang ringan.
+            Catat lewat chat, lihat arus kas di dashboard. Semuanya di satu tempat.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-2.5">
             {FEATURE_BADGES.map(({ label, icon }) => (
@@ -428,7 +423,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <SectionHeading
             title="Kelola Arus Kas dengan Cara yang"
             accent="Paling Mudah"
-            desc="Satu alur kerja yang bisa dipakai siapa saja. Tinggal pilih yang paling mirip denganmu."
+            desc="Pilih yang paling mirip denganmu."
           />
 
           <div className="mt-9 flex flex-wrap justify-center gap-2">
@@ -500,7 +495,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <SectionHeading
             title="Catat Transaksi Cukup Lewat"
             accent="Chat WhatsApp"
-            desc="Ketik seperti bicara normal. Sakunode yang mengenali nominal, jenis, dan kategorinya."
+            desc="Ketik seperti bicara normal. Sakunode mengenali nominal dan kategorinya."
           />
 
           <div className="soft-lift mx-auto mt-12 max-w-4xl rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_24px_60px_rgba(37,99,235,0.1)] sm:p-9">
@@ -510,29 +505,26 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white"><PixelIcon name="whatsapp" size={17} /></span>
                   <div>
                     <p className="text-[13px] font-extrabold">Pesan masuk</p>
-                    <p className="text-[10px] font-semibold text-slate-400">Dari nomor yang sudah terhubung</p>
+                    <p className="text-[10px] font-semibold text-slate-400">Nomor terhubung</p>
                   </div>
                 </div>
                 <div className="rounded-2xl rounded-tl-md bg-slate-900 px-5 py-4 text-sm font-semibold text-white">
                   keluar 25rb buat kopi
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-[11px] font-bold text-blue-600">
-                  <PixelIcon name="sparkles" size={14} /> Pesan dibaca otomatis dalam hitungan detik
-                </div>
-                <div className="mt-4 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-[11px] font-semibold text-blue-700">
-                  <PixelIcon name="badge-check" size={15} /> Tidak perlu buka aplikasi untuk mencatat
+                  <PixelIcon name="sparkles" size={14} /> Dibaca otomatis
                 </div>
                 <button
                   type="button"
                   onClick={showDemoSync}
                   className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
                 >
-                  <PixelIcon name="zap" size={13} /> Lihat notifikasi sinkron
+                  <PixelIcon name="zap" size={13} /> Lihat sinkron
                 </button>
               </div>
 
               <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-                <p className="text-[12px] font-extrabold text-slate-900">Hasil pembacaan pesan</p>
+                <p className="text-[12px] font-extrabold text-slate-900">Hasil pembacaan</p>
                 <div className="mt-4 space-y-3">
                   {[
                     { icon: 'coffee', label: 'Kategori terdeteksi', value: 'Makan & Minum' },
@@ -568,7 +560,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <SectionHeading
             title="Perintah Bot WhatsApp"
             accent="Yang Bisa Kamu Kirim"
-            desc="Tidak perlu hafal format khusus. Ketik seperti bicara normal, lalu lihat hasilnya di dashboard."
+            desc="Tidak perlu hafal format. Ketik seperti bicara normal."
           />
           <div className="soft-lift mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(37,99,235,0.1)] sm:p-8">
             <BotCommands />
@@ -583,7 +575,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             title="Pantau Aliran Uangmu"
             accent="Secara Real-Time"
             accentClassName="sm:inline-block sm:whitespace-nowrap"
-            desc="Satu pusat saldo yang terhubung ke semua kategori. Perubahan dari WhatsApp langsung terlihat di sini."
+            desc="Perubahan dari WhatsApp langsung terlihat di sini."
           />
 
           <div className="mt-12">
@@ -600,7 +592,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Pencatatan Selesai dalam <span className="text-gradient">Hitungan Detik</span>
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-500">
-              Tidak perlu membuka banyak menu. Ketik satu kalimat, Sakunode langsung menyimpannya dan menampilkannya di dashboard.
+              Ketik satu kalimat. Sakunode langsung menyimpannya.
             </p>
             <div className="mt-7 flex flex-wrap gap-2.5">
               {['Auto-kategorisasi', 'Tersimpan instan', 'Sinkron realtime', 'Tanpa ribet'].map((chip) => (
@@ -615,10 +607,9 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
             <div className="flex items-start gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600"><PixelIcon name="cloud" size={20} /></span>
               <div>
-                <p className="text-[14px] font-extrabold">Sinkronisasi saldo instan</p>
-                <p className="mt-1 text-[12px] text-slate-500">Data dari WhatsApp langsung muncul di dashboard tanpa refresh.</p>
+                <p className="text-[14px] font-extrabold">Sinkronisasi instan</p>
+                <p className="mt-1 text-[12px] text-slate-500">Data dari WhatsApp langsung muncul tanpa refresh.</p>
               </div>
-              <span className="ml-auto rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-600">LIVE</span>
             </div>
             <div className="mt-6 space-y-3">
               {[
@@ -631,15 +622,13 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
                     {step.done ? <PixelIcon name="check" size={14} /> : <span className="text-[10px]">{i + 1}</span>}
                   </span>
                   <span className="text-[12px] font-bold text-slate-700">{step.label}</span>
-                  <span className="ml-auto text-[10px] font-semibold text-slate-400">baru saja</span>
                 </div>
               ))}
             </div>
             <div className="mt-6 rounded-2xl bg-gradient-to-r from-blue-50 to-sky-50 p-4">
               <p className="flex items-center gap-2 text-[11.5px] font-bold text-blue-800">
-                <PixelIcon name="shield" size={15} /> Data hanya bisa diakses akunmu sendiri
+                <PixelIcon name="shield" size={15} /> Data hanya untuk akunmu
               </p>
-              <p className="mt-1 text-[10.5px] text-blue-600/80">Dilindungi Supabase Row Level Security.</p>
             </div>
           </div>
         </Reveal>
@@ -650,7 +639,7 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
               Mulai Rapikan Arus Kasmu Sekarang
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm text-blue-100">
-              Gratis dipakai, bisa langsung dicoba tanpa kartu kredit. Data tetap milikmu.
+              Gratis dipakai. Data tetap milikmu.
             </p>
             <button
               type="button"
@@ -669,9 +658,6 @@ export default function LandingPage({ onEnter, isLoggedIn = false }) {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-12">
             <div className="sm:w-56 sm:shrink-0">
               <Brand onHome={() => scrollToSection('top')} />
-              <p className="mt-3 hidden max-w-xs text-[12px] leading-relaxed text-slate-500 sm:block">
-                Catat keuangan harian dengan cepat lewat chat, lalu pahami ke mana uangmu pergi.
-              </p>
             </div>
             <div className="grid grid-cols-3 gap-3 sm:gap-8">
               {[

@@ -121,7 +121,7 @@ export default function WhatsAppLink() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      showToast('Gagal menyalin otomatis. Salin angkanya manual, ya.', 'error')
+      showToast('Gagal menyalin. Salin manual, ya.', 'error')
     }
   }
 
@@ -135,7 +135,7 @@ export default function WhatsAppLink() {
         setOtp('')
         showToast('Nomor WhatsApp sudah terhubung.')
       } else {
-        showToast('Belum terhubung. Kirim kode OTP ke bot, lalu cek lagi di sini.')
+        showToast('Belum terhubung. Kirim kode OTP dulu.')
       }
     } catch (error) {
       showToast(error.message || 'Gagal mengecek status koneksi.', 'error')
@@ -179,7 +179,7 @@ export default function WhatsAppLink() {
     <section className="panel whatsapp-panel">
       <h2 className="panel__title">Catat cukup dengan chat</h2>
       <p className="whatsapp-panel__desc">
-        Setelah mengirim kode OTP atau catatan transaksi ke bot WhatsApp, data langsung tersimpan otomatis di Sakunode (bot tidak mengirim balasan chat).
+        Kirim OTP atau catatan ke bot, data langsung tersimpan di Sakunode. Bot tidak membalas chat.
       </p>
 
       <BotCommands />
@@ -223,8 +223,7 @@ export default function WhatsAppLink() {
                 </>
               )}
               <p>
-                Kirim kode ini ke bot WhatsApp lewat tautan di bawah. Bot tidak membalas chat, jadi setelah pesan terkirim
-                langsung kembali ke halaman ini. Status akan dicek otomatis, atau tekan <strong>Cek status</strong>.
+                Kirim kode lewat tautan di bawah, lalu kembali ke halaman ini. Status dicek otomatis.
               </p>
               <div className="whatsapp-panel__otp-actions">
                 {otp && (
@@ -244,14 +243,14 @@ export default function WhatsAppLink() {
               </div>
               {!delivered && (
                 <span className="whatsapp-panel__otp-note">
-                  Pesan otomatis tidak terkirim. Tetap pakai tautan bot di atas, lalu kembali ke halaman ini untuk cek status.
+                  Pesan otomatis gagal. Pakai tautan bot di atas.
                 </span>
               )}
             </div>
           )}
         </>
       )}
-      <p className="whatsapp-panel__hint">Bot tidak membalas chat. Setelah kirim kode OTP, kembali ke halaman ini untuk melihat status koneksi.</p>
+      <p className="whatsapp-panel__hint">Bot tidak membalas chat. Cek status di sini setelah kirim kode.</p>
     </section>
   )
 }

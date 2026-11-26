@@ -8,28 +8,28 @@ export default function SummaryCards({ income, expense, savings = 0, balance }) 
       value: income,
       icon: 'arrow-down-left',
       tone: 'in',
-      caption: 'Pemasukan bulan ini',
+      caption: 'Bulan ini',
     },
     {
       label: 'Uang keluar',
       value: expense,
       icon: 'arrow-up-right',
       tone: 'out',
-      caption: 'Pengeluaran bulan ini',
+      caption: 'Bulan ini',
     },
     {
       label: 'Tabungan',
       value: savings,
       icon: 'piggy',
       tone: 'savings',
-      caption: 'Disisihkan bulan ini',
+      caption: 'Bulan ini',
     },
     {
       label: balance >= 0 ? 'Sisa uang' : 'Defisit',
       value: Math.abs(balance),
       icon: balance >= 0 ? 'wallet' : 'alert',
       tone: balance >= 0 ? 'balance' : 'danger',
-      caption: balance >= 0 ? 'Sisa setelah tabungan' : 'Lebih besar dari pemasukan',
+      caption: balance >= 0 ? 'Setelah tabungan' : 'Melebihi pemasukan',
     },
   ]
 

@@ -304,8 +304,8 @@ export default function App() {
                 <div className="welcome-banner">
                   <span className="welcome-banner__icon"><PixelIcon name="sparkles" size={26} /></span>
                   <div>
-                    <strong>Langkah pertama dimulai dari satu catatan.</strong>
-                    <p>Tambahkan uang masuk, pengeluaran, atau tabungan pertamamu untuk melihat peta uangmu.</p>
+                    <strong>Mulai dari satu catatan.</strong>
+                    <p>Catat uang pertamamu untuk melihat peta uangmu.</p>
                   </div>
                   <button type="button" className="button button--primary" onClick={openAdd}>Catat sekarang</button>
                 </div>
@@ -317,8 +317,8 @@ export default function App() {
                 <div className="alert-banner alert-banner--danger" role="status">
                   <span className="alert-banner__icon"><PixelIcon name="alert" size={20} /></span>
                   <p>
-                    <strong>{overBudget.length} kategori sudah melewati budget:</strong>{' '}
-                    {overBudget.map((item) => item.label).join(', ')}. Cek pengeluaranmu, ya.
+                    <strong>{overBudget.length} kategori melewati budget:</strong>{' '}
+                    {overBudget.map((item) => item.label).join(', ')}.
                   </p>
                 </div>
               )}

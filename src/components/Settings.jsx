@@ -5,17 +5,17 @@ import ProfilePanel from './ProfilePanel'
 import WhatsAppLink from './WhatsAppLink'
 
 const PAGES = [
-  { id: 'profil', label: 'Profil', hint: 'Nama tampilan dan foto profil kamu.', icon: 'user' },
-  { id: 'budget', label: 'Budget & Tabungan', hint: 'Atur batas pengeluaran dan target tabungan.', icon: 'target' },
-  { id: 'whatsapp', label: 'WhatsApp', hint: 'Hubungkan nomor dan lihat perintah bot.', icon: 'whatsapp' },
-  { id: 'data', label: 'Data & Akun', hint: 'Unduh data, keluar akun, dan panduan aplikasi.', icon: 'package' },
+  { id: 'profil', label: 'Profil', hint: 'Nama dan foto.', icon: 'user' },
+  { id: 'budget', label: 'Budget & Tabungan', hint: 'Batas dan target.', icon: 'target' },
+  { id: 'whatsapp', label: 'WhatsApp', hint: 'Nomor dan perintah bot.', icon: 'whatsapp' },
+  { id: 'data', label: 'Data & Akun', hint: 'Data, akun, panduan.', icon: 'package' },
 ]
 
 const PAGE_COPY = {
-  profil: { title: 'Profil', desc: 'Ubah nama dan foto yang tampil di dashboard Sakunode.' },
-  budget: { title: 'Budget & Tabungan', desc: 'Pasang target tabungan dan batas tiap kategori pengeluaran.' },
-  whatsapp: { title: 'WhatsApp', desc: 'Hubungkan nomor kamu dan lihat daftar perintah bot di bawah.' },
-  data: { title: 'Data & Akun', desc: 'Kelola data, akun, panduan, dan arti ikon di aplikasi.' },
+  profil: { title: 'Profil', desc: 'Nama dan foto di dashboard.' },
+  budget: { title: 'Budget & Tabungan', desc: 'Atur target dan batas kategori.' },
+  whatsapp: { title: 'WhatsApp', desc: 'Hubungkan nomor dan lihat perintah bot.' },
+  data: { title: 'Data & Akun', desc: 'Data, akun, dan panduan.' },
 }
 
 export default function Settings({ page = 'hub', onPage }) {
@@ -27,7 +27,7 @@ export default function Settings({ page = 'hub', onPage }) {
         <div className="page-heading settings-heading">
           <div>
             <h1>Setelan <span className="text-gradient">Sakunode</span></h1>
-            <p>Pilih bagian yang mau diatur. Sekarang lebih singkat dan tidak bertumpuk.</p>
+            <p>Pilih bagian yang mau diatur.</p>
           </div>
         </div>
 
