@@ -269,9 +269,6 @@ export default function App() {
             </button>
 
             <div className="header-actions">
-              {mode === 'cloud' && (
-                <span className="live-badge" title="Data tersinkron langsung"><i /> Live</span>
-              )}
               <button
                 type="button"
                 className="user-chip"
