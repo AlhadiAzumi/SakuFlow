@@ -126,23 +126,36 @@ export default function AddTransactionModal({ open, initial, onClose, onSave }) 
             </div>
           </label>
 
-          <div className="field">
-            <span className="field__label">Kategori</span>
-            <div className={`category-grid${categories.length === 1 ? ' category-grid--single' : ''}`}>
-              {categories.map((category) => (
-                <button
-                  type="button"
-                  key={category.id}
-                  className={`category-chip ${form.category === category.id ? 'is-active' : ''}`}
-                  style={form.category === category.id ? { borderColor: category.color, background: `${category.color}14` } : undefined}
-                  onClick={() => setForm((prev) => ({ ...prev, category: category.id }))}
-                >
-                  <span className="category-chip__icon"><CategoryIcon category={category} size={15} /></span>
-                  <small>{category.label}</small>
-                </button>
-              ))}
+          {form.type === 'savings' ? (
+            <div className="field">
+              <span className="field__label">Kategori</span>
+              <div className="savings-category-card">
+                <span className="savings-category-card__body">
+                  <strong>Tabungan</strong>
+                  <small>Uang yang disisihkan, bukan pengeluaran.</small>
+                </span>
+                <span className="savings-category-card__icon"><PixelIcon name="piggy" size={17} /></span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="field">
+              <span className="field__label">Kategori</span>
+              <div className="category-grid">
+                {categories.map((category) => (
+                  <button
+                    type="button"
+                    key={category.id}
+                    className={`category-chip ${form.category === category.id ? 'is-active' : ''}`}
+                    style={form.category === category.id ? { borderColor: category.color, background: `${category.color}14` } : undefined}
+                    onClick={() => setForm((prev) => ({ ...prev, category: category.id }))}
+                  >
+                    <span className="category-chip__icon"><CategoryIcon category={category} size={15} /></span>
+                    <small>{category.label}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="field-row">
             <label className="field">
