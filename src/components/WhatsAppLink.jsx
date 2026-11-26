@@ -140,7 +140,9 @@ export default function WhatsAppLink() {
         setLinkToken('')
         showToast('Nomor WhatsApp sudah terhubung.')
       } else {
-        showToast('Belum terhubung. Kirim kode OTP dulu.')
+        showToast(otp && linkToken
+          ? 'Kode masih menunggu. Kirim perintah terbaru ke bot.'
+          : 'Belum terhubung. Kirim kode OTP dulu.')
       }
     } catch (error) {
       showToast(error.message || 'Gagal mengecek status koneksi.', 'error')
